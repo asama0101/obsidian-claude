@@ -19,7 +19,24 @@ Webページの内容を後から参照できる形でVaultに保存する。
 - `WebClip_Template.md` ベースのノート（`30_Resources/WebClips/`）
 
 ## 処理の流れ
-1. **Claudeが対象URLをWebFetchで取得する。**
+1. **Claudeが対象URLをPlaywright（実ブラウザ経由）で取得する。**
+   広告ブロック検知や会員限定表示のために本文がほとんど取得できないサイトが
+   あるため、常に最初からPlaywrightのブラウザツールを使う
+   （他の取得手段へのフォールバックはしない）。
+   - `mcp__plugin_playwright_playwright__browser_navigate`で対象URLへ遷移する。
+   - 遅延読み込み画像を取りこぼさないよう、本文・画像を取得する前に
+     ページ全体を下までスクロールする。
+   - `mcp__plugin_playwright_playwright__browser_evaluate`でページ内JSを実行し、
+     本文テキスト（例: `document.querySelector('article') || document.body`の
+     `innerText`）と本文中の画像URL一覧（`querySelectorAll('img')`の`src`。
+     関連記事サムネイル・SNSアイコン等は除外）を取得する。
+   - ページ内に「次ページ」等の分割ページへのリンクがないか確認する。
+     あれば同様に`browser_navigate`→`browser_evaluate`を繰り返して辿り、
+     各ページの本文・画像を記事内での出現順を保ったまま連結する。
+     巡回には安全弁として上限20ページを設け、超えた場合は打ち切って
+     その旨を最終報告でユーザーに伝える。
+   - 取得が完了したら、開いたページ/タブを閉じる
+     （`mcp__plugin_playwright_playwright__browser_close`等）。
 2. **Claudeが取得した本文から要約・キーポイント・全文を作る。**
    - 3行程度または箇条書きの要約（`summary`）
    - 要点の箇条書き（`key_points`）
