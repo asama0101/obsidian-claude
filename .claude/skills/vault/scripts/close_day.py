@@ -151,11 +151,30 @@ def _filter_updated_notes(
     return sorted(entries, key=lambda entry: entry[0])
 
 
-def _build_updated_notes_block(note_names: list[str]) -> str:
-    """更新ノート一覧からマーカーブロック内テキストを組み立てる。"""
-    if not note_names:
+def _build_updated_notes_block(entries: list[tuple[str, Path]]) -> str:
+    """更新ノート一覧からtype別にグルーピングしたマーカーブロック内テキストを組み立てる。
+
+    entriesは_filter_updated_notesが返すstemソート済みの(stem, フルパス)リスト。
+    グループ内の順序はentriesの並び(=stemソート順)をそのまま引き継ぐ。
+    """
+    if not entries:
         return "- （本日の更新ノートなし）"
-    return "\n".join(f"- [[{name}]]" for name in note_names)
+
+    groups: dict[str, list[str]] = {key: [] for key in _TYPE_GROUP_ORDER}
+    for stem, path in entries:
+        raw_type = _read_note_type(path)
+        groups[_normalize_note_type(raw_type)].append(stem)
+
+    lines: list[str] = []
+    for group_key in _TYPE_GROUP_ORDER:
+        stems = groups[group_key]
+        if not stems:
+            continue
+        if lines:
+            lines.append("")
+        lines.append(f"**{group_key}**")
+        lines.extend(f"- [[{stem}]]" for stem in stems)
+    return "\n".join(lines)
 
 
 def _has_pending_changes(vault_root: Path) -> bool:
@@ -190,7 +209,7 @@ def main(argv: list[str] | None = None) -> int:
     updated_paths = _collect_updated_paths(vault_root)
     entries = _filter_updated_notes(updated_paths, date_str, vault_root)
     note_names = [stem for stem, _ in entries]
-    block_text = _build_updated_notes_block(note_names)
+    block_text = _build_updated_notes_block(entries)
 
     # 5. 当日デイリーノートのマーカーブロックを置換して書き戻す
     daily_note_path = vault_root / "00_Daily" / f"{date_str}.md"
