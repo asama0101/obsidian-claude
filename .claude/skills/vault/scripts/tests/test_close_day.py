@@ -15,6 +15,9 @@ from pathlib import Path
 _SCRIPTS_DIR = Path(__file__).resolve().parent.parent
 _CLOSE_DAY = _SCRIPTS_DIR / "close_day.py"
 
+sys.path.insert(0, str(_SCRIPTS_DIR))
+import close_day  # noqa: E402
+
 _DAILY_NOTE_TEMPLATE = (
     "---\n"
     "tags:\n"
@@ -275,6 +278,45 @@ class MergeFailedTest(unittest.TestCase):
             self.assertEqual(payload["status"], "merge_failed")
             self.assertIn("detail", payload)
             self.assertTrue(payload["detail"])
+
+
+class NoteTypeHelpersTest(unittest.TestCase):
+    def test_normalize_meeting_seriesはmeetingに統合される(self):
+        self.assertEqual(close_day._normalize_note_type("meeting_series"), "meeting")
+
+    def test_normalize_既知typeはそのまま(self):
+        for known in ("project", "meeting", "task", "knowhow", "webclip"):
+            with self.subTest(known=known):
+                self.assertEqual(close_day._normalize_note_type(known), known)
+
+    def test_normalize_未知typeはotherになる(self):
+        self.assertEqual(close_day._normalize_note_type("unknown_type"), "other")
+
+    def test_normalize_Noneはotherになる(self):
+        self.assertEqual(close_day._normalize_note_type(None), "other")
+
+    def test_read_note_type_frontmatterのtype値を取得する(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "note.md"
+            path.write_text("---\ntype: project\n---\nbody", encoding="utf-8")
+            self.assertEqual(close_day._read_note_type(path), "project")
+
+    def test_read_note_type_typeキーが無ければNone(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "note.md"
+            path.write_text("---\ntags:\n  - x\n---\nbody", encoding="utf-8")
+            self.assertIsNone(close_day._read_note_type(path))
+
+    def test_read_note_type_frontmatterが無ければNone(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "note.md"
+            path.write_text("plain body without frontmatter", encoding="utf-8")
+            self.assertIsNone(close_day._read_note_type(path))
+
+    def test_read_note_type_ファイルが存在しなければNone(self):
+        missing_path = Path(tempfile.gettempdir()) / "does_not_exist_close_day_test.md"
+        self.assertFalse(missing_path.exists())
+        self.assertIsNone(close_day._read_note_type(missing_path))
 
 
 if __name__ == "__main__":
