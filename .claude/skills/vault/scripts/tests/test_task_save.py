@@ -99,11 +99,13 @@ class TestBuildNoteText(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
-    def _make_vault(self, tmp):
+    def _make_vault(self, tmp, project_names=()):
         vault_root = Path(tmp)
         template_dir = vault_root / "70_Templates"
         template_dir.mkdir(parents=True)
         (template_dir / "Task_Template.md").write_text(_TEMPLATE_TEXT, encoding="utf-8")
+        for name in project_names:
+            (vault_root / "10_Projects" / name).mkdir(parents=True)
         return vault_root
 
     def _run(self, vault_root, *extra_args):
@@ -132,7 +134,7 @@ class TestMain(unittest.TestCase):
 
     def test_正常系でノートが作成されJSONが出力される(self):
         with tempfile.TemporaryDirectory() as tmp:
-            vault_root = self._make_vault(tmp)
+            vault_root = self._make_vault(tmp, project_names=["VaultMigration"])
             result = self._run(
                 vault_root,
                 "--title",
@@ -151,6 +153,23 @@ class TestMain(unittest.TestCase):
             content = note_path.read_text(encoding="utf-8")
             self.assertIn('project: "[[VaultMigration]]"', content)
             self.assertIn("status: 1_todo", content)
+
+    def test_存在しないプロジェクトはエラーになる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            result = self._run(
+                vault_root,
+                "--title",
+                "資料を送る",
+                "--project",
+                "[[NoSuchProject]]",
+            )
+            self.assertEqual(result.returncode, 1)
+            output = json.loads(result.stdout)
+            self.assertEqual(output, {"status": "error", "reason": "project_not_found"})
+            self.assertFalse(
+                (vault_root / "10_Projects" / "NoSuchProject").exists()
+            )
 
 
 if __name__ == "__main__":
