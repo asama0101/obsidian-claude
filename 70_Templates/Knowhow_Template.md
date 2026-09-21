@@ -1,6 +1,5 @@
 ---
 type: knowhow
-project: ""
 tags:
 ---
 # {{title}}

@@ -20,8 +20,9 @@ description: |
    を実行する（`--vault-root`は省略可。省略時はVaultルート自動検出）。
 3. 標準出力のJSON（`created` / `updated` / `skipped_single_attendee` /
    `cancelled` / `no_project`の各リスト）を見て、結果をユーザーへ要約報告する。
-4. `no_project`が空でなければ、`10_Projects/`直下のディレクトリ名一覧
-   （＋「プロジェクトなし」の選択肢）を提示し、`no_project`内の各ノート
+4. `no_project`が空でなければ、`python .claude/skills/vault/scripts/list_projects.py`
+   を実行して候補一覧（`{"projects": [...]}`）を取得し、その一覧
+   （＋「プロジェクトなし」の選択肢）を提示して、`no_project`内の各ノート
    （`title`で識別）についてどれに割り当てるかを1回の確認でまとめて
    ユーザーに尋ねる。
 5. ユーザーが割り当てを決めたら、ノートごとに
@@ -29,7 +30,10 @@ description: |
    を実行してproject欄へ反映する（`<value>`はプロジェクト選択時は
    `"[[ディレクトリ名]]"`、「プロジェクトなし」選択時は`""`）。
    このときノートは新しいproject値に応じて`10_Projects/<Name>/Meetings/`
-   または`20_Areas/Meetings/`へ自動的に移動される。
+   または`20_Areas/Meetings/`へ自動的に移動される。`--project`が
+   `10_Projects/<Name>/`として実在しない値だった場合は
+   `{"status": "error", "reason": "project_not_found"}`が返るので、
+   候補一覧を出し直してユーザーに再選択してもらう。
 
 `meeting_sync.py`自体が全ての判定（新規作成/更新/キャンセル反映/
 定例の回判定）を行うため、Claude側でノートを直接編集する必要はない。
@@ -75,5 +79,5 @@ description: |
   ロジック詳細
 - `references/meeting-field-mapping.md`: Microsoft 365接続時の
   フィールド対応表
-- `references/project-matching.md`: project自動紐付けルール（共通）
+- `references/project-matching.md`: project自動紐付けルール（meeting専用）
 - `references/conventions.md`: vaultプラグイン全体の共通実装規約

@@ -12,7 +12,7 @@ description: |
 Webページの内容を後から参照できる形でVaultに保存する。
 
 ## 入力
-対象URL（任意でプロジェクトの手がかりとなるテキスト）。
+対象URL。
 
 ## 出力
 - `80_Attachments/` にダウンロード保存した主要画像
@@ -66,8 +66,7 @@ Webページの内容を後から参照できる形でVaultに保存する。
 5. **`clip_save.py` を実行する。**
    ```
    python .claude/skills/vault/scripts/clip_save.py \
-     --url <URL> --content-json <JSONファイルパス> --tag <確定したタグ> \
-     [--project-hint <text>]
+     --url <URL> --content-json <JSONファイルパス> --tag <確定したタグ>
    ```
    - `summary`/`key_points`の`image_url`と`full_text`中の`![alt](URL)`を
      まとめて重複排除した上で、画像を`80_Attachments/`にダウンロード保存する
@@ -75,8 +74,6 @@ Webページの内容を後から参照できる形でVaultに保存する。
    - `full_text`中の`![alt](URL)`は、ダウンロードできた画像はローカル埋め込み
      `![[80_Attachments/...]]`に置換され、ダウンロードに失敗した箇所は
      取り除かれた上で「📄 クリップ本文」セクションにblockquote形式で入る。
-   - `project-hint`が指定された場合は`10_Projects/`配下からあいまい一致で
-     プロジェクトを推定し、1件に絞れた場合のみfrontmatterに設定する。
    - `WebClip_Template.md`ベースのノートを`30_Resources/WebClips/`に作成し、
      結果（`note_path`・`images_saved`・`images_failed`）をJSONで出力する。
 6. **Claudeが結果を要約報告する。**
@@ -87,4 +84,3 @@ Webページの内容を後から参照できる形でVaultに保存する。
 
 - `references/category-tagging.md`: カテゴリタグ（`<category>/<topic>`）の
   取得方法・確認必須ポリシー（knowhowと共通）
-- `references/project-matching.md`: project自動紐付けルール（共通）
