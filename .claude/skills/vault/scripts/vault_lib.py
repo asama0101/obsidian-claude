@@ -23,12 +23,22 @@ _WEEKDAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"]
 
 
 def run_git(*args: str, cwd, check: bool = True) -> str:
-    """`git` コマンドを実行し、stdout(strip済み)を返す。
+    """`git` コマンドを実行し、stdout(末尾改行を除いたもの)を返す。
+
+    subprocessのtext=Trueはプラットフォームのデフォルトエンコーディング
+    （Windowsではcp932等）でstdoutをデコードしようとし、日本語ファイル名
+    （Shift-JISで表現できない文字を含む場合）でUnicodeDecodeErrorを起こし
+    stdoutがNoneになることがあるため、明示的にUTF-8を指定する。
 
     check=True の場合、非ゼロ終了時は CalledProcessError を送出する。
     """
     result = subprocess.run(
-        ["git", *args], cwd=cwd, capture_output=True, text=True
+        ["git", *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     if check and result.returncode != 0:
         raise subprocess.CalledProcessError(
