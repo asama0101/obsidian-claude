@@ -21,8 +21,7 @@ description: |
 ## 処理ステップ概要
 1. 入力内容を「概要→手順→注意点」構造に整形
 2. `category` を推測してfrontmatterに設定
-3. `Knowhow_Template.md` からノート作成、`daily_note` に当日デイリー
-   ノートへのリンクを設定
+3. `Knowhow_Template.md` からノート作成
 
 ## 備考（次フェーズでの詳細実装対象）
 - 詳細アルゴリズムは未実装。本ファイルは雛形。

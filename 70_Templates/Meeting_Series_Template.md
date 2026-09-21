@@ -12,7 +12,7 @@ tags:
 # {{title}}
 
 <!-- NEW_MEETING_START -->
-## 📅 [[{{date:YYYY-MM-DD}}]]（第X回）
+## 📅 {{date:YYYY-MM-DD}}（第X回）
 
 ### 📌 概要
 - **開催日時:** {{date:YYYY-MM-DD}} (<span>{{date:ddd}}</span>) {{time:HH:mm}} 〜

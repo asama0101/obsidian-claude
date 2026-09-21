@@ -14,6 +14,11 @@ tags:
 ## 📂 アクティブプロジェクト
 ![[Projects.base#Active]]
 
+## 🔗 本日作成・更新したノート
+<!-- UPDATED_NOTES_START -->
+（`/close` 実行時に自動更新される）
+<!-- UPDATED_NOTES_END -->
+
 ---
 
 ## 📝 メモ

@@ -1,7 +1,6 @@
 ---
 type: webclip
 project: ""
-daily_note: "[[{{date:YYYY-MM-DD}}]]"
 url: ""
 clipped_date: "{{date:YYYY-MM-DD}}"
 tags:

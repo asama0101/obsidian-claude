@@ -1,7 +1,6 @@
 ---
 type: knowhow
 project: ""
-daily_note: "[[{{date:YYYY-MM-DD}}]]"
 category: ""
 tags:
   - knowhow
