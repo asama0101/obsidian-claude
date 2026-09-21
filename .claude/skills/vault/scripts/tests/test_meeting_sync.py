@@ -466,9 +466,9 @@ class TestAttendeesLocationAtCreation(unittest.TestCase):
 
 
 class TestSetProjectMode(unittest.TestCase):
-    def test_set_projectで指定ノートのproject欄だけ書き換わる(self):
+    def test_set_projectで指定ノートのproject欄が書き換わりプロジェクト配下へ移動する(self):
         with tempfile.TemporaryDirectory() as tmp:
-            vault_root = make_vault(Path(tmp))
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
             event = make_event(id="evt1", summary="関係ない打ち合わせ")
             result = meeting_sync.sync_events([event], vault_root)
             note_path = Path(result["created"][0])
@@ -487,7 +487,12 @@ class TestSetProjectMode(unittest.TestCase):
             )
 
             self.assertEqual(exit_code, 0)
-            after_text = note_path.read_text(encoding="utf-8")
+            self.assertFalse(note_path.exists())
+            dest_path = (
+                vault_root / "10_Projects" / "VaultMigration" / "Meetings" / note_path.name
+            )
+            self.assertTrue(dest_path.exists())
+            after_text = dest_path.read_text(encoding="utf-8")
             after_fm, after_body = vault_lib.split_frontmatter(after_text)
 
             self.assertEqual(
@@ -522,6 +527,95 @@ class TestSetProjectMode(unittest.TestCase):
                         str(vault_root),
                     ]
                 )
+
+    def test_set_projectでプロジェクト解除するとAreas配下へ戻る(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
+            dest_dir = vault_root / "10_Projects" / "VaultMigration" / "Meetings"
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            note_path = dest_dir / "会議.md"
+            note_path.write_text(
+                '---\nproject: "[[VaultMigration]]"\n---\nbody', encoding="utf-8"
+            )
+
+            exit_code = meeting_sync.main(
+                [
+                    "--set-project",
+                    str(note_path),
+                    "--project",
+                    '""',
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertFalse(note_path.exists())
+            new_path = vault_root / "20_Areas" / "Meetings" / "会議.md"
+            self.assertTrue(new_path.exists())
+            new_fm, _ = vault_lib.split_frontmatter(
+                new_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(vault_lib.get_fm_value(new_fm, "project"), "")
+
+    def test_set_projectで既に正しいフォルダにあれば移動しない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
+            dest_dir = vault_root / "10_Projects" / "VaultMigration" / "Meetings"
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            note_path = dest_dir / "会議.md"
+            note_path.write_text(
+                '---\nproject: "[[VaultMigration]]"\n---\nbody', encoding="utf-8"
+            )
+
+            exit_code = meeting_sync.main(
+                [
+                    "--set-project",
+                    str(note_path),
+                    "--project",
+                    '"[[VaultMigration]]"',
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(note_path.exists())
+            entries = list(dest_dir.iterdir())
+            self.assertEqual(entries, [note_path])
+
+    def test_set_projectで移動先に同名ファイルがあれば連番付与される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
+            src_dir = vault_root / "20_Areas" / "Meetings"
+            note_path = src_dir / "会議.md"
+            note_path.write_text('---\nproject: ""\n---\nbody-A', encoding="utf-8")
+
+            dest_dir = vault_root / "10_Projects" / "VaultMigration" / "Meetings"
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            existing_path = dest_dir / "会議.md"
+            existing_path.write_text(
+                '---\nproject: "[[VaultMigration]]"\n---\nbody-B', encoding="utf-8"
+            )
+
+            exit_code = meeting_sync.main(
+                [
+                    "--set-project",
+                    str(note_path),
+                    "--project",
+                    '"[[VaultMigration]]"',
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            self.assertFalse(note_path.exists())
+            moved_path = dest_dir / "会議-2.md"
+            self.assertTrue(moved_path.exists())
+            self.assertTrue(existing_path.exists())
+            self.assertIn("body-B", existing_path.read_text(encoding="utf-8"))
+            self.assertIn("body-A", moved_path.read_text(encoding="utf-8"))
 
 
 class TestLoadEvents(unittest.TestCase):
