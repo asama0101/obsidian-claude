@@ -198,6 +198,32 @@ class TestMarkerBlock(unittest.TestCase):
         )
 
 
+class TestListProjectNames(unittest.TestCase):
+    def test_複数ディレクトリがある場合ソートされた名前を返す(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            projects_dir = Path(tmp) / "Projects"
+            projects_dir.mkdir()
+            (projects_dir / "Beta").mkdir()
+            (projects_dir / "Alpha").mkdir()
+            result = vault_lib.list_project_names(projects_dir)
+            self.assertEqual(result, ["Alpha", "Beta"])
+
+    def test_ディレクトリ以外のファイルは除外される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            projects_dir = Path(tmp) / "Projects"
+            projects_dir.mkdir()
+            (projects_dir / "Alpha").mkdir()
+            (projects_dir / "note.md").write_text("dummy", encoding="utf-8")
+            result = vault_lib.list_project_names(projects_dir)
+            self.assertEqual(result, ["Alpha"])
+
+    def test_projects_dirが存在しない場合は空リスト(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            missing_dir = Path(tmp) / "NoSuchDir"
+            result = vault_lib.list_project_names(missing_dir)
+            self.assertEqual(result, [])
+
+
 class TestFuzzyProjectMatch(unittest.TestCase):
     def _make_projects(self, tmp, names):
         projects_dir = Path(tmp) / "Projects"
