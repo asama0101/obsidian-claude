@@ -1,0 +1,36 @@
+filters:
+  'type == "task"'
+properties:
+  status:
+    displayName: ステータス
+  project:
+    displayName: プロジェクト
+  startDate:
+    displayName: 開始日
+  dueDate:
+    displayName: 期限
+views:
+  - type: table
+    name: Today
+    filters:
+      and:
+        - 'startDate'
+        - 'dueDate'
+        - 'startDate <= today()'
+        - 'dueDate >= today()'
+    order: [file.name, project, status, dueDate]
+  - type: table
+    name: ProjectTasks
+    filters:
+      and:
+        - 'project == link(this.file.name)'
+        - 'status != "4_done"'
+        - 'status != "5_cancel"'
+    order: [file.name, status, startDate, dueDate]
+  - type: table
+    name: ProjectCompletedTasks
+    filters:
+      and:
+        - 'project == link(this.file.name)'
+        - 'status == "4_done"'
+    order: [file.name, dueDate]

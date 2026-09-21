@@ -1,0 +1,13 @@
+# Obsidian ローカル状態ファイル
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+.obsidian/plugins/*/data.json
+
+# OS/エディタ関連
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Obsidian ゴミ箱
+.trash/

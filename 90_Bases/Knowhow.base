@@ -1,0 +1,15 @@
+filters:
+  'type == "knowhow"'
+properties:
+  category:
+    displayName: カテゴリ
+views:
+  - type: table
+    name: All
+    order: [file.name, category]
+  - type: table
+    name: ByCategory
+    groupBy:
+      property: category
+      direction: ASC
+    order: [file.name, category]

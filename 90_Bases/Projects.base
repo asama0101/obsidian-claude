@@ -1,0 +1,15 @@
+filters:
+  'type == "project"'
+properties:
+  startDate:
+    displayName: 開始日
+  dueDate:
+    displayName: 期限
+views:
+  - type: table
+    name: Active
+    filters:
+      or:
+        - '!dueDate'
+        - 'dueDate >= today()'
+    order: [file.name, startDate, dueDate]

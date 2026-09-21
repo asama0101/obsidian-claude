@@ -1,0 +1,31 @@
+filters:
+  or:
+    - 'type == "meeting"'
+    - 'type == "meeting_series"'
+properties:
+  project:
+    displayName: プロジェクト
+  date:
+    displayName: 開催日（単発）
+  last_updated:
+    displayName: 最終更新日（定例）
+views:
+  - type: table
+    name: Today
+    # 定例(meeting_series)は1ファイルに全開催回が集約されるため単一の
+    # 「開催日」を持たない。/meetingスキルが新しい回を追記するたびに
+    # last_updatedを更新する前提とし、これを「本日開催」の代替判定に使う。
+    filters:
+      or:
+        - and:
+            - 'type == "meeting"'
+            - 'date == today()'
+        - and:
+            - 'type == "meeting_series"'
+            - 'last_updated == today()'
+    order: [file.name, project, type]
+  - type: table
+    name: ProjectMeetings
+    filters:
+      'project == link(this.file.name)'
+    order: [file.name, type, date, last_updated]
