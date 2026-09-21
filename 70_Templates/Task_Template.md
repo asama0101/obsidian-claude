@@ -2,8 +2,8 @@
 type: task
 project: ""
 daily_note: "[[{{date:YYYY-MM-DD}}]]"
-startDate: "{{date:YYYY-MM-DD}}"
-dueDate: "{{date:YYYY-MM-DD}}"
+start_date: "{{date:YYYY-MM-DD}}"
+due_date: "{{date:YYYY-MM-DD}}"
 status: 1_todo
 tags:
   - task

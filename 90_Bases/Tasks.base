@@ -5,20 +5,20 @@ properties:
     displayName: ステータス
   project:
     displayName: プロジェクト
-  startDate:
+  start_date:
     displayName: 開始日
-  dueDate:
+  due_date:
     displayName: 期限
 views:
   - type: table
     name: Today
     filters:
       and:
-        - 'startDate'
-        - 'dueDate'
-        - 'startDate <= today()'
-        - 'dueDate >= today()'
-    order: [file.name, project, status, dueDate]
+        - 'start_date'
+        - 'due_date'
+        - 'start_date <= today()'
+        - 'due_date >= today()'
+    order: [file.name, project, status, due_date]
   - type: table
     name: ProjectTasks
     filters:
@@ -26,11 +26,11 @@ views:
         - 'project == link(this.file.name)'
         - 'status != "4_done"'
         - 'status != "5_cancel"'
-    order: [file.name, status, startDate, dueDate]
+    order: [file.name, status, start_date, due_date]
   - type: table
     name: ProjectCompletedTasks
     filters:
       and:
         - 'project == link(this.file.name)'
         - 'status == "4_done"'
-    order: [file.name, dueDate]
+    order: [file.name, due_date]

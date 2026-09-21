@@ -1,7 +1,7 @@
 ---
 type: project
-startDate: "{{date:YYYY-MM-DD}}"
-dueDate: 
+start_date: "{{date:YYYY-MM-DD}}"
+due_date: 
 tags:
   - project
 ---
