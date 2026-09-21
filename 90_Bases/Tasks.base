@@ -9,16 +9,18 @@ properties:
     displayName: 開始日
   due_date:
     displayName: 期限
+  memo:
+    displayName: メモ
 views:
   - type: table
     name: Today
     filters:
       and:
         - 'start_date'
-        - 'due_date'
         - 'start_date <= today()'
-        - 'due_date >= today()'
-    order: [file.name, project, status, due_date]
+        - 'status != "4_done"'
+        - 'status != "5_cancel"'
+    order: [file.name, project, status, due_date, memo]
   - type: table
     name: ProjectTasks
     filters:
@@ -26,11 +28,11 @@ views:
         - 'project == link(this.file.name)'
         - 'status != "4_done"'
         - 'status != "5_cancel"'
-    order: [file.name, status, start_date, due_date]
+    order: [file.name, status, start_date, due_date, memo]
   - type: table
     name: ProjectCompletedTasks
     filters:
       and:
         - 'project == link(this.file.name)'
         - 'status == "4_done"'
-    order: [file.name, due_date]
+    order: [file.name, due_date, memo]

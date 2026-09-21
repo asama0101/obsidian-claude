@@ -19,7 +19,15 @@ description: |
 2. `python .claude/skills/vault/scripts/meeting_sync.py --events-json <path>`
    を実行する（`--vault-root`は省略可。省略時はVaultルート自動検出）。
 3. 標準出力のJSON（`created` / `updated` / `skipped_single_attendee` /
-   `cancelled`の各リスト）を見て、結果をユーザーへ要約報告する。
+   `cancelled` / `no_project`の各リスト）を見て、結果をユーザーへ要約報告する。
+4. `no_project`が空でなければ、`10_Projects/`直下のディレクトリ名一覧
+   （＋「プロジェクトなし」の選択肢）を提示し、`no_project`内の各ノート
+   （`title`で識別）についてどれに割り当てるかを1回の確認でまとめて
+   ユーザーに尋ねる。
+5. ユーザーが割り当てを決めたら、ノートごとに
+   `python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project <value>`
+   を実行してproject欄へ反映する（`<value>`はプロジェクト選択時は
+   `"[[ディレクトリ名]]"`、「プロジェクトなし」選択時は`""`）。
 
 `meeting_sync.py`自体が全ての判定（新規作成/更新/キャンセル反映/
 定例の回判定）を行うため、Claude側でノートを直接編集する必要はない。

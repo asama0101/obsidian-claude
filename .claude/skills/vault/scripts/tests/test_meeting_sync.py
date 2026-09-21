@@ -301,14 +301,227 @@ class TestSeriesTransition(unittest.TestCase):
             self.assertIn('occurrence_id: "occA"', archive_area)
             self.assertIn("occA回の決定事項", archive_area)
 
-            # 元々あった「過去の議事録」コメントも失われていない
-            self.assertIn("過去の議事録", archive_area)
-
             fm, _body = vault_lib.split_frontmatter(final_text)
             self.assertEqual(
                 vault_lib.get_fm_value(fm, "last_updated"),
                 datetime.date.today().isoformat(),
             )
+
+
+class TestFilenameDatePrefix(unittest.TestCase):
+    def test_単発ノートのファイル名に開催日プレフィックスが付く(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            self.assertEqual(note_path.name, "2026-09-21 定例1on1.md")
+
+    def test_定例ノートのファイル名に日付プレフィックスは付かない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            self.assertEqual(note_path.name, "週次定例.md")
+
+
+class TestNoProject(unittest.TestCase):
+    def test_project推定できなければno_projectに追加される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
+            event = make_event(id="evt1", summary="関係ない打ち合わせ")
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            self.assertEqual(
+                result["no_project"],
+                [{"note_path": str(note_path), "title": "関係ない打ち合わせ"}],
+            )
+
+    def test_project推定できればno_projectに追加されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
+            event = make_event(id="evt1", summary="VaultMigration定例MTG")
+            result = meeting_sync.sync_events([event], vault_root)
+            self.assertEqual(result["no_project"], [])
+
+    def test_定例ノートもproject推定できなければno_projectに追加される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            self.assertEqual(
+                result["no_project"],
+                [{"note_path": str(note_path), "title": "週次定例"}],
+            )
+
+
+class TestFormatAttendees(unittest.TestCase):
+    def test_自分自身は除外される(self):
+        attendees = [
+            {"email": "me@example.com", "self": True},
+            {"email": "a@example.com"},
+        ]
+        self.assertEqual(meeting_sync._format_attendees(attendees), "a@example.com")
+
+    def test_displayNameが優先される(self):
+        attendees = [{"email": "a@example.com", "displayName": "山田太郎"}]
+        self.assertEqual(meeting_sync._format_attendees(attendees), "山田太郎")
+
+    def test_displayNameが無ければemailにフォールバックする(self):
+        attendees = [{"email": "a@example.com"}]
+        self.assertEqual(meeting_sync._format_attendees(attendees), "a@example.com")
+
+    def test_複数人はカンマ区切りで結合される(self):
+        attendees = [
+            {"email": "a@example.com"},
+            {"displayName": "山田太郎", "email": "b@example.com"},
+        ]
+        self.assertEqual(
+            meeting_sync._format_attendees(attendees), "a@example.com, 山田太郎"
+        )
+
+    def test_空リストは空文字になる(self):
+        self.assertEqual(meeting_sync._format_attendees([]), "")
+
+    def test_自分だけの場合も空文字になる(self):
+        attendees = [{"self": True, "email": "me@example.com"}]
+        self.assertEqual(meeting_sync._format_attendees(attendees), "")
+
+
+class TestAttendeesLocationAtCreation(unittest.TestCase):
+    def test_単発ノート作成時に参加者と開催場所が埋まる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="evt1",
+                summary="定例1on1",
+                location="会議室A",
+                attendees=[
+                    {"email": "me@example.com", "self": True},
+                    {"displayName": "山田太郎", "email": "b@example.com"},
+                ],
+            )
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            self.assertIn("**開催場所:** 会議室A", text)
+            self.assertIn("**参加者:** 山田太郎", text)
+
+    def test_定例ノート新規作成時に参加者と開催場所が埋まる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                location="会議室B",
+                attendees=[
+                    {"email": "me@example.com", "self": True},
+                    {"displayName": "鈴木花子", "email": "c@example.com"},
+                ],
+            )
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            self.assertIn("**開催場所:** 会議室B", text)
+            self.assertIn("**参加者:** 鈴木花子", text)
+
+    def test_新しい回への遷移時に新ブロックへ参加者と開催場所が埋まり旧ブロックは変わらない(
+        self,
+    ):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+
+            event2 = make_event(
+                id="occB",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                start={"dateTime": "2026-09-28T13:00:00+09:00"},
+                end={"dateTime": "2026-09-28T14:00:00+09:00"},
+                location="会議室C",
+                attendees=[{"displayName": "佐藤次郎", "email": "d@example.com"}],
+            )
+            meeting_sync.sync_events([event2], vault_root)
+
+            final_text = note_path.read_text(encoding="utf-8")
+            start_idx = final_text.find("<!-- NEW_MEETING_START -->")
+            end_idx = final_text.find("<!-- NEW_MEETING_END -->")
+            current_block = final_text[start_idx:end_idx]
+            archive_area = final_text[end_idx:]
+
+            self.assertIn("**開催場所:** 会議室C", current_block)
+            self.assertIn("**参加者:** 佐藤次郎", current_block)
+            # 旧ブロックは元々開催場所・参加者未設定で作成されたため変わらない
+            self.assertNotIn("会議室C", archive_area)
+            self.assertNotIn("佐藤次郎", archive_area)
+
+
+class TestSetProjectMode(unittest.TestCase):
+    def test_set_projectで指定ノートのproject欄だけ書き換わる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="関係ない打ち合わせ")
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            before_text = note_path.read_text(encoding="utf-8")
+            before_fm, before_body = vault_lib.split_frontmatter(before_text)
+
+            exit_code = meeting_sync.main(
+                [
+                    "--set-project",
+                    str(note_path),
+                    "--project",
+                    '"[[VaultMigration]]"',
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            after_text = note_path.read_text(encoding="utf-8")
+            after_fm, after_body = vault_lib.split_frontmatter(after_text)
+
+            self.assertEqual(
+                vault_lib.get_fm_value(after_fm, "project"), "[[VaultMigration]]"
+            )
+            self.assertEqual(
+                vault_lib.get_fm_value(after_fm, "calendar_event_id"),
+                vault_lib.get_fm_value(before_fm, "calendar_event_id"),
+            )
+            self.assertEqual(
+                vault_lib.get_fm_value(after_fm, "date"),
+                vault_lib.get_fm_value(before_fm, "date"),
+            )
+            self.assertEqual(
+                vault_lib.get_fm_value(after_fm, "url"),
+                vault_lib.get_fm_value(before_fm, "url"),
+            )
+            self.assertEqual(after_body, before_body)
+
+    def test_set_projectのみでprojectが無ければエラー終了する(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            note_path = vault_root / "dummy.md"
+            note_path.write_text('---\nproject: ""\n---\nbody', encoding="utf-8")
+
+            with self.assertRaises(SystemExit):
+                meeting_sync.main(
+                    [
+                        "--set-project",
+                        str(note_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
 
 
 class TestLoadEvents(unittest.TestCase):

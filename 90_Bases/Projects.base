@@ -9,7 +9,5 @@ views:
   - type: table
     name: Active
     filters:
-      or:
-        - '!due_date'
-        - 'due_date >= today()'
+      '!file.inFolder("40_Archives")'
     order: [file.name, start_date, due_date]

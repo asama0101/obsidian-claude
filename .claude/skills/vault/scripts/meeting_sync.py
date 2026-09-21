@@ -12,7 +12,13 @@
   再同期・新しい回への遷移・新規作成を行う。
 
 結果は `{"created": [...], "updated": [...], "skipped_single_attendee": [...],
-"cancelled": [...]}` の形でJSONとしてstdoutへ出力する。
+"cancelled": [...], "no_project": [...]}` の形でJSONとしてstdoutへ出力する。
+`no_project` は新規作成されたノートのうちprojectが自動推定できなかった
+ものの `{"note_path": ..., "title": ...}` 一覧。
+
+`--set-project <note_path> --project <value>` を渡すと、指定ノートの
+frontmatter `project` 欄のみを書き換える別モードで動作する
+（`--events-json` とは排他）。
 """
 
 from __future__ import annotations
@@ -77,6 +83,17 @@ def _format_duration(start_dt: datetime.datetime, end_dt: datetime.datetime) -> 
     return f"{minutes}分"
 
 
+def _format_attendees(attendees: list) -> str:
+    """attendeesから自分自身(self: true)を除き、表示名(無ければメールアドレス)を
+    カンマ区切りで結合する。"""
+    names = []
+    for attendee in attendees:
+        if attendee.get("self"):
+            continue
+        names.append(attendee.get("displayName") or attendee.get("email", ""))
+    return ", ".join(names)
+
+
 def _extract_project_name(project_match: str) -> str:
     """fuzzy_project_match の返す '"[[Name]]"' からディレクトリ名 Name を取り出す。"""
     m = re.match(r'"\[\[(.+)\]\]"', project_match)
@@ -114,7 +131,7 @@ def _find_note_by_fm(vault_root: Path, key: str, value: str):
 # ---------------------------------------------------------------------------
 # 単発予定
 # ---------------------------------------------------------------------------
-def _create_single_note(event: dict, vault_root: Path) -> Path:
+def _create_single_note(event: dict, vault_root: Path) -> tuple[Path, str | None]:
     start_dt = _parse_dt(event["start"]["dateTime"])
     summary = event.get("summary", "")
     description = event.get("description", "")
@@ -123,6 +140,10 @@ def _create_single_note(event: dict, vault_root: Path) -> Path:
     template_text = template_path.read_text(encoding="utf-8")
     filled = vault_lib.fill_template(template_text, title=summary, dt=start_dt)
     fm_text, body_text = vault_lib.split_frontmatter(filled)
+    body_text = _replace_body_line(body_text, "開催場所", event.get("location", ""))
+    body_text = _replace_body_line(
+        body_text, "参加者", _format_attendees(event.get("attendees", []))
+    )
 
     project_match = vault_lib.fuzzy_project_match(
         summary + description, vault_root / "10_Projects"
@@ -134,10 +155,12 @@ def _create_single_note(event: dict, vault_root: Path) -> Path:
 
     dest_dir = _resolve_dest_dir(vault_root, project_match)
     dest_dir.mkdir(parents=True, exist_ok=True)
-    filename = vault_lib.sanitize_filename(summary) + ".md"
+    filename = (
+        vault_lib.sanitize_filename(f"{start_dt.strftime('%Y-%m-%d')} {summary}") + ".md"
+    )
     dest_path = vault_lib.unique_path(dest_dir, filename)
     _save_note(dest_path, fm_text, body_text)
-    return dest_path
+    return dest_path, project_match
 
 
 def _process_single_event(
@@ -149,8 +172,12 @@ def _process_single_event(
         if low_attendance:
             result["skipped_single_attendee"].append(event["id"])
             return
-        dest_path = _create_single_note(event, vault_root)
+        dest_path, project_match = _create_single_note(event, vault_root)
         result["created"].append(str(dest_path))
+        if not project_match:
+            result["no_project"].append(
+                {"note_path": str(dest_path), "title": event.get("summary", "")}
+            )
         return
 
     path, _text, fm_text, body_text = existing
@@ -183,8 +210,14 @@ def _get_occurrence_id(text: str) -> str | None:
 
 
 def _replace_body_line(inner: str, label: str, new_value: str) -> str:
-    pattern = re.compile(rf"(^- \*\*{re.escape(label)}:\*\* ?).*$", re.MULTILINE)
-    return pattern.sub(lambda m: m.group(1) + new_value, inner, count=1)
+    """`- **{label}:** ...` 行の値部分を new_value に置換する。
+
+    テンプレート側の元の行にラベル直後のスペースが有る/無いにかかわらず、
+    new_value が空でなければ常にラベルと値の間を1スペースで揃える。
+    """
+    pattern = re.compile(rf"(^- \*\*{re.escape(label)}:\*\*) ?.*$", re.MULTILINE)
+    suffix = f" {new_value}" if new_value else ""
+    return pattern.sub(lambda m: m.group(1) + suffix, inner, count=1)
 
 
 def _annotate_cancelled(inner: str) -> str:
@@ -221,6 +254,10 @@ def _fresh_occurrence_block(
     )
     inner = inner.replace('occurrence_id: ""', f'occurrence_id: "{event["id"]}"')
     inner = vault_lib.fill_template(inner, title="", dt=start_dt)
+    inner = _replace_body_line(inner, "開催場所", event.get("location", ""))
+    inner = _replace_body_line(
+        inner, "参加者", _format_attendees(event.get("attendees", []))
+    )
     return inner
 
 
@@ -234,7 +271,7 @@ def _archive_block(text: str, old_inner: str) -> str:
     return f"{text[:insert_pos]}\n\n{old_inner}\n{text[insert_pos:]}"
 
 
-def _create_series_note(event: dict, vault_root: Path, today: str) -> Path:
+def _create_series_note(event: dict, vault_root: Path, today: str) -> tuple[Path, str | None]:
     start_dt = _parse_dt(event["start"]["dateTime"])
     summary = event.get("summary", "")
     description = event.get("description", "")
@@ -244,6 +281,10 @@ def _create_series_note(event: dict, vault_root: Path, today: str) -> Path:
     filled = vault_lib.fill_template(template_text, title=summary, dt=start_dt)
     filled = filled.replace('occurrence_id: ""', f'occurrence_id: "{event["id"]}"')
     fm_text, body_text = vault_lib.split_frontmatter(filled)
+    body_text = _replace_body_line(body_text, "開催場所", event.get("location", ""))
+    body_text = _replace_body_line(
+        body_text, "参加者", _format_attendees(event.get("attendees", []))
+    )
 
     project_match = vault_lib.fuzzy_project_match(
         summary + description, vault_root / "10_Projects"
@@ -260,7 +301,7 @@ def _create_series_note(event: dict, vault_root: Path, today: str) -> Path:
     filename = vault_lib.sanitize_filename(summary) + ".md"
     dest_path = vault_lib.unique_path(dest_dir, filename)
     _save_note(dest_path, fm_text, body_text)
-    return dest_path
+    return dest_path, project_match
 
 
 def _process_series_event(
@@ -273,8 +314,12 @@ def _process_series_event(
         if low_attendance:
             result["skipped_single_attendee"].append(event["id"])
             return
-        dest_path = _create_series_note(event, vault_root, today)
+        dest_path, project_match = _create_series_note(event, vault_root, today)
         result["created"].append(str(dest_path))
+        if not project_match:
+            result["no_project"].append(
+                {"note_path": str(dest_path), "title": event.get("summary", "")}
+            )
         return
 
     path, text, fm_text, _body_text = existing
@@ -321,6 +366,7 @@ def sync_events(events: list[dict], vault_root: Path) -> dict:
         "updated": [],
         "skipped_single_attendee": [],
         "cancelled": [],
+        "no_project": [],
     }
 
     for event in events:
@@ -343,23 +389,44 @@ def _load_events(path: Path) -> list[dict]:
     return data.get("events", [])
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Google Calendarの予定と議事録ノートを同期する。"
     )
+    mode_group = parser.add_mutually_exclusive_group(required=True)
+    mode_group.add_argument(
+        "--events-json", help="イベント一覧を含むJSONファイルのパス"
+    )
+    mode_group.add_argument(
+        "--set-project", help="project欄のみを書き換える対象ノートのパス"
+    )
     parser.add_argument(
-        "--events-json", required=True, help="イベント一覧を含むJSONファイルのパス"
+        "--project",
+        default=None,
+        help="--set-project使用時に設定するproject欄の値（例: '\"[[Name]]\"' や '\"\"'）",
     )
     parser.add_argument(
         "--vault-root", default=None, help="Vaultルート（省略時はvault_lib.VAULT_ROOT）"
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+
+    if args.set_project:
+        if args.project is None:
+            parser.error("--set-project には --project の指定が必要です")
+        note_path = Path(args.set_project)
+        text = note_path.read_text(encoding="utf-8")
+        fm_text, body_text = vault_lib.split_frontmatter(text)
+        fm_text = _set_fm_raw(fm_text, "project", args.project)
+        _save_note(note_path, fm_text, body_text)
+        print(json.dumps({"status": "ok", "note_path": str(note_path)}, ensure_ascii=False))
+        return 0
 
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
     events = _load_events(Path(args.events_json))
     result = sync_events(events, vault_root)
     print(json.dumps(result, ensure_ascii=False))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -4,6 +4,7 @@ project: ""
 start_date: "{{date:YYYY-MM-DD}}"
 due_date: "{{date:YYYY-MM-DD}}"
 status: 1_todo
+memo: ""
 ---
 # {{title}}
 
