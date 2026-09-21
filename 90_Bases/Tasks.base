@@ -1,5 +1,4 @@
-filters:
-  'type == "task"'
+filters: type == "task"
 properties:
   status:
     displayName: ステータス
@@ -16,23 +15,43 @@ views:
     name: Today
     filters:
       and:
-        - 'start_date'
-        - 'start_date <= today()'
-        - 'status != "4_done"'
-        - 'status != "5_cancel"'
-    order: [file.name, project, status, due_date, memo]
+        - start_date
+        - start_date <= today()
+        - "!status.contains(\"4_done\")"
+        - "!status.contains(\"5_cancel\")"
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - project
+      - status
+      - start_date
+      - due_date
+      - memo
+    sort:
+      - property: project
+        direction: ASC
   - type: table
     name: ProjectTasks
     filters:
       and:
-        - 'project == link(this.file.name)'
-        - 'status != "4_done"'
-        - 'status != "5_cancel"'
-    order: [file.name, status, start_date, due_date, memo]
+        - project == link(this.file.name)
+        - "!status.contains(\"4_done\")"
+        - "!status.contains(\"5_cancel\")"
+    order:
+      - file.name
+      - status
+      - start_date
+      - due_date
+      - memo
   - type: table
     name: ProjectCompletedTasks
     filters:
       and:
-        - 'project == link(this.file.name)'
-        - 'status == "4_done"'
-    order: [file.name, due_date, memo]
+        - project == link(this.file.name)
+        - status.contains("4_done")
+    order:
+      - file.name
+      - due_date
+      - memo
