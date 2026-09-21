@@ -1,5 +1,7 @@
 filters:
-  'type == "project"'
+  and:
+    - 'type == "project"'
+    - 'file.inFolder("10_Projects")'
 properties:
   start_date:
     displayName: 開始日
