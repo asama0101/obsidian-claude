@@ -1,4 +1,4 @@
-"""clip_save.py のユニットテスト。
+"""webclip_save.py のユニットテスト。
 
 標準ライブラリの unittest のみを使用する。ネットワークアクセスは行わず、
 urllib.request.urlopen をモックして検証する。
@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 # scripts/ ディレクトリを import パスに追加する
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import clip_save  # noqa: E402
+import webclip_save  # noqa: E402
 import vault_lib  # noqa: E402
 
 
@@ -47,7 +47,7 @@ TEMPLATE_TEXT = (
 )
 
 
-class TestClipSave(unittest.TestCase):
+class TestWebclipSave(unittest.TestCase):
     def _make_vault(self, tmp):
         vault_root = Path(tmp)
         (vault_root / "70_Templates").mkdir(parents=True)
@@ -75,7 +75,8 @@ class TestClipSave(unittest.TestCase):
     def _mock_urlopen_by_url(self, responses: dict):
         """URLごとに異なるレスポンスを返すside_effect関数を作る。"""
 
-        def _side_effect(url, timeout=10.0):
+        def _side_effect(request, timeout=10.0):
+            url = request.full_url if hasattr(request, "full_url") else request
             return responses[url]
 
         return _side_effect
@@ -83,7 +84,7 @@ class TestClipSave(unittest.TestCase):
     def _run_main(self, argv):
         stdout = io.StringIO()
         with redirect_stdout(stdout):
-            exit_code = clip_save.main(argv)
+            exit_code = webclip_save.main(argv)
         self.assertEqual(exit_code, 0)
         return json.loads(stdout.getvalue())
 
@@ -109,7 +110,7 @@ class TestClipSave(unittest.TestCase):
                 "https://example.com/k1.jpg": self._mock_response(b"k1data", "image/jpeg"),
             }
             with patch(
-                "clip_save.urllib.request.urlopen",
+                "webclip_save.urllib.request.urlopen",
                 side_effect=self._mock_urlopen_by_url(responses),
             ):
                 result = self._run_main(
@@ -142,6 +143,42 @@ class TestClipSave(unittest.TestCase):
             )
             self.assertIn("> 本文全文です", note_text)
 
+    def test_画像ダウンロード時にUser_Agentヘッダを送る(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "UAテスト記事",
+                    "summary": [
+                        {"text": "要約1", "image_url": "https://example.com/s1.png"}
+                    ],
+                    "key_points": [],
+                    "full_text": "本文",
+                },
+            )
+            mock_response = self._mock_response(b"s1data", "image/png")
+            with patch(
+                "webclip_save.urllib.request.urlopen", return_value=mock_response
+            ) as mock_urlopen:
+                self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/article",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                        "--tag",
+                        "python/pandas",
+                    ]
+                )
+
+            request_arg = mock_urlopen.call_args[0][0]
+            self.assertEqual(request_arg.full_url, "https://example.com/s1.png")
+            self.assertIn("User-agent", request_arg.headers)
+            self.assertIn("Mozilla", request_arg.headers["User-agent"])
+
     def test_image_urlを持たない項目には画像が埋め込まれない(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault_root = self._make_vault(tmp)
@@ -154,7 +191,7 @@ class TestClipSave(unittest.TestCase):
                     "full_text": "本文",
                 },
             )
-            with patch("clip_save.urllib.request.urlopen") as mock_urlopen:
+            with patch("webclip_save.urllib.request.urlopen") as mock_urlopen:
                 result = self._run_main(
                     [
                         "--url",
@@ -193,7 +230,7 @@ class TestClipSave(unittest.TestCase):
             )
             mock_response = self._mock_response(b"shareddata", "image/png")
             with patch(
-                "clip_save.urllib.request.urlopen", return_value=mock_response
+                "webclip_save.urllib.request.urlopen", return_value=mock_response
             ) as mock_urlopen:
                 result = self._run_main(
                     [
@@ -259,7 +296,7 @@ class TestClipSave(unittest.TestCase):
                 },
             )
             with patch(
-                "clip_save.urllib.request.urlopen", side_effect=OSError("network error")
+                "webclip_save.urllib.request.urlopen", side_effect=OSError("network error")
             ):
                 result = self._run_main(
                     [
@@ -333,7 +370,7 @@ class TestClipSave(unittest.TestCase):
             )
             mock_response = self._mock_response(b"body1data", "image/png")
             with patch(
-                "clip_save.urllib.request.urlopen", return_value=mock_response
+                "webclip_save.urllib.request.urlopen", return_value=mock_response
             ) as mock_urlopen:
                 result = self._run_main(
                     [
@@ -375,7 +412,7 @@ class TestClipSave(unittest.TestCase):
             )
             mock_response = self._mock_response(b"shared2data", "image/png")
             with patch(
-                "clip_save.urllib.request.urlopen", return_value=mock_response
+                "webclip_save.urllib.request.urlopen", return_value=mock_response
             ) as mock_urlopen:
                 result = self._run_main(
                     [
@@ -415,7 +452,7 @@ class TestClipSave(unittest.TestCase):
                 },
             )
             with patch(
-                "clip_save.urllib.request.urlopen", side_effect=OSError("network error")
+                "webclip_save.urllib.request.urlopen", side_effect=OSError("network error")
             ):
                 result = self._run_main(
                     [
@@ -455,7 +492,7 @@ class TestClipSave(unittest.TestCase):
                     "full_text": "画像を含まない本文テキスト",
                 },
             )
-            with patch("clip_save.urllib.request.urlopen") as mock_urlopen:
+            with patch("webclip_save.urllib.request.urlopen") as mock_urlopen:
                 result = self._run_main(
                     [
                         "--url",
@@ -498,7 +535,7 @@ class TestClipSave(unittest.TestCase):
                 "https://example.com/mix2.png": self._mock_response(b"mix2", "image/png"),
             }
             with patch(
-                "clip_save.urllib.request.urlopen",
+                "webclip_save.urllib.request.urlopen",
                 side_effect=self._mock_urlopen_by_url(responses),
             ):
                 result = self._run_main(
@@ -594,7 +631,7 @@ class TestClipSave(unittest.TestCase):
         # テンプレートのtags:ブロックが空(子要素無し)の場合でもタグが追加されることを
         # build_note_textで直接検証する。
         empty_tags_template = TEMPLATE_TEXT.replace("tags:\n  - webclip\n", "tags:\n")
-        note = clip_save.build_note_text(
+        note = webclip_save.build_note_text(
             template_text=empty_tags_template,
             title="空タグ記事",
             dt=datetime.datetime(2026, 9, 21, 10, 0),

@@ -1,5 +1,5 @@
 {
   "name": "vault",
   "version": "0.1.0",
-  "description": "Obsidianボルト運用支援スキル集（today/close/meeting/clip/knowhow/task/project）。デイリーノート運用・議事録取り込み・Webクリップ・ナレッジ整形・タスク抽出・プロジェクト開始を支援する。"
+  "description": "Obsidianボルト運用支援スキル集（today/close/meeting/webclip/knowhow/task/project）。デイリーノート運用・議事録取り込み・Webクリップ・ナレッジ整形・タスク抽出・プロジェクト開始を支援する。"
 }

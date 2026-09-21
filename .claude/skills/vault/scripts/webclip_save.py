@@ -28,6 +28,12 @@ _KNOWN_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".s
 # altは`]`を含まない任意文字列、URLは`)`が来るまでの文字列(ネストした括弧は非対応)。
 _MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]*)\)")
 
+# User-Agent未指定だとBot判定で403を返す画像CDNがあるため、ブラウザ相当のUAを送る。
+_DOWNLOAD_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+
 
 def _guess_extension(url: str, content_type: str | None) -> str:
     """URLの末尾かContent-Typeヘッダから画像の拡張子を判定する。不明なら.jpgとする。"""
@@ -47,7 +53,10 @@ def _guess_extension(url: str, content_type: str | None) -> str:
 
 def _download_image(url: str, timeout: float = 10.0) -> tuple[bytes, str | None]:
     """URLから画像データをダウンロードし、(バイナリデータ, content-type)を返す。"""
-    with urllib.request.urlopen(url, timeout=timeout) as response:
+    request = urllib.request.Request(
+        url, headers={"User-Agent": _DOWNLOAD_USER_AGENT}
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
         data = response.read()
         content_type = response.headers.get_content_type()
     return data, content_type

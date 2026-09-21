@@ -54,7 +54,7 @@
 | `conventions.md` | vaultプラグイン全体の共通実装規約（ファイル名サニタイズ等、`vault_lib.py`の決定的処理の一覧） |
 | `meeting-field-mapping.md` | Microsoft 365/Outlook/Teams接続時のフィールド対応表（現状M365 MCP未接続のため将来対応） |
 | `meeting-series-update.md` | 定例予定ノートの更新ロジック（`occurrence_id`による同一回/次回判定） |
-| `project-matching.md` | `meeting`/`clip`共通のプロジェクト自動紐付けルール（`vault_lib.fuzzy_project_match`） |
+| `project-matching.md` | `meeting`/`webclip`共通のプロジェクト自動紐付けルール（`vault_lib.fuzzy_project_match`） |
 
 ## 90_Bases/ Baseファイル一覧
 

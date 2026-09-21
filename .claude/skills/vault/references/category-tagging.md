@@ -1,4 +1,4 @@
-# カテゴリタグ運用ルール（knowhow / clip 共通）
+# カテゴリタグ運用ルール（knowhow / webclip 共通）
 
 Knowhow・WebClipのノートは共通の分類軸として、`tags`に
 `<category>/<topic>`形式の階層タグを1本追加する（例:
@@ -31,7 +31,7 @@ Knowhowの旧`category`frontmatterプロパティは廃止済み。WebClipには
    選択肢は併記し、提案はあくまで候補にとどめる。
 2. ユーザーが既存タグを選ぶか新規タグを作るか、明示的に選択・入力
    するまで待つ。
-3. 確定したタグを`knowhow_save.py --tag <値>` / `clip_save.py --tag <値>`
+3. 確定したタグを`knowhow_save.py --tag <値>` / `webclip_save.py --tag <値>`
    に渡す。
 
 これは`task`スキルの「project不明なら必ず確認する」方針と同型。

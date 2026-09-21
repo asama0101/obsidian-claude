@@ -1,12 +1,12 @@
 ---
-name: clip
+name: webclip
 description: |
   指定URLのWebページを要約・画像保存してノート化する。「このページを
-  クリップして」「Webクリップ作って」「/clip <URL>」等のトリガーで
+  クリップして」「Webクリップ作って」「/webclip <URL>」等のトリガーで
   起動する。
 ---
 
-# clip
+# webclip
 
 ## 目的
 Webページの内容を後から参照できる形でVaultに保存する。
@@ -80,9 +80,9 @@ Webページの内容を後から参照できる形でVaultに保存する。
    （「新規作成」の選択肢も併記して）ユーザーに提示し、明示的に選択・
    入力するまで待つ（自動決定はしない。`references/category-tagging.md`
    を参照）。
-5. **`clip_save.py` を実行する。**
+5. **`webclip_save.py` を実行する。**
    ```
-   python .claude/skills/vault/scripts/clip_save.py \
+   python .claude/skills/vault/scripts/webclip_save.py \
      --url <URL> --content-json <JSONファイルパス> --tag <確定したタグ>
    ```
    - `summary`/`key_points`の`image_url`と`full_text`中の`![alt](URL)`を

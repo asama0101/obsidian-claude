@@ -20,7 +20,7 @@ Vault本体（Markdownノート・テンプレート・Bases定義）と、そ�
 | `10_Projects/` | プロジェクト単位のフォルダ。各配下に `Tasks/`・`Meetings/`・`Documents/` |
 | `20_Areas/Knowledge/` | ナレッジノート（`knowhow`スキルが整形） |
 | `20_Areas/Meetings/` | プロジェクトに紐付かない議事録 |
-| `30_Resources/WebClips/` | Webクリップ（`clip`スキルが保存） |
+| `30_Resources/WebClips/` | Webクリップ（`webclip`スキルが保存） |
 | `40_Archives/` | 完了・非アクティブになったノートの置き場 |
 | `70_Templates/` | 各ノート種別のテンプレート（後述） |
 | `80_Attachments/` | 画像等の添付ファイル |
@@ -48,7 +48,7 @@ Vault本体（Markdownノート・テンプレート・Bases定義）と、そ�
 |--------|------|------|
 | `today` | 当日ブランチを作成し、デイリーノートを新規作成する（1日の作業開始） | [SKILL.md](.claude/skills/vault/skills/today/SKILL.md) |
 | `meeting` | Google Calendarの予定から議事録ノートを作成・更新する | [SKILL.md](.claude/skills/vault/skills/meeting/SKILL.md) |
-| `clip` | 指定URLのWebページを要約・画像保存してノート化する | [SKILL.md](.claude/skills/vault/skills/clip/SKILL.md) |
+| `webclip` | 指定URLのWebページを要約・画像保存してノート化する | [SKILL.md](.claude/skills/vault/skills/webclip/SKILL.md) |
 | `knowhow` | 雑多なメモ・ログをナレッジノートとして整形保存する | [SKILL.md](.claude/skills/vault/skills/knowhow/SKILL.md) |
 | `task` | 議事録のアクションアイテムやCLI入力からタスクノートを抽出・作成する | [SKILL.md](.claude/skills/vault/skills/task/SKILL.md) |
 | `project` | プロジェクト概要ノートとTasks/Meetings/Documentsフォルダを一括作成する | [SKILL.md](.claude/skills/vault/skills/project/SKILL.md) |
@@ -75,7 +75,7 @@ Obsidian Basesプラグインのビュー定義。対応するノート種別を
 ## 日次ワークフロー
 
 1. `today` を実行し、当日ブランチ（`YYYY-MM-DD`形式）を作成してデイリーノートを用意する。
-2. 作業中は `meeting`・`clip`・`knowhow`・`task`・`project` を必要に応じて実行し、当日ブランチ上にノートを蓄積する。
+2. 作業中は `meeting`・`webclip`・`knowhow`・`task`・`project` を必要に応じて実行し、当日ブランチ上にノートを蓄積する。
 3. 作業終了時に `close` を実行し、当日ブランチの変更をコミットして `main` へ ff-only マージする。
 
 ブランチ運用・スクリプト実装方針など、Claude Codeがこのリポジトリで作業する際の詳細ルールは [CLAUDE.md](CLAUDE.md) を参照。
