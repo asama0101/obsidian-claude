@@ -11,3 +11,7 @@ desktop.ini
 
 # Obsidian ゴミ箱
 .trash/
+
+# Python
+__pycache__/
+*.pyc

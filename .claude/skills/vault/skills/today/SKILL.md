@@ -11,18 +11,32 @@ description: |
 ## 目的
 1日の作業を開始するための準備を自動化する。
 
-## 入力
-なし（実行日の日付を自動取得）。
+## 処理
+1. `.claude/skills/vault/scripts/today_start.py` を引数なしで実行する。
+   ```
+   python .claude/skills/vault/scripts/today_start.py
+   ```
+2. スクリプトは標準出力にJSON(1行)を出す。`status`フィールドで結果を判定する。
+   - `status: "blocked"`
+     - `branches`に未マージの過去日ブランチ名の一覧が入る。
+     - このスクリプト自身はマージ・削除を行わない。
+     - ユーザーに「未マージの過去日ブランチ（例: `branches`の内容）が残っています。
+       マージまたは破棄してから再実行してください」と確認し、対応方針が決まるまで
+       `today`の処理を先に進めない。
+   - `status: "ok"`
+     - `branch`: `"existing"`（当日ブランチが既にありcheckoutのみ実施）
+       または`"created"`（`main`から新規作成しcheckout）。
+     - `daily_note`: `"skipped"`（当日のデイリーノートが既に存在し何もしなかった）
+       または`"created"`（`Daily_Template.md`から新規作成した）。
+     - `daily_note`が`"created"`のとき、`carryover_source`に転記元にした前日ノートの
+       日付（`YYYY-MM-DD`）が入る。前日ノートが見つからなければ`null`。
+3. 正常終了（`status: "ok"`）ならユーザーに結果（ブランチ状態・デイリーノート作成有無・
+   Carryover転記元）を簡潔に報告する。
 
-## 出力
-- `main` から作成・チェックアウトされた `YYYY-MM-DD` ブランチ
-- `00_Daily/YYYY-MM-DD.md`（`Daily_Template.md` ベース）
-
-## 処理ステップ概要
-1. 当日日付のgitブランチを `main` から作成しチェックアウト
-2. `Daily_Template.md` からデイリーノートを作成
-3. 前日のデイリーノートが存在すれば、`<!-- CARRYOVER_START -->`〜
-   `<!-- CARRYOVER_END -->` 内の未完了項目を新規ノートの同セクションに転記
-
-## 備考（次フェーズでの詳細実装対象）
-- 詳細アルゴリズムは未実装。本ファイルは雛形。
+## 備考
+- 当日ブランチの作成前に、`origin`リモートが設定されていれば`main`を
+  `git pull --ff-only`で最新化する（失敗しても処理は続行する）。
+- Carryover転記は前日ノートの`<!-- CARRYOVER_START -->`〜`<!-- CARRYOVER_END -->`
+  ブロックの中身のみを読み取り、元ノートは一切変更しない。
+- 前日ノートは`00_Daily/`内を日付降順に走査し、当日より前で最初に見つかったもの
+  （連続していなくてもよい）を使う。見つからなければCarryoverは空のまま作成する。

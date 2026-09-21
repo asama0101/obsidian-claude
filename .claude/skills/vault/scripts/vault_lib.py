@@ -34,7 +34,7 @@ def run_git(*args: str, cwd, check: bool = True) -> str:
         raise subprocess.CalledProcessError(
             result.returncode, ["git", *args], output=result.stdout, stderr=result.stderr
         )
-    return result.stdout.strip()
+    return result.stdout.rstrip("\n")
 
 
 def sanitize_filename(title: str) -> str:
