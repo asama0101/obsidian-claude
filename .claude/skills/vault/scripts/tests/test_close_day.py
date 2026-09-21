@@ -418,5 +418,44 @@ class TypeGroupingTest(unittest.TestCase):
                 self.assertNotIn(absent, merged)
 
 
+class UnknownAndDeletedTypeFallbackTest(unittest.TestCase):
+    def test_未知typeと削除済みファイルはotherグループに入る(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _init_repo(root)
+            _write(root / "00_Daily" / ".gitkeep", "")
+            _write(root / "70_Templates" / "Daily_Template.md", "template")
+            _commit_all(root, "initial commit")
+
+            branch = "2026-09-27"
+            _run_git(["checkout", "-b", branch], cwd=root)
+            daily_note = root / "00_Daily" / f"{branch}.md"
+            _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
+
+            # 未知のtype値を持つノート
+            _write(root / "20_Notes" / "Mystery.md", "---\ntype: mystery\n---\nbody")
+
+            # 追跡済みファイルを削除する
+            # (git statusでは'D'として検出されるが実体はもう無い)
+            deleted_note = root / "20_Notes" / "Ghost.md"
+            _write(deleted_note, "---\ntype: project\n---\nbody")
+            _commit_all(root, "add ghost note")
+            deleted_note.unlink()
+
+            result = _run_close_day(root)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "ok")
+            self.assertEqual(sorted(payload["updated_notes"]), ["Ghost", "Mystery"])
+
+            _run_git(["checkout", "main"], cwd=root)
+            merged = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+            self.assertIn("**other**", merged)
+            self.assertIn("- [[Mystery]]", merged)
+            self.assertIn("- [[Ghost]]", merged)
+            self.assertNotIn("**project**", merged)
+
+
 if __name__ == "__main__":
     unittest.main()
