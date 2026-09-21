@@ -57,6 +57,13 @@ def main() -> None:
         sys.exit(1)
 
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
+
+    project_name = extract_project_name(args.project)
+    project_dir = vault_root / "10_Projects" / project_name
+    if not project_dir.is_dir():
+        print(json.dumps({"status": "error", "reason": "project_not_found"}, ensure_ascii=False))
+        sys.exit(1)
+
     template_text = (vault_root / _TEMPLATE_RELATIVE_PATH).read_text(encoding="utf-8")
 
     now = datetime.datetime.now()
@@ -68,8 +75,7 @@ def main() -> None:
         dt=now,
     )
 
-    project_name = extract_project_name(args.project)
-    tasks_dir = vault_root / "10_Projects" / project_name / "Tasks"
+    tasks_dir = project_dir / "Tasks"
     tasks_dir.mkdir(parents=True, exist_ok=True)
 
     filename = f"{vault_lib.sanitize_filename(args.title)}.md"
