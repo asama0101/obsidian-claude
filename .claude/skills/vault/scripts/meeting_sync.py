@@ -416,11 +416,23 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("--set-project には --project の指定が必要です")
         vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
         note_path = Path(args.set_project)
+
+        project_match = args.project if args.project not in (None, "", '""') else None
+        if project_match:
+            project_name = _extract_project_name(project_match)
+            if not (vault_root / "10_Projects" / project_name).is_dir():
+                print(
+                    json.dumps(
+                        {"status": "error", "reason": "project_not_found"},
+                        ensure_ascii=False,
+                    )
+                )
+                return 1
+
         text = note_path.read_text(encoding="utf-8")
         fm_text, body_text = vault_lib.split_frontmatter(text)
         fm_text = _set_fm_raw(fm_text, "project", args.project)
 
-        project_match = args.project if args.project not in (None, "", '""') else None
         dest_dir = _resolve_dest_dir(vault_root, project_match)
         dest_dir.mkdir(parents=True, exist_ok=True)
 

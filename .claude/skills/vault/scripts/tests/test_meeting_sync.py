@@ -5,7 +5,9 @@
 （内容を重複転記せず、実物とのズレを防ぐため）。
 """
 
+import contextlib
 import datetime
+import io
 import json
 import shutil
 import sys
@@ -583,6 +585,40 @@ class TestSetProjectMode(unittest.TestCase):
             self.assertTrue(note_path.exists())
             entries = list(dest_dir.iterdir())
             self.assertEqual(entries, [note_path])
+
+    def test_set_projectで存在しないプロジェクト名を指定するとエラーになりノートは変更されない(
+        self,
+    ):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
+            src_dir = vault_root / "20_Areas" / "Meetings"
+            note_path = src_dir / "会議.md"
+            before_text = '---\nproject: ""\n---\nbody'
+            note_path.write_text(before_text, encoding="utf-8")
+
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = meeting_sync.main(
+                    [
+                        "--set-project",
+                        str(note_path),
+                        "--project",
+                        '"[[NonExistent]]"',
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(
+                json.loads(stdout.getvalue()),
+                {"status": "error", "reason": "project_not_found"},
+            )
+            self.assertTrue(note_path.exists())
+            self.assertEqual(note_path.read_text(encoding="utf-8"), before_text)
+            self.assertFalse(
+                (vault_root / "10_Projects" / "NonExistent").exists()
+            )
 
     def test_set_projectで移動先に同名ファイルがあれば連番付与される(self):
         with tempfile.TemporaryDirectory() as tmp:
