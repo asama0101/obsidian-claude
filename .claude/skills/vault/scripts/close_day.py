@@ -28,16 +28,51 @@ def _git_status_porcelain(vault_root: Path) -> str:
 
     vault_lib.run_git() は rstrip("\n") のみで先頭の空白は保持するため
     （porcelain形式は行頭が半角スペースの場合に意味を持つ）、そのまま使える。
+    `--untracked-files=all` を指定し、丸ごと新規のディレクトリ（例:
+    新規プロジェクトの最初のノート）でもディレクトリ名1行に折りたたまず
+    個々のファイルを列挙させる（デフォルトの `normal` モードだと
+    追跡済みファイルが1つも無いディレクトリは1行に集約されてしまう）。
     """
     return vault_lib.run_git(
-        "-c", "core.quotepath=false", "status", "--porcelain", cwd=vault_root
+        "-c",
+        "core.quotepath=false",
+        "status",
+        "--porcelain",
+        "--untracked-files=all",
+        cwd=vault_root,
     )
+
+
+def _unquote_git_path(raw: str) -> str:
+    """gitがダブルクォートで囲んだパスをアンクォートする。
+
+    `git status --porcelain` は、パスにスペース・括弧等の特定の文字が
+    含まれる場合、`core.quotepath=false` を指定していてもパス全体を
+    ダブルクォートで囲み、`"` と `\\` のみバックスラッシュエスケープする
+    ことがある（非ASCIIバイトの8進数エスケープは quotepath=false により
+    発生しない想定）。クォートされていない場合はそのまま返す。
+    """
+    if len(raw) >= 2 and raw[0] == '"' and raw[-1] == '"':
+        inner = raw[1:-1]
+        result: list[str] = []
+        i = 0
+        while i < len(inner):
+            ch = inner[i]
+            if ch == "\\" and i + 1 < len(inner) and inner[i + 1] in ('"', "\\"):
+                result.append(inner[i + 1])
+                i += 2
+                continue
+            result.append(ch)
+            i += 1
+        return "".join(result)
+    return raw
 
 
 def _parse_status_paths(porcelain_output: str) -> set[str]:
     """`git status --porcelain` の出力からファイルパス集合を得る。
 
-    リネームの場合は変更後のパスを採用する。
+    リネームの場合は変更後のパスを採用する。パスがダブルクォートで
+    囲まれている場合はアンクォートする。
     """
     paths: set[str] = set()
     for line in porcelain_output.splitlines():
@@ -46,7 +81,7 @@ def _parse_status_paths(porcelain_output: str) -> set[str]:
         rest = line[3:]
         if "->" in rest:
             rest = rest.split("->", 1)[1].strip()
-        paths.add(rest)
+        paths.add(_unquote_git_path(rest))
     return paths
 
 

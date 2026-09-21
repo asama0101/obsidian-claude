@@ -151,6 +151,63 @@ class UpdatedNotesBlockTest(unittest.TestCase):
             self.assertNotIn("scratch", merged_note_text)
 
 
+class QuotedPathTest(unittest.TestCase):
+    def test_gitがクォートするファイル名も一覧に含まれる(self):
+        # スペースと括弧を含むファイル名は core.quotepath=false でも
+        # git status --porcelain がダブルクォートで囲むことがある
+        # (実データ検証で発見した実際のバグの再現)。
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _init_repo(root)
+            _write(root / "00_Daily" / ".gitkeep", "")
+            _write(root / "70_Templates" / "Daily_Template.md", "template")
+            _commit_all(root, "initial commit")
+
+            branch = "2026-09-25"
+            _run_git(["checkout", "-b", branch], cwd=root)
+            daily_note = root / "00_Daily" / f"{branch}.md"
+            _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
+            _write(root / "20_Areas" / "Knowledge" / "status --check(x).md", "content")
+
+            result = _run_close_day(root)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "ok")
+            self.assertEqual(payload["updated_notes"], ["status --check(x)"])
+
+
+class NewProjectDirectoryTest(unittest.TestCase):
+    def test_全く新規のディレクトリ内のファイルも個別に一覧化される(self):
+        # 10_Projects/<新規プロジェクト>/Tasks/ のように、追跡済み
+        # ファイルが1つも無い全く新規のディレクトリにノートを作成した
+        # 場合、gitのデフォルト(untracked-files=normal)だと
+        # ディレクトリ名1行に集約され、ファイルが一覧から漏れる
+        # (実データ検証で発見した実際のバグの再現)。
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _init_repo(root)
+            _write(root / "00_Daily" / ".gitkeep", "")
+            _write(root / "70_Templates" / "Daily_Template.md", "template")
+            _commit_all(root, "initial commit")
+
+            branch = "2026-09-26"
+            _run_git(["checkout", "-b", branch], cwd=root)
+            daily_note = root / "00_Daily" / f"{branch}.md"
+            _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
+            _write(
+                root / "10_Projects" / "NewProject" / "Tasks" / "FirstTask.md",
+                "task content",
+            )
+
+            result = _run_close_day(root)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "ok")
+            self.assertEqual(payload["updated_notes"], ["FirstTask"])
+
+
 class AlreadyClosedTest(unittest.TestCase):
     def test_mainとHEADが一致していれば_already_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
