@@ -131,12 +131,14 @@ def _collect_updated_paths(vault_root: Path) -> set[str]:
     return committed_paths | status_paths
 
 
-def _filter_updated_notes(paths: set[str], date_str: str) -> list[str]:
+def _filter_updated_notes(
+    paths: set[str], date_str: str, vault_root: Path
+) -> list[tuple[str, Path]]:
     """close対象外(当日ノート自身/テンプレート/.claude配下/非.md)を除外し、
-    ファイル名(拡張子除く)のソート済みリストを返す。
+    (ファイル名(拡張子除く), フルパス) のstemソート済みリストを返す。
     """
     daily_note_path = f"00_Daily/{date_str}.md"
-    names = []
+    entries: list[tuple[str, Path]] = []
     for path in paths:
         normalized = path.replace("\\", "/")
         if not normalized.endswith(".md"):
@@ -145,8 +147,8 @@ def _filter_updated_notes(paths: set[str], date_str: str) -> list[str]:
             continue
         if any(normalized.startswith(prefix) for prefix in _EXCLUDED_PREFIXES):
             continue
-        names.append(Path(normalized).stem)
-    return sorted(names)
+        entries.append((Path(normalized).stem, vault_root / normalized))
+    return sorted(entries, key=lambda entry: entry[0])
 
 
 def _build_updated_notes_block(note_names: list[str]) -> str:
@@ -186,7 +188,8 @@ def main(argv: list[str] | None = None) -> int:
 
     # 2-4. 更新ノート一覧を作成する
     updated_paths = _collect_updated_paths(vault_root)
-    note_names = _filter_updated_notes(updated_paths, date_str)
+    entries = _filter_updated_notes(updated_paths, date_str, vault_root)
+    note_names = [stem for stem, _ in entries]
     block_text = _build_updated_notes_block(note_names)
 
     # 5. 当日デイリーノートのマーカーブロックを置換して書き戻す
