@@ -1,6 +1,6 @@
 """既存ノートから使用済みの階層カテゴリタグを収集するスクリプト。
 
-Knowhow(20_Areas/Knowledge)とWebClip(30_Resources/WebClips)配下のノートを走査し、
+Knowhow(20_Areas/Knowledge)とWebClip(20_Areas/WebClips)配下のノートを走査し、
 frontmatterのtags:から`<category>/<topic>`形式(`/`をちょうど1つ含む)のタグだけを
 抽出して候補として返す。判断はせず、重複排除とソートのみ行う機械的な収集であり、
 候補の採用可否は呼び出し元のスキルが人間に確認する。標準ライブラリのみに依存する。
@@ -19,7 +19,7 @@ def list_category_tags(vault_root: Path) -> list[str]:
     """vault_root配下のKnowhow/WebClipノートから階層カテゴリタグを収集する。"""
     target_dirs = [
         vault_root / "20_Areas" / "Knowledge",
-        vault_root / "30_Resources" / "WebClips",
+        vault_root / "20_Areas" / "WebClips",
     ]
 
     found: set[str] = set()

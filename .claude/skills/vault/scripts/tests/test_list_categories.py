@@ -50,11 +50,11 @@ class TestListCategoryTags(unittest.TestCase):
                 ["python/pandas"],
             )
             _write_note(
-                vault_root / "30_Resources" / "WebClips" / "note2.md",
+                vault_root / "20_Areas" / "WebClips" / "note2.md",
                 ["python/pandas"],
             )
             _write_note(
-                vault_root / "30_Resources" / "WebClips" / "note3.md",
+                vault_root / "20_Areas" / "WebClips" / "note3.md",
                 ["git/rebase"],
             )
             result = list_categories.list_category_tags(vault_root)

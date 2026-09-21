@@ -20,7 +20,8 @@ Vault本体（Markdownノート・テンプレート・Bases定義）と、そ�
 | `10_Projects/` | プロジェクト単位のフォルダ。各配下に `Tasks/`・`Meetings/`・`Documents/` |
 | `20_Areas/Knowledge/` | ナレッジノート（`knowhow`スキルが整形） |
 | `20_Areas/Meetings/` | プロジェクトに紐付かない議事録 |
-| `30_Resources/WebClips/` | Webクリップ（`webclip`スキルが保存） |
+| `20_Areas/WebClips/` | Webクリップ（`webclip`スキルが保存） |
+| `30_Resources/` | プロジェクトに紐付かないドキュメントの格納先 |
 | `40_Archives/` | 完了・非アクティブになったノートの置き場 |
 | `70_Templates/` | 各ノート種別のテンプレート（後述） |
 | `80_Attachments/` | 画像等の添付ファイル |

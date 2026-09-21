@@ -55,7 +55,7 @@ class TestWebclipSave(unittest.TestCase):
             TEMPLATE_TEXT, encoding="utf-8"
         )
         (vault_root / "80_Attachments").mkdir()
-        (vault_root / "30_Resources" / "WebClips").mkdir(parents=True)
+        (vault_root / "20_Areas" / "WebClips").mkdir(parents=True)
         (vault_root / "10_Projects").mkdir()
         return vault_root
 
