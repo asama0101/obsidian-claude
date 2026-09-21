@@ -2,6 +2,7 @@
 type: meeting
 calendar_event_id: ""
 project: ""
+daily_note: "[[{{date:YYYY-MM-DD}}]]"
 date: "{{date:YYYY-MM-DD}}"
 url: ""
 tags:
