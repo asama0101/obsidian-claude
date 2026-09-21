@@ -319,5 +319,26 @@ class NoteTypeHelpersTest(unittest.TestCase):
         self.assertIsNone(close_day._read_note_type(missing_path))
 
 
+class FilterUpdatedNotesTupleTest(unittest.TestCase):
+    def test_stemとフルパスのtupleリストをソート済みで返す(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = Path(tmp)
+            paths = {
+                "20_Notes/Beta.md",
+                "20_Notes/Alpha.md",
+                "70_Templates/x.md",
+                "images/a.png",
+                "00_Daily/2026-09-22.md",
+            }
+            entries = close_day._filter_updated_notes(paths, "2026-09-22", vault_root)
+            self.assertEqual(
+                entries,
+                [
+                    ("Alpha", vault_root / "20_Notes/Alpha.md"),
+                    ("Beta", vault_root / "20_Notes/Beta.md"),
+                ],
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
