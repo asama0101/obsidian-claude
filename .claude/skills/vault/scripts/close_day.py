@@ -22,6 +22,38 @@ _DAILY_BRANCH_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # 更新ノート一覧から除外するパス接頭辞
 _EXCLUDED_PREFIXES = ("70_Templates/", ".claude/")
 
+# frontmatterのtype値のうちグループとして認識する既知の値
+_KNOWN_TYPES = ("project", "meeting", "task", "knowhow", "webclip")
+
+# 更新ノート一覧の表示グループ順(固定)。otherは既知7種以外・type未定義の受け皿。
+_TYPE_GROUP_ORDER = ("project", "meeting", "task", "knowhow", "webclip", "other")
+
+
+def _normalize_note_type(raw_type: str | None) -> str:
+    """frontmatterのtype値をグルーピング用のtypeキーへ正規化する。
+
+    meeting_seriesはmeetingへ統合し、既知7種以外・type未定義はotherへ丸め込む。
+    """
+    if raw_type == "meeting_series":
+        return "meeting"
+    if raw_type in _KNOWN_TYPES:
+        return raw_type
+    return "other"
+
+
+def _read_note_type(path: Path) -> str | None:
+    """ノートファイルを読み込みfrontmatterのtype値を返す。
+
+    ファイル読み込みでI/Oエラー(FileNotFoundError等)が起きた場合はNoneを返す
+    (呼び出し側の_normalize_note_typeによりotherへ丸め込まれる)。
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    fm_text, _ = vault_lib.split_frontmatter(text)
+    return vault_lib.get_fm_value(fm_text, "type")
+
 
 def _git_status_porcelain(vault_root: Path) -> str:
     """`git status --porcelain` の生出力を返す。
