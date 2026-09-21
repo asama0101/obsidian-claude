@@ -2,7 +2,7 @@
 type: webclip
 project: ""
 url: ""
-clipped_date: "{{date:YYYY-MM-DD}}"
+date: "{{date:YYYY-MM-DD}}"
 tags:
   - webclip
 ---
