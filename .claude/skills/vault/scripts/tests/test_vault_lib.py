@@ -202,10 +202,12 @@ class TestVaultRoot(unittest.TestCase):
     def test_VAULT_ROOTがPathである(self):
         self.assertIsInstance(vault_lib.VAULT_ROOT, Path)
 
-    def test_VAULT_ROOTはscriptsの3階層上(self):
-        scripts_dir = Path(vault_lib.__file__).resolve().parent
-        expected = scripts_dir.parent.parent.parent
-        self.assertEqual(vault_lib.VAULT_ROOT, expected)
+    def test_VAULT_ROOTは_claude_skills_vault_scriptsの親である(self):
+        # vault_lib.py は <VAULT_ROOT>/.claude/skills/vault/scripts/vault_lib.py に配置される
+        expected_file = (
+            vault_lib.VAULT_ROOT / ".claude" / "skills" / "vault" / "scripts" / "vault_lib.py"
+        )
+        self.assertEqual(expected_file, Path(vault_lib.__file__).resolve())
 
 
 class TestRunGit(unittest.TestCase):
