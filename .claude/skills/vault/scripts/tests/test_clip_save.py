@@ -121,6 +121,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
 
@@ -162,6 +164,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
                 mock_urlopen.assert_not_called()
@@ -200,6 +204,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
                 self.assertEqual(mock_urlopen.call_count, 1)
@@ -232,6 +238,8 @@ class TestClipSave(unittest.TestCase):
                     str(content_path),
                     "--vault-root",
                     str(vault_root),
+                    "--tag",
+                    "python/pandas",
                 ]
             )
             note_text = Path(result["note_path"]).read_text(encoding="utf-8")
@@ -262,6 +270,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
 
@@ -299,6 +309,8 @@ class TestClipSave(unittest.TestCase):
                     "VaultMigrationについての記事",
                     "--vault-root",
                     str(vault_root),
+                    "--tag",
+                    "python/pandas",
                 ]
             )
             note_text = Path(result["note_path"]).read_text(encoding="utf-8")
@@ -328,6 +340,8 @@ class TestClipSave(unittest.TestCase):
                     "全く関係ない話題",
                     "--vault-root",
                     str(vault_root),
+                    "--tag",
+                    "python/pandas",
                 ]
             )
             note_text = Path(result["note_path"]).read_text(encoding="utf-8")
@@ -354,6 +368,8 @@ class TestClipSave(unittest.TestCase):
                     str(content_path),
                     "--vault-root",
                     str(vault_root),
+                    "--tag",
+                    "python/pandas",
                 ]
             )
             note_text = Path(result["note_path"]).read_text(encoding="utf-8")
@@ -390,6 +406,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
                 self.assertEqual(mock_urlopen.call_count, 1)
@@ -430,6 +448,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
                 self.assertEqual(mock_urlopen.call_count, 1)
@@ -468,6 +488,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
 
@@ -505,6 +527,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
                 mock_urlopen.assert_not_called()
@@ -548,6 +572,8 @@ class TestClipSave(unittest.TestCase):
                         str(content_path),
                         "--vault-root",
                         str(vault_root),
+                        "--tag",
+                        "python/pandas",
                     ]
                 )
 
@@ -566,6 +592,84 @@ class TestClipSave(unittest.TestCase):
             self.assertEqual(len(image_lines), 2)
             for image_line in image_lines:
                 self.assertTrue(image_line.startswith("> ![[80_Attachments/"))
+
+    def test_tagがfrontmatterのtagsリストに追加される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "タグ付き記事",
+                    "summary": [],
+                    "key_points": [],
+                    "full_text": "",
+                },
+            )
+            result = self._run_main(
+                [
+                    "--url",
+                    "https://example.com/tagged",
+                    "--content-json",
+                    str(content_path),
+                    "--vault-root",
+                    str(vault_root),
+                    "--tag",
+                    "python/pandas",
+                ]
+            )
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            fm, _ = vault_lib.split_frontmatter(note_text)
+            self.assertIn("python/pandas", vault_lib.get_fm_tags(fm))
+
+    def test_tagは既存の静的webclipタグと共存する(self):
+        # 実行時点のWebClip_Template.mdのtags:ブロック(`- webclip`を含む)を前提に、
+        # 既存の静的タグを壊さずカテゴリタグが追加されることを確認する。
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "共存タグ記事",
+                    "summary": [],
+                    "key_points": [],
+                    "full_text": "",
+                },
+            )
+            result = self._run_main(
+                [
+                    "--url",
+                    "https://example.com/coexist",
+                    "--content-json",
+                    str(content_path),
+                    "--vault-root",
+                    str(vault_root),
+                    "--tag",
+                    "python/pandas",
+                ]
+            )
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            fm, _ = vault_lib.split_frontmatter(note_text)
+            tags = vault_lib.get_fm_tags(fm)
+            self.assertIn("webclip", tags)
+            self.assertIn("python/pandas", tags)
+
+    def test_tagはtagsブロックが空でも追加される(self):
+        # テンプレートのtags:ブロックが空(子要素無し)の場合でもタグが追加されることを
+        # build_note_textで直接検証する。
+        empty_tags_template = TEMPLATE_TEXT.replace("tags:\n  - webclip\n", "tags:\n")
+        note = clip_save.build_note_text(
+            template_text=empty_tags_template,
+            title="空タグ記事",
+            dt=datetime.datetime(2026, 9, 21, 10, 0),
+            url="https://example.com/empty-tags",
+            project_match=None,
+            summary_items=[],
+            key_points_items=[],
+            full_text="",
+            tag="python/pandas",
+        )
+        fm, _ = vault_lib.split_frontmatter(note)
+        self.assertEqual(vault_lib.get_fm_tags(fm), ["python/pandas"])
 
     def test_同タイトルで実行するとファイル名が衝突回避される(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -586,6 +690,8 @@ class TestClipSave(unittest.TestCase):
                 str(content_path),
                 "--vault-root",
                 str(vault_root),
+                "--tag",
+                "python/pandas",
             ]
             first = self._run_main(argv)
             second = self._run_main(argv)

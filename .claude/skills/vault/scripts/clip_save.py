@@ -198,12 +198,14 @@ def build_note_text(
     summary_items: list[dict],
     key_points_items: list[dict],
     full_text: str,
+    tag: str,
 ) -> str:
     """テンプレートに内容を差し込み、完成したノート全文を返す。
 
     summary_items/key_points_itemsは{"text": str, "filename": str | None}のリスト。
     full_textは画像記法(![alt](URL))が既にローカル埋め込み(![[80_Attachments/...]])
     へ置換済みの状態で渡される想定(呼び出し側で_replace_full_text_images済み)。
+    tagは"<category>/<topic>"形式のカテゴリタグで、frontmatterのtags:リストに追加する。
     """
     text = vault_lib.fill_template(template_text, title=title, dt=dt)
     fm, body = vault_lib.split_frontmatter(text)
@@ -211,6 +213,7 @@ def build_note_text(
     fm = vault_lib.set_fm_value(fm, "url", url)
     if project_match:
         fm = _set_fm_raw(fm, "project", project_match)
+    fm = vault_lib.add_tag(fm, tag)
 
     body = body.replace(
         "## \U0001f4cc 概要・要約\n- ",
@@ -236,6 +239,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--url", required=True)
     parser.add_argument("--content-json", required=True)
     parser.add_argument("--project-hint", default=None)
+    parser.add_argument("--tag", required=True)
     parser.add_argument("--vault-root", default=None)
     args = parser.parse_args(argv)
 
@@ -277,6 +281,7 @@ def main(argv: list[str] | None = None) -> int:
         summary_items=summary_items,
         key_points_items=key_points_items,
         full_text=full_text,
+        tag=args.tag,
     )
 
     dest_dir = vault_root / "30_Resources" / "WebClips"

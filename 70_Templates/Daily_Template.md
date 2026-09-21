@@ -1,6 +1,5 @@
 ---
-tags:
-  - daily
+type: daily
 ---
 # {{title}} (<span>{{date:ddd}}</span>)
 

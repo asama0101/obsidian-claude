@@ -4,8 +4,6 @@ calendar_series_id: ""
 project: ""
 last_updated: "{{date:YYYY-MM-DD}}"
 url: ""
-tags:
-  - meeting
 ---
 # {{title}}
 

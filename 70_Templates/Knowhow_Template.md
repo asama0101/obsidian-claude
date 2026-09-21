@@ -1,9 +1,7 @@
 ---
 type: knowhow
 project: ""
-category: ""
 tags:
-  - knowhow
 ---
 # {{title}}
 

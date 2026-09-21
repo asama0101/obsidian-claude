@@ -44,24 +44,6 @@ def render_blockquote(text: str) -> str:
     return "\n".join(f"> {line}" for line in str(text).split("\n"))
 
 
-def _add_tag(fm_text: str, tag: str) -> str:
-    """frontmatter の tags: リストへ新しいタグ行を追加する。"""
-    lines = fm_text.split("\n") if fm_text else []
-
-    for i, line in enumerate(lines):
-        if line.startswith("tags:"):
-            j = i + 1
-            while j < len(lines) and lines[j].startswith("  - "):
-                j += 1
-            lines.insert(j, f"  - {tag}")
-            return "\n".join(lines)
-
-    # tags: キーが無ければ新規に追加する
-    lines.append("tags:")
-    lines.append(f"  - {tag}")
-    return "\n".join(lines)
-
-
 def _replace_section(body: str, heading: str, new_content: str) -> str:
     """見出し行の直後にあるプレースホルダ部分を new_content に置換する。
 
@@ -88,16 +70,19 @@ def _replace_section(body: str, heading: str, new_content: str) -> str:
     return "\n".join(new_lines)
 
 
-def build_note(content: dict, template_text: str, dt: datetime.datetime) -> str:
-    """content の内容をテンプレートへ差し込み、ノート全文を返す。"""
+def build_note(
+    content: dict, template_text: str, dt: datetime.datetime, tag: str
+) -> str:
+    """content の内容をテンプレートへ差し込み、ノート全文を返す。
+
+    tag には呼び出し元で確定済みの `<category>/<topic>` 形式のタグ文字列を渡す。
+    """
     title = content["title"]
-    category = content["category"]
 
     filled = vault_lib.fill_template(template_text, title=title, dt=dt)
     fm_text, body_text = vault_lib.split_frontmatter(filled)
 
-    fm_text = vault_lib.set_fm_value(fm_text, "category", category)
-    fm_text = _add_tag(fm_text, f"knowledge/{category}")
+    fm_text = vault_lib.add_tag(fm_text, tag)
 
     body_text = _replace_section(
         body_text, _HEADING_OVERVIEW, render_bullets(content["overview"])
@@ -124,6 +109,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--content-json", required=True)
     parser.add_argument("--vault-root", default=None)
+    parser.add_argument("--tag", required=True)
     args = parser.parse_args(argv)
 
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
@@ -133,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     template_text = template_path.read_text(encoding="utf-8")
 
     dt = datetime.datetime.now()
-    note_text = build_note(content, template_text, dt)
+    note_text = build_note(content, template_text, dt, tag=args.tag)
 
     out_dir = vault_root / "20_Areas" / "Knowledge"
     out_dir.mkdir(parents=True, exist_ok=True)

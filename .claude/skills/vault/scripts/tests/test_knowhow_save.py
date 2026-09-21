@@ -24,7 +24,6 @@ TEMPLATE_PATH = vault_lib.VAULT_ROOT / "70_Templates" / "Knowhow_Template.md"
 def _sample_content(**overrides):
     content = {
         "title": "テストノウハウ",
-        "category": "python",
         "overview": "これは概要です。",
         "steps": ["手順1を実行する", "手順2を確認する"],
         "pitfalls": ["注意点A", "注意点B"],
@@ -40,29 +39,36 @@ class TestBuildNote(unittest.TestCase):
         self.template_text = TEMPLATE_PATH.read_text(encoding="utf-8")
         self.dt = datetime.datetime(2026, 9, 21, 10, 0)
 
-    def test_categoryとtagsが設定される(self):
-        content = _sample_content(category="python")
-        note = knowhow_save.build_note(content, self.template_text, self.dt)
+    def test_categoryは書き込まれずtagsに確定タグが追加される(self):
+        content = _sample_content()
+        note = knowhow_save.build_note(
+            content, self.template_text, self.dt, tag="python/pandas"
+        )
         fm_text, _ = vault_lib.split_frontmatter(note)
-        self.assertEqual(vault_lib.get_fm_value(fm_text, "category"), "python")
-        self.assertIn("  - knowhow", fm_text)
-        self.assertIn("  - knowledge/python", fm_text)
+        self.assertIsNone(vault_lib.get_fm_value(fm_text, "category"))
+        self.assertIn("python/pandas", vault_lib.get_fm_tags(fm_text))
 
     def test_overviewが概要セクションに入る(self):
         content = _sample_content(overview="これは概要です。")
-        note = knowhow_save.build_note(content, self.template_text, self.dt)
+        note = knowhow_save.build_note(
+            content, self.template_text, self.dt, tag="python/pandas"
+        )
         self.assertIn("## 💡 概要・結論\n- これは概要です。", note)
 
     def test_stepsが番号付きで手順セクションに入る(self):
         content = _sample_content(steps=["最初の手順", "次の手順"])
-        note = knowhow_save.build_note(content, self.template_text, self.dt)
+        note = knowhow_save.build_note(
+            content, self.template_text, self.dt, tag="python/pandas"
+        )
         self.assertIn(
             "## 🛠 手順・実行方法 / 解決策\n1. 最初の手順\n2. 次の手順", note
         )
 
     def test_pitfallsが箇条書きで注意点セクションに入る(self):
         content = _sample_content(pitfalls=["ハマりA", "ハマりB"])
-        note = knowhow_save.build_note(content, self.template_text, self.dt)
+        note = knowhow_save.build_note(
+            content, self.template_text, self.dt, tag="python/pandas"
+        )
         self.assertIn(
             "## ⚠️ 注意点・ハマりポイント\n- ハマりA\n- ハマりB", note
         )
@@ -71,7 +77,9 @@ class TestBuildNote(unittest.TestCase):
         content = _sample_content(
             references=["https://example.com/a", "https://example.com/b"]
         )
-        note = knowhow_save.build_note(content, self.template_text, self.dt)
+        note = knowhow_save.build_note(
+            content, self.template_text, self.dt, tag="python/pandas"
+        )
         self.assertIn(
             "## 🔗 参照・関連リンク\n- https://example.com/a\n- https://example.com/b",
             note,
@@ -79,14 +87,18 @@ class TestBuildNote(unittest.TestCase):
 
     def test_original_textが加工されず引用形式で残る(self):
         content = _sample_content(original_text="生ログ行1\n生ログ行2\n  インデント行")
-        note = knowhow_save.build_note(content, self.template_text, self.dt)
+        note = knowhow_save.build_note(
+            content, self.template_text, self.dt, tag="python/pandas"
+        )
         self.assertIn(
             "## 📄 ノウハウ本文\n> 生ログ行1\n> 生ログ行2\n>   インデント行", note
         )
 
     def test_タイトルが本文見出しに反映される(self):
         content = _sample_content(title="日付フォーマットの罠")
-        note = knowhow_save.build_note(content, self.template_text, self.dt)
+        note = knowhow_save.build_note(
+            content, self.template_text, self.dt, tag="python/pandas"
+        )
         self.assertIn("# 日付フォーマットの罠", note)
 
 
@@ -115,6 +127,8 @@ class TestMain(unittest.TestCase):
                 str(content_json),
                 "--vault-root",
                 str(vault_root),
+                "--tag",
+                "python/pandas",
             ]
 
             buf = io.StringIO()
@@ -127,8 +141,8 @@ class TestMain(unittest.TestCase):
             self.assertTrue(note_path.exists())
             self.assertEqual(note_path.parent, vault_root / "20_Areas" / "Knowledge")
             saved_text = note_path.read_text(encoding="utf-8")
-            self.assertIn('category: "python"', saved_text)
-            self.assertIn("  - knowledge/python", saved_text)
+            self.assertNotIn("category:", saved_text)
+            self.assertIn("  - python/pandas", saved_text)
 
     def test_ファイル名衝突時はunique_pathで回避する(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -144,6 +158,8 @@ class TestMain(unittest.TestCase):
                 str(content_json),
                 "--vault-root",
                 str(vault_root),
+                "--tag",
+                "python/pandas",
             ]
 
             buf = io.StringIO()

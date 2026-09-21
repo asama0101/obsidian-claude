@@ -105,6 +105,41 @@ class TestSetFmValue(unittest.TestCase):
         self.assertEqual(result, 'title: "foo"\nstatus: "done"')
 
 
+class TestAddTag(unittest.TestCase):
+    def test_既存タグリストの末尾に追加する(self):
+        fm = 'title: "foo"\ntags:\n  - existing'
+        result = vault_lib.add_tag(fm, "new-tag")
+        self.assertEqual(result, 'title: "foo"\ntags:\n  - existing\n  - new-tag')
+
+    def test_tagsキーが無い場合は新設する(self):
+        fm = 'title: "foo"'
+        result = vault_lib.add_tag(fm, "new-tag")
+        self.assertEqual(result, 'title: "foo"\ntags:\n  - new-tag')
+
+    def test_tagsキーが空の場合はそこに追加する(self):
+        fm = 'title: "foo"\ntags:\ndate: "2026-09-21"'
+        result = vault_lib.add_tag(fm, "new-tag")
+        self.assertEqual(result, 'title: "foo"\ntags:\n  - new-tag\ndate: "2026-09-21"')
+
+
+class TestGetFmTags(unittest.TestCase):
+    def test_複数タグを順番通り取得する(self):
+        fm = "tags:\n  - alpha\n  - beta\n  - gamma"
+        self.assertEqual(vault_lib.get_fm_tags(fm), ["alpha", "beta", "gamma"])
+
+    def test_tagsキーが無い場合は空リスト(self):
+        fm = 'title: "foo"'
+        self.assertEqual(vault_lib.get_fm_tags(fm), [])
+
+    def test_tagsキーが空の場合は空リスト(self):
+        fm = 'title: "foo"\ntags:\ndate: "2026-09-21"'
+        self.assertEqual(vault_lib.get_fm_tags(fm), [])
+
+    def test_単一タグを取得する(self):
+        fm = "tags:\n  - solo"
+        self.assertEqual(vault_lib.get_fm_tags(fm), ["solo"])
+
+
 class TestFillTemplate(unittest.TestCase):
     def setUp(self):
         # 2026-09-21 は月曜日

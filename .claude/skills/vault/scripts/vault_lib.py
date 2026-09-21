@@ -112,6 +112,35 @@ def set_fm_value(fm_text: str, key: str, value: str) -> str:
     return "\n".join(lines)
 
 
+def add_tag(fm_text: str, tag: str) -> str:
+    """frontmatterテキストの tags: リストに1件追加する。tags: が無ければ新設する。"""
+    lines = fm_text.split("\n") if fm_text else []
+    for i, line in enumerate(lines):
+        if line.startswith("tags:"):
+            j = i + 1
+            while j < len(lines) and lines[j].startswith("  - "):
+                j += 1
+            lines.insert(j, f"  - {tag}")
+            return "\n".join(lines)
+    lines.append("tags:")
+    lines.append(f"  - {tag}")
+    return "\n".join(lines)
+
+
+def get_fm_tags(fm_text: str) -> list[str]:
+    """frontmatterテキストから tags: リストを取り出す。無ければ空リスト。"""
+    lines = fm_text.split("\n")
+    for i, line in enumerate(lines):
+        if line.startswith("tags:"):
+            tags = []
+            j = i + 1
+            while j < len(lines) and lines[j].startswith("  - "):
+                tags.append(lines[j][4:].strip())
+                j += 1
+            return tags
+    return []
+
+
 def fill_template(template_text: str, *, title: str, dt: datetime.datetime) -> str:
     """テンプレート内のプレースホルダを実値に置換する。"""
     result = template_text

@@ -4,7 +4,6 @@ project: ""
 url: ""
 date: "{{date:YYYY-MM-DD}}"
 tags:
-  - webclip
 ---
 # {{title}}
 

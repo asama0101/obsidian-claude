@@ -4,8 +4,6 @@ calendar_event_id: ""
 project: ""
 date: "{{date:YYYY-MM-DD}}"
 url: ""
-tags:
-  - meeting
 ---
 # {{title}}
 

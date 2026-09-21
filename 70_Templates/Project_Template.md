@@ -2,8 +2,6 @@
 type: project
 start_date: "{{date:YYYY-MM-DD}}"
 due_date: 
-tags:
-  - project
 ---
 # プロジェクト: {{title}}
 
