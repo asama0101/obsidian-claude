@@ -4,10 +4,8 @@ project: "[[VaultPluginテスト]]"
 start_date: "2026-09-21"
 due_date: ""
 status: 1_todo
-tags:
-  - task
 ---
-# vaultプラグインのライブ検証結果をまとめる
+# type/tags重複解消のライブ検証結果をまとめる
 
 ## 📌 作業手順・サブタスク
 - [ ] 
