@@ -17,8 +17,9 @@
 ものの `{"note_path": ..., "title": ...}` 一覧。
 
 `--set-project <note_path> --project <value>` を渡すと、指定ノートの
-frontmatter `project` 欄のみを書き換える別モードで動作する
-（`--events-json` とは排他）。
+frontmatter `project` 欄を書き換え、新しいproject値が指す
+`10_Projects/<Name>/Meetings/` または `20_Areas/Meetings/` へ
+ノートを移動する別モードで動作する（`--events-json` とは排他）。
 """
 
 from __future__ import annotations
@@ -413,12 +414,28 @@ def main(argv: list[str] | None = None) -> int:
     if args.set_project:
         if args.project is None:
             parser.error("--set-project には --project の指定が必要です")
+        vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
         note_path = Path(args.set_project)
         text = note_path.read_text(encoding="utf-8")
         fm_text, body_text = vault_lib.split_frontmatter(text)
         fm_text = _set_fm_raw(fm_text, "project", args.project)
-        _save_note(note_path, fm_text, body_text)
-        print(json.dumps({"status": "ok", "note_path": str(note_path)}, ensure_ascii=False))
+
+        project_match = args.project if args.project not in (None, "", '""') else None
+        dest_dir = _resolve_dest_dir(vault_root, project_match)
+        dest_dir.mkdir(parents=True, exist_ok=True)
+
+        if note_path.resolve().parent == dest_dir.resolve():
+            dest_path = note_path
+        else:
+            dest_path = vault_lib.unique_path(dest_dir, note_path.name)
+
+        if dest_path != note_path:
+            _save_note(dest_path, fm_text, body_text)
+            note_path.unlink()
+        else:
+            _save_note(note_path, fm_text, body_text)
+
+        print(json.dumps({"status": "ok", "note_path": str(dest_path)}, ensure_ascii=False))
         return 0
 
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT

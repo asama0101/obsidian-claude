@@ -28,6 +28,8 @@ description: |
    `python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project <value>`
    を実行してproject欄へ反映する（`<value>`はプロジェクト選択時は
    `"[[ディレクトリ名]]"`、「プロジェクトなし」選択時は`""`）。
+   このときノートは新しいproject値に応じて`10_Projects/<Name>/Meetings/`
+   または`20_Areas/Meetings/`へ自動的に移動される。
 
 `meeting_sync.py`自体が全ての判定（新規作成/更新/キャンセル反映/
 定例の回判定）を行うため、Claude側でノートを直接編集する必要はない。
