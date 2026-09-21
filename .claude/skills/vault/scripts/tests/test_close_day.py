@@ -151,6 +151,7 @@ class UpdatedNotesBlockTest(unittest.TestCase):
             # main にマージ後の内容を確認する
             _run_git(["checkout", "main"], cwd=root)
             merged_note_text = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+            self.assertIn("**other**", merged_note_text)
             self.assertIn("- [[Alpha]]", merged_note_text)
             self.assertIn("- [[Beta]]", merged_note_text)
             self.assertNotIn("scratch", merged_note_text)
@@ -338,6 +339,83 @@ class FilterUpdatedNotesTupleTest(unittest.TestCase):
                     ("Beta", vault_root / "20_Notes/Beta.md"),
                 ],
             )
+
+
+class TypeGroupingTest(unittest.TestCase):
+    def test_type別に固定順でグルーピングされmeeting_seriesはmeetingへ統合される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _init_repo(root)
+            _write(root / "00_Daily" / ".gitkeep", "")
+            _write(root / "70_Templates" / "Daily_Template.md", "template")
+            _commit_all(root, "initial commit")
+
+            branch = "2026-09-28"
+            _run_git(["checkout", "-b", branch], cwd=root)
+            daily_note = root / "00_Daily" / f"{branch}.md"
+            _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
+
+            _write(root / "10_Projects" / "Zeta.md", "---\ntype: project\n---\nbody")
+            _write(
+                root / "10_Projects" / "Meetings" / "Alpha.md",
+                "---\ntype: meeting\n---\nbody",
+            )
+            _write(
+                root / "10_Projects" / "Meetings" / "Weekly.md",
+                "---\ntype: meeting_series\n---\nbody",
+            )
+            _write(root / "40_Tasks" / "DoThing.md", "---\ntype: task\n---\nbody")
+
+            result = _run_close_day(root)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(
+                sorted(payload["updated_notes"]),
+                ["Alpha", "DoThing", "Weekly", "Zeta"],
+            )
+
+            _run_git(["checkout", "main"], cwd=root)
+            merged = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+
+            project_idx = merged.index("**project**")
+            meeting_idx = merged.index("**meeting**")
+            task_idx = merged.index("**task**")
+            self.assertLess(project_idx, meeting_idx)
+            self.assertLess(meeting_idx, task_idx)
+            self.assertIn("- [[Zeta]]", merged)
+            self.assertIn("- [[Alpha]]", merged)
+            self.assertIn("- [[Weekly]]", merged)
+            self.assertIn("- [[DoThing]]", merged)
+            self.assertEqual(merged.count("**meeting**"), 1)
+            self.assertNotIn("**meeting_series**", merged)
+            self.assertNotIn("**knowhow**", merged)
+            self.assertNotIn("**webclip**", merged)
+            self.assertNotIn("**other**", merged)
+
+    def test_単一typeのみ更新時はそのグループのみ表示される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _init_repo(root)
+            _write(root / "00_Daily" / ".gitkeep", "")
+            _write(root / "70_Templates" / "Daily_Template.md", "template")
+            _commit_all(root, "initial commit")
+
+            branch = "2026-09-29"
+            _run_git(["checkout", "-b", branch], cwd=root)
+            daily_note = root / "00_Daily" / f"{branch}.md"
+            _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
+            _write(root / "30_Knowhow" / "Tip.md", "---\ntype: knowhow\n---\nbody")
+
+            result = _run_close_day(root)
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            _run_git(["checkout", "main"], cwd=root)
+            merged = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+            self.assertIn("**knowhow**", merged)
+            self.assertIn("- [[Tip]]", merged)
+            for absent in ("**project**", "**meeting**", "**task**", "**webclip**", "**other**"):
+                self.assertNotIn(absent, merged)
 
 
 if __name__ == "__main__":
