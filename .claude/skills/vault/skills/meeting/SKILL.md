@@ -29,6 +29,7 @@ description: |
    | `no_project` | 新規作成したがprojectを自動推定できなかったノートの`{"note_path", "title"}`一覧 |
    | `deleted` | カレンダー側でキャンセルされ物理削除された単発ノートのパス一覧 |
    | `needs_attendance_check` | 開催確認が必要なノートの`{"note_path", "title"}`一覧 |
+   | `needs_task_check` | `attendance`確定済み（`2_done`/`3_skip`）なのに未チェックのアクションアイテムが残っているノートの`{"note_path", "title"}`一覧 |
 4. `no_project`が空でなければ、`python .claude/skills/vault/scripts/list_projects.py`
    を実行して候補一覧（`{"projects": [...]}`）を取得し、その一覧
    （＋「プロジェクトなし」の選択肢）を提示して、`no_project`内の各ノート
@@ -48,14 +49,16 @@ description: |
    確認結果は`python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <1_scheduled|2_done|3_skip>`で反映する。
    `--attendance`には実施済みなら`2_done`、不参加なら`3_skip`を渡す。
    「実施済み」と確認されたノートは、続けて下記「task化フロー」へ進む。
+7. `needs_task_check`が空でなければ、対象ノートは直接下記「task化フロー」へ進む。`attendance`（`2_done`/`3_skip`）は既に確定済みのため、「実施済み/不参加」の確認は不要である。
 
 `meeting_sync.py`自体が全ての判定（新規作成/更新/キャンセル反映/
 定例の回判定）を行うため、Claude側でノートを直接編集する必要はない。
 
 ## task化フロー
 
-`needs_attendance_check`の確認で「実施済み」と判定されたノートについて、
-ノートごとに以下を実行する。
+`needs_attendance_check`の確認で「実施済み」と判定されたノート、
+および`needs_task_check`で検出されたノートのいずれについても、
+ノートごとに以下を実行する共通フローである。
 
 1. `python .claude/skills/vault/scripts/task_extract.py --note <note_path>`
    を実行し、標準出力のJSON（`{"items": [...], "project": ...}`）から
@@ -106,6 +109,21 @@ description: |
 フィールド対応表は`references/meeting-field-mapping.md`を参照。
 未接続の場合はこの節の処理は行わず、Microsoft 365 MCPサーバーの
 接続方法をユーザーに案内するに留める。
+
+## today/closeスキルからの呼び出しについて
+
+`today`・`close`スキルからもmeetingスキルの実行フロー（カレンダー同期〜
+`needs_attendance_check`/`needs_task_check`の確認・task化フローまで）が
+自動的に呼び出される。呼ばれた場合も、通常`/meeting`実行時と同じ
+対話フロー（project割り当て確認・実施確認・task化確認）をそのまま
+ユーザーに提示してよい。
+
+Google Calendar MCP未接続やAPI呼び出し失敗時は、本スキルの処理を
+そこで中断し、呼び出し元（`today`/`close`）本来の処理はブロックしない。
+
+`needs_task_check`は日付を問わず全件スキャン対象のため、対応せず
+残したノートは`today`・`close`を実行するたびに繰り返し提示される
+（仕様通りの動作である）。
 
 ## 参照ドキュメント
 

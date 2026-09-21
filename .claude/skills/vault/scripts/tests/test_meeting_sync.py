@@ -984,6 +984,292 @@ class TestNeedsAttendanceCheck(unittest.TestCase):
             self.assertEqual(result2["needs_attendance_check"], [])
 
 
+class TestNeedsTaskCheck(unittest.TestCase):
+    def _set_attendance(self, note_path: Path, vault_root: Path, value: str) -> None:
+        meeting_sync.main(
+            [
+                "--set-attendance",
+                str(note_path),
+                "--attendance",
+                value,
+                "--vault-root",
+                str(vault_root),
+            ]
+        )
+
+    def _inject_unchecked_item(self, note_path: Path, heading: str, text: str) -> None:
+        note_text = note_path.read_text(encoding="utf-8")
+        note_text = note_text.replace(f"{heading}\n- [ ] ", f"{heading}\n- [ ] {text}")
+        note_path.write_text(note_text, encoding="utf-8")
+
+    def _check_item(self, note_path: Path, heading: str, text: str) -> None:
+        note_text = note_path.read_text(encoding="utf-8")
+        note_text = note_text.replace(
+            f"{heading}\n- [ ] {text}", f"{heading}\n- [x] {text}"
+        )
+        note_path.write_text(note_text, encoding="utf-8")
+
+    def test_単発で2_doneかつ未チェックアイテムがあれば検出される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_attendance(note_path, vault_root, "2_done")
+            self._inject_unchecked_item(note_path, "## ⚡ アクションアイテム", "資料を送る")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(
+                result2["needs_task_check"],
+                [{"note_path": str(note_path), "title": "定例1on1"}],
+            )
+
+    def test_単発で3_skipでも検出される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_attendance(note_path, vault_root, "3_skip")
+            self._inject_unchecked_item(note_path, "## ⚡ アクションアイテム", "資料を送る")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(
+                result2["needs_task_check"],
+                [{"note_path": str(note_path), "title": "定例1on1"}],
+            )
+
+    def test_単発で全項目チェック済みなら検出されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_attendance(note_path, vault_root, "2_done")
+            self._inject_unchecked_item(note_path, "## ⚡ アクションアイテム", "資料を送る")
+            self._check_item(note_path, "## ⚡ アクションアイテム", "資料を送る")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(result2["needs_task_check"], [])
+
+    def test_単発でアクションアイテム未記入の空プレースホルダーのみなら検出されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            # アクションアイテム欄を一切編集せず(テンプレートの
+            # 空プレースホルダー行"- [ ] "のみが残る状態)attendanceだけ確定する
+            self._set_attendance(note_path, vault_root, "2_done")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(result2["needs_task_check"], [])
+
+    def test_単発でアクションアイテムセクション自体が無ければ検出されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            dest_dir = vault_root / "20_Areas" / "Meetings"
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            note_path = dest_dir / "会議.md"
+            note_path.write_text(
+                '---\ntype: meeting\ncalendar_event_id: "evt1"\n'
+                'project: ""\ndate: "2020-01-01"\nurl: ""\n'
+                'attendance: "2_done"\n---\n'
+                "# 会議\n\n## 📝 決定事項\n- \n",
+                encoding="utf-8",
+            )
+
+            result = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(result["needs_task_check"], [])
+
+    def test_単発でattendanceが1_scheduledのままならneeds_task_checkに出ない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._inject_unchecked_item(note_path, "## ⚡ アクションアイテム", "資料を送る")
+            # 開催日を過去にしてneeds_attendance_check側の対象にする
+            text = note_path.read_text(encoding="utf-8")
+            fm, body = vault_lib.split_frontmatter(text)
+            fm = vault_lib.set_fm_value(fm, "date", "2020-01-01")
+            note_path.write_text(f"---\n{fm}\n---\n{body}", encoding="utf-8")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(result2["needs_task_check"], [])
+            self.assertEqual(
+                result2["needs_attendance_check"],
+                [{"note_path": str(note_path), "title": "定例1on1"}],
+            )
+
+    def test_単発で開催日が今日でも過去でも検出される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            today = datetime.date.today()
+            start_dt = datetime.datetime.combine(today, datetime.time(13, 0))
+            end_dt = datetime.datetime.combine(today, datetime.time(14, 0))
+            event = make_event(
+                id="evt1",
+                summary="定例1on1",
+                start={"dateTime": start_dt.isoformat()},
+                end={"dateTime": end_dt.isoformat()},
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_attendance(note_path, vault_root, "2_done")
+            self._inject_unchecked_item(note_path, "## ⚡ アクションアイテム", "資料を送る")
+
+            result2 = meeting_sync.sync_events([event], vault_root)
+
+            self.assertEqual(
+                result2["needs_task_check"],
+                [{"note_path": str(note_path), "title": "定例1on1"}],
+            )
+
+    def test_定例で現在occurrenceが2_doneかつ未チェックなら検出される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_attendance(note_path, vault_root, "2_done")
+            self._inject_unchecked_item(
+                note_path, "### ⚡ アクションアイテム（今回）", "議事録を送付する"
+            )
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(
+                result2["needs_task_check"],
+                [{"note_path": str(note_path), "title": "週次定例"}],
+            )
+
+    def test_定例でアーカイブ領域の未チェックアイテムは対象外(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_attendance(note_path, vault_root, "2_done")
+            self._inject_unchecked_item(
+                note_path, "### ⚡ アクションアイテム（今回）", "occA回のタスク"
+            )
+
+            # 次回へ遷移させ、occAのブロックをアーカイブへ退避する
+            event2 = make_event(
+                id="occB",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                start={"dateTime": "2026-09-28T13:00:00+09:00"},
+                end={"dateTime": "2026-09-28T14:00:00+09:00"},
+            )
+            meeting_sync.sync_events([event2], vault_root)
+
+            result3 = meeting_sync.sync_events([], vault_root)
+
+            # 新occurrence(occB)は1_scheduledなので対象外、
+            # アーカイブされたoccAの未チェックアイテムも対象外
+            self.assertEqual(result3["needs_task_check"], [])
+
+    def test_定例で現在occurrenceが1_scheduledなら検出されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._inject_unchecked_item(
+                note_path, "### ⚡ アクションアイテム（今回）", "議事録を送付する"
+            )
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(result2["needs_task_check"], [])
+
+    def test_定例でoccurrenceコメントのattendanceキーが欠損していればneeds_attendance_check側に出る(
+        self,
+    ):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+
+            # 移行前フォーマット相当: attendanceキー自体を欠損させる
+            # (dateは有効な過去日を残す)
+            text = note_path.read_text(encoding="utf-8")
+            text = text.replace(
+                '<!-- occurrence_id: "occA" attendance: "1_scheduled" date: "2026-09-21" -->',
+                '<!-- occurrence_id: "occA" date: "2020-01-01" -->',
+            )
+            note_path.write_text(text, encoding="utf-8")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(
+                result2["needs_attendance_check"],
+                [{"note_path": str(note_path), "title": "週次定例"}],
+            )
+            self.assertEqual(result2["needs_task_check"], [])
+
+    def test_link_taskでチェック済みにすると検出されなくなる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_attendance(note_path, vault_root, "2_done")
+            self._inject_unchecked_item(note_path, "## ⚡ アクションアイテム", "資料を送る")
+
+            result_before = meeting_sync.sync_events([], vault_root)
+            self.assertEqual(len(result_before["needs_task_check"]), 1)
+
+            meeting_sync.main(
+                [
+                    "--link-task",
+                    str(note_path),
+                    "--item-text",
+                    "資料を送る",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            result_after = meeting_sync.sync_events([], vault_root)
+            self.assertEqual(result_after["needs_task_check"], [])
+
+    def test_新規イベント同期と同じ呼び出し内でneeds_task_checkも返る(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            existing_event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([existing_event], vault_root)
+            existing_note_path = Path(result1["created"][0])
+            self._set_attendance(existing_note_path, vault_root, "2_done")
+            self._inject_unchecked_item(
+                existing_note_path, "## ⚡ アクションアイテム", "資料を送る"
+            )
+
+            new_event = make_event(id="evt2", summary="新規会議")
+            result2 = meeting_sync.sync_events([existing_event, new_event], vault_root)
+
+            self.assertEqual(len(result2["created"]), 1)
+            self.assertEqual(
+                result2["needs_task_check"],
+                [{"note_path": str(existing_note_path), "title": "定例1on1"}],
+            )
+
+
 class TestSetAttendanceMode(unittest.TestCase):
     def test_単発ノートのattendanceが書き換わる(self):
         with tempfile.TemporaryDirectory() as tmp:

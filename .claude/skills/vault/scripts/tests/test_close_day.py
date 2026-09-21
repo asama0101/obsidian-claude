@@ -106,6 +106,7 @@ class NoChangesTest(unittest.TestCase):
             self.assertEqual(payload["updated_notes"], [])
             self.assertFalse(payload["committed"])
             self.assertFalse(payload["pushed"])
+            self.assertTrue(payload["branch_deleted"])
 
 
 class UpdatedNotesBlockTest(unittest.TestCase):
@@ -142,6 +143,7 @@ class UpdatedNotesBlockTest(unittest.TestCase):
             self.assertEqual(payload["status"], "ok")
             self.assertEqual(payload["updated_notes"], ["Alpha", "Beta"])
             self.assertTrue(payload["committed"])
+            self.assertTrue(payload["branch_deleted"])
 
             # main にマージ後の内容を確認する
             _run_git(["checkout", "main"], cwd=root)
@@ -149,6 +151,10 @@ class UpdatedNotesBlockTest(unittest.TestCase):
             self.assertIn("- [[Alpha]]", merged_note_text)
             self.assertIn("- [[Beta]]", merged_note_text)
             self.assertNotIn("scratch", merged_note_text)
+
+            # 当日ブランチ自体が削除されていることを確認する
+            remaining_branches = _run_git(["branch", "--list", branch], cwd=root)
+            self.assertEqual(remaining_branches, "")
 
 
 class QuotedPathTest(unittest.TestCase):

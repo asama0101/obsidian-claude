@@ -40,6 +40,16 @@ class TestExtractActionItems(unittest.TestCase):
         text = "## ⚡ アクションアイテム\n\n"
         self.assertEqual(task_extract.extract_action_items(text), [])
 
+    def test_本文未記入の空プレースホルダー行は除外される(self):
+        # テンプレートのデフォルト状態(未編集の"- [ ] "のみ)を実際のタスクと
+        # 誤認しないことを確認する。
+        text = "## ⚡ アクションアイテム\n- [ ] \n"
+        self.assertEqual(task_extract.extract_action_items(text), [])
+
+    def test_本文入りと空プレースホルダーが混在する場合は本文入りのみ抽出する(self):
+        text = "## ⚡ アクションアイテム\n- [ ] 資料を送る\n- [ ] \n"
+        self.assertEqual(task_extract.extract_action_items(text), ["資料を送る"])
+
     def test_次の見出しで抽出を止める(self):
         text = (
             "## ⚡ アクションアイテム\n"

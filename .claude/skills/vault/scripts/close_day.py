@@ -194,6 +194,12 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
+    # 8b. マージ済みの当日ブランチを削除する。ff-onlyマージ直後のため
+    # branch の内容はすべて main に含まれており、`-d`(安全な削除、
+    # 未マージなら失敗する)で問題なく削除できる。
+    vault_lib.run_git("branch", "-d", branch, cwd=vault_root)
+    branch_deleted = True
+
     # 9. origin が設定されていれば push を試みる(失敗しても致命的エラーにしない)
     pushed = False
     try:
@@ -214,6 +220,7 @@ def main(argv: list[str] | None = None) -> int:
                 "status": "ok",
                 "updated_notes": note_names,
                 "committed": committed,
+                "branch_deleted": branch_deleted,
                 "pushed": pushed,
             },
             ensure_ascii=False,

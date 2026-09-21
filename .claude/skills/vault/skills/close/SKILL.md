@@ -15,7 +15,13 @@ description: |
 `main` へ ff-only マージする。
 
 ## 処理
-1. `close_day.py` を実行する。
+1. `close_day.py`実行前に、続けてmeetingスキルの実行フローを呼び出す
+   （詳細は備考のリンク参照）。これにより、meetingスキルが作成・更新する
+   ノートを`close_day.py`のコミット対象として拾わせる。Google Calendar
+   MCP未接続やAPI呼び出し失敗等でmeetingスキル側が失敗する場合がある。
+   その場合でも、close本来の処理（コミット・マージ・ブランチ削除）は継続する。
+
+2. `close_day.py` を実行する。
 
    ```
    python .claude/skills/vault/scripts/close_day.py
@@ -24,12 +30,18 @@ description: |
    Vault ルート以外から実行する場合や動作確認時は `--vault-root <path>`
    で対象を明示できる。
 
-2. スクリプトは標準出力に1行のJSONを返す。`status` フィールドに応じて
+3. スクリプトは標準出力に1行のJSONを返す。`status` フィールドに応じて
    次のように解釈する。
 
-   - `"ok"`: 正常に完了した。`updated_notes`（今日更新されたノート名の
-     一覧）・`committed`（コミットを行ったか）・`pushed`（`origin` へ
-     push できたか）を確認し、ユーザーに要約を報告する。
+   - `"ok"`: 正常に完了した。以下のフィールドを確認し、ユーザーに要約を報告する。
+
+     | フィールド | 内容 |
+     |------------|------|
+     | `updated_notes` | 今日更新されたノート名の一覧 |
+     | `committed` | コミットを行ったか |
+     | `branch_deleted` | `main`へのff-onlyマージ後、当日ブランチを`git branch -d`で削除できたか |
+     | `pushed` | `origin`へpushできたか |
+
    - `"already_closed"`: `main` と当日ブランチの HEAD が既に一致して
      いる（既にclose済み）。追加の作業は不要である旨をユーザーに伝える。
    - `"error"`（`reason: "not_on_daily_branch"`）: 現在のブランチが
@@ -42,10 +54,13 @@ description: |
      を取り込んでから再実行する等）か手動でどう解決したいかの判断を
      仰ぐ。ユーザーの指示なしに競合解決を進めない。
 
-3. いずれの場合も、終了コードが非ゼロ（`error`/`merge_failed`）のときは
+4. いずれの場合も、終了コードが非ゼロ（`error`/`merge_failed`）のときは
    Vault の状態（現在のブランチ・`git status`）を変更前後で確認し、
    意図しない状態のまま放置しない。
 
 ## 備考
-- 当日ブランチ自体は `close` 実行後も削除されない。
+- `main` へのff-onlyマージ成功後、当日ブランチは`git branch -d`
+  （安全な削除。未マージなら失敗する）で自動的に削除される。
 - 実装本体・詳細な除外規則は `scripts/close_day.py` を参照。
+- meetingスキルの自動実行の詳細は`meeting/SKILL.md`の
+  「today/closeスキルからの呼び出しについて」を参照。

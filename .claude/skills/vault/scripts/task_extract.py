@@ -21,13 +21,21 @@ _CHECKBOX_PATTERN = re.compile(r"^- \[ \] ?(.*)$", re.MULTILINE)
 
 
 def extract_action_items(text: str) -> list[str]:
-    """本文からアクションアイテムのセクションを探し、チェックボックス行の本文一覧を返す。"""
+    """本文からアクションアイテムのセクションを探し、チェックボックス行のうち
+    本文が入っているものの一覧を返す。テンプレートのデフォルト状態である
+    本文なしの空プレースホルダー行(`- [ ] `)は実際のアクションアイテムでは
+    ないため除外する。
+    """
     span = vault_lib.find_heading_section(text, _SECTION_HEADING_PATTERN)
     if span is None:
         return []
 
     section_text = text[span[0] : span[1]]
-    return [m.group(1) for m in _CHECKBOX_PATTERN.finditer(section_text)]
+    return [
+        m.group(1)
+        for m in _CHECKBOX_PATTERN.finditer(section_text)
+        if m.group(1).strip()
+    ]
 
 
 def extract_project(text: str, vault_root: Path) -> str | None:

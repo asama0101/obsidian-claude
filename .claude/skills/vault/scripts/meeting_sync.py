@@ -23,13 +23,18 @@
 - `attendance` が `1_scheduled` のまま開催日を過ぎたノート（単発・定例
   とも）は `needs_attendance_check` として報告する。呼び出し元はこれを
   ユーザーに確認し、`--set-attendance` で結果を反映する。
+- `attendance` が `2_done`/`3_skip`（確定済み）なのに未チェックの
+  アクションアイテムが残っているノート（単発・定例とも、日付は問わず
+  全件対象）は `needs_task_check` として報告する。`--set-attendance`
+  を経由せずObsidian上で手動編集されたノート等、task化フローが
+  一度も提示されないまま放置されるのを防ぐための検出。
 
 結果は `{"created": [...], "updated": [...], "skipped_single_attendee": [...],
 "cancelled": [...], "no_project": [...], "deleted": [...],
-"needs_attendance_check": [...]}` の形でJSONとしてstdoutへ出力する。
-`no_project` は新規作成されたノートのうちprojectが自動推定できなかった
-ものの `{"note_path": ..., "title": ...}` 一覧。`needs_attendance_check`
-も同じ形。
+"needs_attendance_check": [...], "needs_task_check": [...]}` の形で
+JSONとしてstdoutへ出力する。`no_project` は新規作成されたノートのうち
+projectが自動推定できなかったものの `{"note_path": ..., "title": ...}`
+一覧。`needs_attendance_check`/`needs_task_check` も同じ形。
 
 以下は`--events-json`と排他の別モードとして動作する:
 - `--set-project <note_path> --project <value>`: frontmatter `project`
@@ -78,6 +83,8 @@ _CANCEL_NOTE = "**(キャンセル)**"
 _ACTION_ITEM_HEADING_PATTERN = re.compile(
     r"^#{2,3} ⚡ アクションアイテム(?:（今回）)?[ \t]*$", re.MULTILINE
 )
+# `- [ ] 本文` 形式のチェックボックス行(task_extract.pyと同一パターン)
+_CHECKBOX_PATTERN = re.compile(r"^- \[ \] ?(.*)$", re.MULTILINE)
 
 
 # ---------------------------------------------------------------------------
@@ -312,6 +319,19 @@ def _check_action_item(scope_text: str, item_text: str, task_note: str | None) -
     return scope_text[: span[0]] + new_section_text + scope_text[span[1] :]
 
 
+def _has_unchecked_action_items(scope_text: str) -> bool:
+    """scope_text内のアクションアイテムセクションに、本文入りの未チェック行が
+    1件以上あるか判定する。テンプレートのデフォルト状態である本文なしの
+    空プレースホルダー行(`- [ ] `)は、実際のアクションアイテムではないため
+    対象外とする。
+    """
+    span = vault_lib.find_heading_section(scope_text, _ACTION_ITEM_HEADING_PATTERN)
+    if span is None:
+        return False
+    section_text = scope_text[span[0] : span[1]]
+    return any(m.group(1).strip() for m in _CHECKBOX_PATTERN.finditer(section_text))
+
+
 def _annotate_cancelled(inner: str) -> str:
     if _CANCEL_NOTE in inner:
         return inner
@@ -461,16 +481,23 @@ def _process_series_event(
 # ---------------------------------------------------------------------------
 def _scan_stale_and_pending(
     vault_root: Path, seen_event_ids: set[str], today: str
-) -> tuple[list[str], list[dict]]:
-    """全会議ノートを1回走査し、(削除対象パス一覧, needs_attendance_check一覧) を返す。
+) -> tuple[list[str], list[dict], list[dict]]:
+    """全会議ノートを1回走査し、
+    (削除対象パス一覧, needs_attendance_check一覧, needs_task_check一覧) を返す。
 
     削除は単発予定(type: meeting)のみ対象。開催日(date)が今日で、かつ今日の
     events一覧に対応するcalendar_event_idが無いノートに限定する(先読み廃止に
     より、開催日が過去のノートは二度と今日のevents一覧に現れないため、そちら
     を削除条件に含めると開催確認前に消えてしまう)。
+
+    needs_attendance_check と needs_task_check は同一ノートに同時計上されない
+    (if/elifで相互排他)。attendanceが"1_scheduled"のノートは定義上まだ未確定
+    なのでneeds_task_check対象になり得ず、両者の判定条件はそもそも重ならない
+    が、意図を明示するためif/elifにしている。
     """
     to_delete: list[str] = []
-    needs_check: list[dict] = []
+    needs_attendance: list[dict] = []
+    needs_task: list[dict] = []
 
     for path in _iter_meeting_notes(vault_root):
         text = path.read_text(encoding="utf-8")
@@ -487,22 +514,41 @@ def _scan_stale_and_pending(
                 continue
 
             if attendance == "1_scheduled" and date and date < today:
-                needs_check.append(
+                needs_attendance.append(
+                    {"note_path": str(path), "title": _get_note_title(body_text)}
+                )
+            elif attendance in ("2_done", "3_skip") and _has_unchecked_action_items(
+                body_text
+            ):
+                needs_task.append(
                     {"note_path": str(path), "title": _get_note_title(body_text)}
                 )
 
         elif note_type == "meeting_series":
             meta = _get_occurrence_meta(body_text)
-            if (
-                meta.get("attendance") == "1_scheduled"
-                and meta.get("date")
-                and meta["date"] < today
-            ):
-                needs_check.append(
+            # attendanceキー自体が欠損している場合(一度も_set_occurrence_meta
+            # を通っていない極めて古いノート)は"1_scheduled"相当として扱う。
+            # _set_occurrence_meta(書き込み時)は既にこの既定値を補うが、
+            # この読み取り専用スキャンでも同じ既定値を適用しないと、そうした
+            # ノートがneeds_attendance_check/needs_task_checkどちらにも
+            # 該当しなくなってしまう。
+            occ_attendance = meta.get("attendance") or "1_scheduled"
+            occ_date = meta.get("date")
+
+            if occ_attendance == "1_scheduled" and occ_date and occ_date < today:
+                needs_attendance.append(
                     {"note_path": str(path), "title": _get_note_title(body_text)}
                 )
+            elif occ_attendance in ("2_done", "3_skip"):
+                current_block = vault_lib.get_marker_block(
+                    body_text, "NEW_MEETING_START", "NEW_MEETING_END"
+                )
+                if _has_unchecked_action_items(current_block):
+                    needs_task.append(
+                        {"note_path": str(path), "title": _get_note_title(body_text)}
+                    )
 
-    return to_delete, needs_check
+    return to_delete, needs_attendance, needs_task
 
 
 # ---------------------------------------------------------------------------
@@ -519,6 +565,7 @@ def sync_events(events: list[dict], vault_root: Path) -> dict:
         "no_project": [],
         "deleted": [],
         "needs_attendance_check": [],
+        "needs_task_check": [],
     }
 
     seen_event_ids: set[str] = set()
@@ -532,7 +579,9 @@ def sync_events(events: list[dict], vault_root: Path) -> dict:
         else:
             _process_series_event(event, vault_root, low_attendance, today, result)
 
-    to_delete, needs_check = _scan_stale_and_pending(vault_root, seen_event_ids, today)
+    to_delete, needs_attendance, needs_task = _scan_stale_and_pending(
+        vault_root, seen_event_ids, today
+    )
     deleted: list[str] = []
     for path_str in to_delete:
         try:
@@ -543,7 +592,8 @@ def sync_events(events: list[dict], vault_root: Path) -> dict:
             continue
         deleted.append(path_str)
     result["deleted"] = deleted
-    result["needs_attendance_check"] = needs_check
+    result["needs_attendance_check"] = needs_attendance
+    result["needs_task_check"] = needs_task
 
     return result
 
