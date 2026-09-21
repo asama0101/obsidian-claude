@@ -25,7 +25,6 @@ import vault_lib  # noqa: E402
 TEMPLATE_TEXT = (
     '---\n'
     'type: webclip\n'
-    'project: ""\n'
     'url: ""\n'
     'date: "{{date:YYYY-MM-DD}}"\n'
     'tags:\n'
@@ -285,68 +284,6 @@ class TestClipSave(unittest.TestCase):
             note_text = note_path.read_text(encoding="utf-8")
             self.assertIn("- 要約", note_text)
             self.assertNotIn("![[80_Attachments/", note_text)
-
-    def test_project_hintから正しく推定されfrontmatterに設定される(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = self._make_vault(tmp)
-            (vault_root / "10_Projects" / "VaultMigration").mkdir()
-            content_path = self._make_content_json(
-                tmp,
-                {
-                    "title": "プロジェクト記事",
-                    "summary": [],
-                    "key_points": [],
-                    "full_text": "",
-                },
-            )
-            result = self._run_main(
-                [
-                    "--url",
-                    "https://example.com/proj",
-                    "--content-json",
-                    str(content_path),
-                    "--project-hint",
-                    "VaultMigrationについての記事",
-                    "--vault-root",
-                    str(vault_root),
-                    "--tag",
-                    "python/pandas",
-                ]
-            )
-            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
-            fm, _ = vault_lib.split_frontmatter(note_text)
-            self.assertEqual(vault_lib.get_fm_value(fm, "project"), "[[VaultMigration]]")
-
-    def test_project_hintが一致しない場合はfrontmatterのprojectが空欄のまま(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = self._make_vault(tmp)
-            (vault_root / "10_Projects" / "VaultMigration").mkdir()
-            content_path = self._make_content_json(
-                tmp,
-                {
-                    "title": "無関係記事",
-                    "summary": [],
-                    "key_points": [],
-                    "full_text": "",
-                },
-            )
-            result = self._run_main(
-                [
-                    "--url",
-                    "https://example.com/unrelated",
-                    "--content-json",
-                    str(content_path),
-                    "--project-hint",
-                    "全く関係ない話題",
-                    "--vault-root",
-                    str(vault_root),
-                    "--tag",
-                    "python/pandas",
-                ]
-            )
-            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
-            fm, _ = vault_lib.split_frontmatter(note_text)
-            self.assertEqual(vault_lib.get_fm_value(fm, "project"), "")
 
     def test_frontmatterのurlとdateが正しく設定される(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -662,7 +599,6 @@ class TestClipSave(unittest.TestCase):
             title="空タグ記事",
             dt=datetime.datetime(2026, 9, 21, 10, 0),
             url="https://example.com/empty-tags",
-            project_match=None,
             summary_items=[],
             key_points_items=[],
             full_text="",

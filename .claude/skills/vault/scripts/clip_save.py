@@ -169,32 +169,12 @@ def _blockquote(text: str) -> str:
     return "\n".join(f"> {line}" for line in lines)
 
 
-def _set_fm_raw(fm_text: str, key: str, raw_value: str) -> str:
-    """frontmatterのkey行を、クォートを追加せずraw_valueで置換または追加する。
-
-    vault_lib.set_fm_valueと異なり、既にYAML表現済みの値(例: `"[[Project]]"`)を
-    そのまま書き込みたい場合に使う。
-    """
-    prefix = f"{key}:"
-    new_line = f"{key}: {raw_value}"
-    lines = fm_text.split("\n") if fm_text else []
-
-    for i, line in enumerate(lines):
-        if line.startswith(prefix):
-            lines[i] = new_line
-            return "\n".join(lines)
-
-    lines.append(new_line)
-    return "\n".join(lines)
-
-
 def build_note_text(
     *,
     template_text: str,
     title: str,
     dt: datetime.datetime,
     url: str,
-    project_match: str | None,
     summary_items: list[dict],
     key_points_items: list[dict],
     full_text: str,
@@ -211,8 +191,6 @@ def build_note_text(
     fm, body = vault_lib.split_frontmatter(text)
 
     fm = vault_lib.set_fm_value(fm, "url", url)
-    if project_match:
-        fm = _set_fm_raw(fm, "project", project_match)
     fm = vault_lib.add_tag(fm, tag)
 
     body = body.replace(
@@ -238,7 +216,6 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="WebページをクリップしてVaultにノート化する")
     parser.add_argument("--url", required=True)
     parser.add_argument("--content-json", required=True)
-    parser.add_argument("--project-hint", default=None)
     parser.add_argument("--tag", required=True)
     parser.add_argument("--vault-root", default=None)
     args = parser.parse_args(argv)
@@ -264,11 +241,6 @@ def main(argv: list[str] | None = None) -> int:
     key_points_items = _resolve_item_filenames(normalized_key_points, url_to_filename)
     full_text = _replace_full_text_images(full_text, url_to_filename)
 
-    project_match = None
-    if args.project_hint:
-        projects_dir = vault_root / "10_Projects"
-        project_match = vault_lib.fuzzy_project_match(args.project_hint, projects_dir)
-
     template_path = vault_root / "70_Templates" / "WebClip_Template.md"
     template_text = template_path.read_text(encoding="utf-8")
 
@@ -277,7 +249,6 @@ def main(argv: list[str] | None = None) -> int:
         title=title,
         dt=datetime.datetime.now(),
         url=args.url,
-        project_match=project_match,
         summary_items=summary_items,
         key_points_items=key_points_items,
         full_text=full_text,

@@ -1,6 +1,5 @@
 ---
 type: webclip
-project: ""
 url: ""
 date: "{{date:YYYY-MM-DD}}"
 tags:
