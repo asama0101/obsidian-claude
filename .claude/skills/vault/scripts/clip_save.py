@@ -1,7 +1,8 @@
 """WebページのクリップをVaultのノートとして保存するスクリプト。
 
 Claude側でWebFetch+要約して作成したJSON(title/summary/key_points/full_text)を
-受け取り、summary/key_pointsの各項目に紐づく画像をダウンロードして
+受け取り、summary/key_pointsの各項目に紐づく画像および、full_text中に
+![alt](URL)形式でインライン埋め込まれた画像をまとめてダウンロードして
 80_Attachments/に保存し、WebClip_Template.mdベースのノートを
 30_Resources/WebClips/に作成する。標準ライブラリのみに依存する。
 """
@@ -12,6 +13,7 @@ import argparse
 import datetime
 import json
 import mimetypes
+import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -21,6 +23,10 @@ import vault_lib
 
 # 画像として扱う既知の拡張子(URL末尾からの判定に使う)
 _KNOWN_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"}
+
+# full_text中の標準Markdown画像記法 ![alt](URL) を検出する。
+# altは`]`を含まない任意文字列、URLは`)`が来るまでの文字列(ネストした括弧は非対応)。
+_MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]*)\)")
 
 
 def _guess_extension(url: str, content_type: str | None) -> str:
@@ -89,15 +95,41 @@ def _normalize_items(raw_items: list) -> list[dict]:
     return normalized
 
 
-def _collect_unique_urls(*item_lists: list[dict]) -> list[str]:
-    """複数の正規化済み項目リストから、image_urlを重複無く出現順で集める。"""
+def _collect_unique_urls(
+    *item_lists: list[dict], full_text_urls: list[str] | None = None
+) -> list[str]:
+    """複数の正規化済み項目リストとfull_text由来のURL群から、重複無く出現順で集める。"""
     seen: list[str] = []
     for items in item_lists:
         for item in items:
             url = item["image_url"]
             if url and url not in seen:
                 seen.append(url)
+    for url in full_text_urls or []:
+        if url and url not in seen:
+            seen.append(url)
     return seen
+
+
+def _extract_full_text_image_urls(full_text: str) -> list[str]:
+    """full_text中の![alt](URL)記法から画像URLを出現順(重複含む)で抽出する。"""
+    return _MARKDOWN_IMAGE_RE.findall(full_text)
+
+
+def _replace_full_text_images(full_text: str, url_to_filename: dict[str, str]) -> str:
+    """full_text中の![alt](URL)記法を、ダウンロード済みならローカル埋め込みに置換する。
+
+    ダウンロードに失敗した(url_to_filenameに存在しない)URLの箇所は記法ごと取り除く。
+    """
+
+    def _replace(match: re.Match) -> str:
+        url = match.group(1)
+        filename = url_to_filename.get(url)
+        if filename:
+            return f"![[80_Attachments/{filename}]]"
+        return ""
+
+    return _MARKDOWN_IMAGE_RE.sub(_replace, full_text)
 
 
 def _resolve_item_filenames(
@@ -170,6 +202,8 @@ def build_note_text(
     """テンプレートに内容を差し込み、完成したノート全文を返す。
 
     summary_items/key_points_itemsは{"text": str, "filename": str | None}のリスト。
+    full_textは画像記法(![alt](URL))が既にローカル埋め込み(![[80_Attachments/...]])
+    へ置換済みの状態で渡される想定(呼び出し側で_replace_full_text_images済み)。
     """
     text = vault_lib.fill_template(template_text, title=title, dt=dt)
     fm, body = vault_lib.split_frontmatter(text)
@@ -212,8 +246,11 @@ def main(argv: list[str] | None = None) -> int:
     normalized_summary = _normalize_items(content.get("summary", []))
     normalized_key_points = _normalize_items(content.get("key_points", []))
     full_text = content.get("full_text", "")
+    full_text_image_urls = _extract_full_text_image_urls(full_text)
 
-    unique_urls = _collect_unique_urls(normalized_summary, normalized_key_points)
+    unique_urls = _collect_unique_urls(
+        normalized_summary, normalized_key_points, full_text_urls=full_text_image_urls
+    )
 
     attachments_dir = vault_root / "80_Attachments"
     url_to_filename, images_failed = download_images(unique_urls, title, attachments_dir)
@@ -221,6 +258,7 @@ def main(argv: list[str] | None = None) -> int:
 
     summary_items = _resolve_item_filenames(normalized_summary, url_to_filename)
     key_points_items = _resolve_item_filenames(normalized_key_points, url_to_filename)
+    full_text = _replace_full_text_images(full_text, url_to_filename)
 
     project_match = None
     if args.project_hint:

@@ -362,6 +362,211 @@ class TestClipSave(unittest.TestCase):
             today = datetime.date.today().strftime("%Y-%m-%d")
             self.assertEqual(vault_lib.get_fm_value(fm, "date"), today)
 
+    def test_full_text内の画像記法が抽出されダウンロードされblockquote内でローカル埋め込みに置換される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "本文画像記事",
+                    "summary": [],
+                    "key_points": [],
+                    "full_text": (
+                        "冒頭のテキスト\n\n"
+                        "![説明](https://example.com/body1.png)\n\n"
+                        "続きのテキスト"
+                    ),
+                },
+            )
+            mock_response = self._mock_response(b"body1data", "image/png")
+            with patch(
+                "clip_save.urllib.request.urlopen", return_value=mock_response
+            ) as mock_urlopen:
+                result = self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/body-article",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+                self.assertEqual(mock_urlopen.call_count, 1)
+
+            self.assertEqual(len(result["images_saved"]), 1)
+            self.assertEqual(result["images_failed"], [])
+            body_filename = result["images_saved"][0]
+
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            self.assertIn("> 冒頭のテキスト", note_text)
+            self.assertIn(f"> ![[80_Attachments/{body_filename}]]", note_text)
+            self.assertIn("> 続きのテキスト", note_text)
+            self.assertNotIn("https://example.com/body1.png", note_text)
+
+    def test_full_textとsummaryで同一URLが参照される場合ダウンロードは1回で同じファイル名が両方に使われる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "本文共有画像記事",
+                    "summary": [
+                        {"text": "要約A", "image_url": "https://example.com/shared2.png"}
+                    ],
+                    "key_points": [],
+                    "full_text": "冒頭\n\n![説明](https://example.com/shared2.png)\n\n末尾",
+                },
+            )
+            mock_response = self._mock_response(b"shared2data", "image/png")
+            with patch(
+                "clip_save.urllib.request.urlopen", return_value=mock_response
+            ) as mock_urlopen:
+                result = self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/body-shared-article",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+                self.assertEqual(mock_urlopen.call_count, 1)
+
+            self.assertEqual(len(result["images_saved"]), 1)
+            shared_filename = result["images_saved"][0]
+
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            self.assertIn(f"- 要約A\n  ![[80_Attachments/{shared_filename}]]", note_text)
+            self.assertIn(f"> ![[80_Attachments/{shared_filename}]]", note_text)
+
+    def test_full_text内の画像ダウンロード失敗時は該当箇所が取り除かれimages_failedに記録される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "本文画像失敗記事",
+                    "summary": [],
+                    "key_points": [],
+                    "full_text": (
+                        "冒頭のテキスト\n\n"
+                        "![説明](https://example.com/broken-body.jpg)\n\n"
+                        "続きのテキスト"
+                    ),
+                },
+            )
+            with patch(
+                "clip_save.urllib.request.urlopen", side_effect=OSError("network error")
+            ):
+                result = self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/broken-body-article",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+
+            self.assertEqual(result["images_saved"], [])
+            self.assertEqual(
+                result["images_failed"], ["https://example.com/broken-body.jpg"]
+            )
+
+            note_path = Path(result["note_path"])
+            self.assertTrue(note_path.exists())
+            note_text = note_path.read_text(encoding="utf-8")
+            self.assertIn("> 冒頭のテキスト", note_text)
+            self.assertIn("> 続きのテキスト", note_text)
+            self.assertNotIn("https://example.com/broken-body.jpg", note_text)
+            self.assertNotIn("![[80_Attachments/", note_text)
+
+    def test_full_textに画像が無い場合は従来通りテキストのみのblockquoteになる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "画像無し本文記事",
+                    "summary": [],
+                    "key_points": [],
+                    "full_text": "画像を含まない本文テキスト",
+                },
+            )
+            with patch("clip_save.urllib.request.urlopen") as mock_urlopen:
+                result = self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/no-body-image",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+                mock_urlopen.assert_not_called()
+
+            self.assertEqual(result["images_saved"], [])
+            self.assertEqual(result["images_failed"], [])
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            self.assertIn("> 画像を含まない本文テキスト", note_text)
+
+    def test_full_text内で画像行とテキスト行が混在してもblockquote化が各行に正しく行われる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "混在本文記事",
+                    "summary": [],
+                    "key_points": [],
+                    "full_text": (
+                        "1行目のテキスト\n"
+                        "![alt1](https://example.com/mix1.png)\n"
+                        "2行目のテキスト\n"
+                        "![alt2](https://example.com/mix2.png)\n"
+                        "3行目のテキスト"
+                    ),
+                },
+            )
+            responses = {
+                "https://example.com/mix1.png": self._mock_response(b"mix1", "image/png"),
+                "https://example.com/mix2.png": self._mock_response(b"mix2", "image/png"),
+            }
+            with patch(
+                "clip_save.urllib.request.urlopen",
+                side_effect=self._mock_urlopen_by_url(responses),
+            ):
+                result = self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/mix-article",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+
+            self.assertEqual(len(result["images_saved"]), 2)
+            self.assertEqual(result["images_failed"], [])
+
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            lines = note_text.splitlines()
+            body_lines = [
+                line for line in lines if line.startswith("> ") or line == ">"
+            ]
+            self.assertIn("> 1行目のテキスト", body_lines)
+            self.assertIn("> 2行目のテキスト", body_lines)
+            self.assertIn("> 3行目のテキスト", body_lines)
+            image_lines = [line for line in body_lines if "![[80_Attachments/" in line]
+            self.assertEqual(len(image_lines), 2)
+            for image_line in image_lines:
+                self.assertTrue(image_line.startswith("> ![[80_Attachments/"))
+
     def test_同タイトルで実行するとファイル名が衝突回避される(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault_root = self._make_vault(tmp)
