@@ -1,12 +1,15 @@
-filters:
-  'type == "knowhow"'
+filters: type == "knowhow"
 views:
   - type: table
     name: All
-    order: [file.name, tags]
+    order:
+      - file.name
+      - tags
   - type: table
     name: ByCategory
     groupBy:
       property: tags
       direction: ASC
-    order: [file.name, tags]
+    order:
+      - file.name
+      - tags

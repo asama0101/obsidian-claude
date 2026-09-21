@@ -16,23 +16,17 @@ import vault_lib
 _SECTION_HEADING_PATTERN = re.compile(
     r"^#{2,3} ⚡ アクションアイテム(?:（今回）)?[ \t]*$", re.MULTILINE
 )
-# 次の見出し行(セクションの終端)
-_NEXT_HEADING_PATTERN = re.compile(r"^#", re.MULTILINE)
 # `- [ ] 本文` 形式のチェックボックス行
 _CHECKBOX_PATTERN = re.compile(r"^- \[ \] ?(.*)$", re.MULTILINE)
 
 
 def extract_action_items(text: str) -> list[str]:
     """本文からアクションアイテムのセクションを探し、チェックボックス行の本文一覧を返す。"""
-    heading_match = _SECTION_HEADING_PATTERN.search(text)
-    if heading_match is None:
+    span = vault_lib.find_heading_section(text, _SECTION_HEADING_PATTERN)
+    if span is None:
         return []
 
-    section_start = heading_match.end()
-    next_heading_match = _NEXT_HEADING_PATTERN.search(text, section_start)
-    section_end = next_heading_match.start() if next_heading_match else len(text)
-    section_text = text[section_start:section_end]
-
+    section_text = text[span[0] : span[1]]
     return [m.group(1) for m in _CHECKBOX_PATTERN.finditer(section_text)]
 
 

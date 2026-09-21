@@ -13,13 +13,22 @@ description: |
 
 ## 実行フロー
 
-1. Claudeが接続済みGoogle Calendar MCP（`list_events`）で本日〜+7日の
-   予定を取得し、その結果（`{"events": [...]}`または配列そのもの）を
-   一時JSONファイルへ書き出す。
+1. Claudeが接続済みGoogle Calendar MCP（`list_events`）で本日分の予定を
+   取得し（先読み廃止、本日1日分のみ）、その結果（`{"events": [...]}`
+   または配列そのもの）を一時JSONファイルへ書き出す。
 2. `python .claude/skills/vault/scripts/meeting_sync.py --events-json <path>`
    を実行する（`--vault-root`は省略可。省略時はVaultルート自動検出）。
-3. 標準出力のJSON（`created` / `updated` / `skipped_single_attendee` /
-   `cancelled` / `no_project`の各リスト）を見て、結果をユーザーへ要約報告する。
+3. 標準出力のJSONを見て、結果をユーザーへ要約報告する。各フィールドの内容は次の通り。
+
+   | フィールド | 内容 |
+   |------------|------|
+   | `created` | 新規作成したノートのパス一覧 |
+   | `updated` | 日時・URLなどを更新した既存ノートのパス一覧 |
+   | `skipped_single_attendee` | 出席者1人以下かつ既存ノートも無く、無視したイベントID一覧 |
+   | `cancelled` | 既存ノート対応の予定が出席者1人以下になり、`attendance`を`3_skip`にしたノートのパス一覧 |
+   | `no_project` | 新規作成したがprojectを自動推定できなかったノートの`{"note_path", "title"}`一覧 |
+   | `deleted` | カレンダー側でキャンセルされ物理削除された単発ノートのパス一覧 |
+   | `needs_attendance_check` | 開催確認が必要なノートの`{"note_path", "title"}`一覧 |
 4. `no_project`が空でなければ、`python .claude/skills/vault/scripts/list_projects.py`
    を実行して候補一覧（`{"projects": [...]}`）を取得し、その一覧
    （＋「プロジェクトなし」の選択肢）を提示して、`no_project`内の各ノート
@@ -34,9 +43,33 @@ description: |
    `10_Projects/<Name>/`として実在しない値だった場合は
    `{"status": "error", "reason": "project_not_found"}`が返るので、
    候補一覧を出し直してユーザーに再選択してもらう。
+6. `needs_attendance_check`が空でなければ、各ノート（`note_path`で識別）について「実施済み/不参加」をユーザーにまとめて確認する。
+   カレンダー情報だけでは予定が存在したことは分かっても実際に開催されたかは判定できないため、この手動確認が必要である。
+   確認結果は`python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <1_scheduled|2_done|3_skip>`で反映する。
+   `--attendance`には実施済みなら`2_done`、不参加なら`3_skip`を渡す。
+   「実施済み」と確認されたノートは、続けて下記「task化フロー」へ進む。
 
 `meeting_sync.py`自体が全ての判定（新規作成/更新/キャンセル反映/
 定例の回判定）を行うため、Claude側でノートを直接編集する必要はない。
+
+## task化フロー
+
+`needs_attendance_check`の確認で「実施済み」と判定されたノートについて、
+ノートごとに以下を実行する。
+
+1. `python .claude/skills/vault/scripts/task_extract.py --note <note_path>`
+   を実行し、標準出力のJSON（`{"items": [...], "project": ...}`）から
+   未チェックのアクションアイテム一覧（`items`）を取得する。
+2. `items`が空でなければ、各itemについてタスク化するかどうかを
+   ユーザーに確認する。
+3. タスク化する場合は、`task`スキルのパターン(a)フロー通り
+   `python .claude/skills/vault/scripts/task_save.py`を呼ぶ。このとき
+   `--source "[[議事録ノート名]]"`を追加で渡す。
+4. タスク化の有無にかかわらず、
+   `python .claude/skills/vault/scripts/meeting_sync.py --link-task <note_path> --item-text <元のアクションアイテム本文> [--task-note <タスクノート名>]`
+   を実行し、議事録側の該当チェックボックスをチェック済みにする
+   （タスク化した場合は`--task-note`にタスクノート名を渡すと
+   `[[リンク]]`も追記される）。
 
 ## 出力
 
@@ -60,11 +93,12 @@ description: |
    （`references/meeting-series-update.md`）。無ければ新規作成する。
 4. カレンダー側で日時・URLが変更されていれば既存ノートに反映する。
    議事・決定事項などユーザー手書き欄は変更しない。
-5. 既存ノート対応の予定が後から出席者1人以下に変わった場合
-   （実質キャンセル）は、単発予定ならノートを削除せず
-   `status: cancelled`をfrontmatterに追記する。定例予定なら
-   シリーズ全体はキャンセルにせず、対象occurrenceのブロック内に
-   `(キャンセル)`と注記する。
+5. 既存ノート対応の予定が後から出席者1人以下に変わった場合（実質キャンセル）の扱いは、単発予定と定例予定で異なる。
+   - 単発予定: ノートを削除せず`attendance`を`3_skip`にする（`status`欄は廃止）。
+   - 定例予定: シリーズ全体をキャンセルにせず、対象occurrenceのブロック内に`(キャンセル)`と注記した上で、同ブロックの`attendance`も`3_skip`にする。
+6. 削除対象の判定は単発予定と定例予定で異なる。
+   - 単発予定（`type: meeting`）: 開催日（`date`）が今日であり、かつ今日取得したevents一覧に対応する`calendar_event_id`が無いこと、の2条件を満たすノートが対象である。該当ノートはカレンダー側でキャンセルされたとみなし、中身を確認せず物理削除する（`deleted`）。
+   - 定例予定: 削除対象外。
 
 ## Microsoft 365 / Outlook / Teams連携について
 

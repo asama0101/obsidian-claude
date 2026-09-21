@@ -1,0 +1,33 @@
+[    1302ms] [WARNING] OkraElectronIpcService Preloader API is not loaded @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1320ms] [WARNING] DFP SERVICE DFP_PREBID_SOURCE: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1320ms] [WARNING] DFP SERVICE DFP_TAM_ENABLED: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1366ms] [WARNING] HTTP GET SERVICE URL: _/v0/posts/search?category_id=3513&sort=-schedule_date,id&unit=30, OPTIONS: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1368ms] [WARNING] HTTP GET SERVICE URL: _/v0/posts/search?category_id=9&sort=-schedule_date&unit=16, OPTIONS: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1391ms] [WARNING] HTTP GET SERVICE URL: menus/header-menu, OPTIONS: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1393ms] [WARNING] HTTP GET SERVICE URL: posts/101501, OPTIONS: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1406ms] [WARNING] HTTP GET SERVICE URL: _/v0/posts/search?category_id=13&page=1&paginate=false&unit=1, OPTIONS: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1409ms] [WARNING] HTTP GET SERVICE URL: menus/global-menu, OPTIONS: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1412ms] [WARNING] params for recommend posts: {paginate: false, sort: -schedule_date, unit: 50, category_id__or: Array(1), exclude__origin_id: 12988} @ https://assets-www.df-grid.com/client/_src_production_client_app_components_elements_common_recommend-posts_module_ts.4b6e83233cae9399.js:0
+[    1412ms] [WARNING] HTTP GET SERVICE URL: _/v0/posts/search?category_id__or=191&exclude__origin_id=12988&paginate=false&sort=-schedule_date&unit=50, OPTIONS: undefined @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    1426ms] [TABLE] [Object] @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2026ms] [WARNING] [GPT] PubAdsService.enableSingleRequest is deprecated, use googletag.setConfig({singleRequest: ...}) instead.
+https://goo.gle/gpt-message#170 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609150101/pubads_impl.js?cb=122881092:22
+[    2038ms] [WARNING] [GPT] Slot.clearCategoryExclusions is deprecated, use Slot.setConfig({categoryExclusion: ...}) instead.
+https://goo.gle/gpt-message#171 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609150101/pubads_impl.js?cb=122881092:22
+[    2232ms] [WARNING] DFPAD: slotRenderEnded leon_pc_article_rectangle j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2233ms] [WARNING] DFPAD: slotRenderEnded div-gpt-ad-1593394736193-0 j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2233ms] [WARNING] DFPAD: slotRenderEnded div-gpt-ad-1593394997050-0 j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2233ms] [WARNING] DFPAD: slotRenderEnded leon_pc_article_billboard2 j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2233ms] [WARNING] DFPAD: slotRenderEnded leon_pc_article_billboard3 j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2233ms] [WARNING] DFPAD: slotRenderEnded leon_pc_article_billboard4 j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2233ms] [WARNING] DFPAD: slotRenderEnded leon_pc_article_billboard5 j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2233ms] [WARNING] DFPAD: slotRenderEnded leon_pc_article_billboard6 j1 @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    2512ms] [ERROR] Failed to load resource: net::ERR_FILE_NOT_FOUND @ blob:https://www.leon.jp/15855609-58d3-4af0-ae21-01e03e799639:0
+[    6329ms] [INFO] Using native ARIAMixin interface. @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    6330ms] [LOG] mathRound.install @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    6330ms] [LOG] MediaSource.install @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    6330ms] [INFO] Using native MSE as-is. @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    6330ms] [LOG] VideoPlayPromise.install @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    6330ms] [INFO] Using native VTTCue. @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    6330ms] [LOG] MediaCapabilities: install @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0
+[    6330ms] [LOG] MediaCapabilities: Native mediaCapabilities support found. @ https://assets-www.df-grid.com/client/main.3000ca00bbfc6379.js:0

@@ -1,0 +1,887 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img "東洋経済オンライン" [ref=e6]
+        - navigation [ref=e7]:
+          - list [ref=e8]:
+            - listitem [ref=e9]:
+              - link "トップ" [ref=e10] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e11]:
+              - link "最新順" [ref=e12] [cursor=pointer]:
+                - /url: /category/tk-articles
+            - listitem [ref=e13]:
+              - link "特集・連載" [ref=e14] [cursor=pointer]:
+                - /url: /list/columns
+            - listitem [ref=e15]:
+              - link "人気順" [ref=e16] [cursor=pointer]:
+                - /url: /list/ranking
+            - listitem [ref=e17]:
+              - link "動画" [ref=e18] [cursor=pointer]:
+                - /url: /list/video
+            - listitem [ref=e19]:
+              - link "マンガ" [ref=e20] [cursor=pointer]:
+                - /url: /list/comics
+            - listitem [ref=e21]:
+              - link "セミナー" [ref=e22] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/event/
+            - listitem [ref=e23]:
+              - link "四季報" [ref=e24] [cursor=pointer]:
+                - /url: https://shikiho.toyokeizai.net/
+            - listitem [ref=e25]:
+              - link "書籍" [ref=e26] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/
+        - generic [ref=e27]:
+          - button [ref=e28] [cursor=pointer]:
+            - img "検索" [ref=e29]
+          - button [ref=e30] [cursor=pointer]:
+            - img "お知らせ" [ref=e31]
+          - button [ref=e32] [cursor=pointer]:
+            - img "ブックマーク" [ref=e33]
+        - generic [ref=e34]:
+          - link "有料会員登録" [ref=e35] [cursor=pointer]:
+            - /url: https://str.toyokeizai.net/-/tkm/?utm_source=headerlink
+          - button "ログイン" [ref=e36] [cursor=pointer]
+      - generic [ref=e38]:
+        - navigation [ref=e39]:
+          - list [ref=e40]:
+            - listitem [ref=e41]:
+              - link "ビジネス" [ref=e42] [cursor=pointer]:
+                - /url: /list/genre/business
+            - listitem [ref=e43]:
+              - link "政治・経済・投資" [ref=e44] [cursor=pointer]:
+                - /url: /list/genre/economy-and-politics
+            - listitem [ref=e45]:
+              - link "キャリア・教育" [ref=e46] [cursor=pointer]:
+                - /url: /list/genre/career-and-education
+            - listitem [ref=e47]:
+              - link "ライフ" [ref=e48] [cursor=pointer]:
+                - /url: /list/genre/life
+            - listitem [ref=e49]:
+              - generic [ref=e50]: テーマ
+              - generic:
+                - link "education×ICT":
+                  - /url: /list/theme/ict-edu
+                - link "サイバーセキュリティ":
+                  - /url: /list/theme/security
+                - link "鉄道最前線":
+                  - /url: /list/theme/tetsudosaizensen
+            - listitem [ref=e51]:
+              - generic [ref=e52]: BRAND
+              - generic:
+                - link "ステート・ストリート・インベストメント・マネジメント 今さら聞けない金投資入門":
+                  - /url: https://toyokeizai.net/sp/media/ssim/
+                  - generic: ステート・ストリート・インベストメント・マネジメント
+                  - text: 今さら聞けない金投資入門
+                - link "上智大学 叡智が世界をつなぐ":
+                  - /url: https://toyokeizai.net/sp/media/sophia-series/
+                  - generic: 上智大学
+                  - text: 叡智が世界をつなぐ
+                - link "象印マホービン 「食」と「暮らし」のソリューションブランドへ":
+                  - /url: https://toyokeizai.net/category/zojirushi_index
+                  - generic: 象印マホービン
+                  - text: 「食」と「暮らし」のソリューションブランドへ
+                - link "ダイキン工業 空気で答えを出す会社":
+                  - /url: https://toyokeizai.net/category/daikin_kuki
+                  - generic: ダイキン工業
+                  - text: 空気で答えを出す会社
+                - link "JTB 交わる先に、新たな未来。":
+                  - /url: https://toyokeizai.net/sp/media/jtb/
+                  - generic: JTB
+                  - text: 交わる先に、新たな未来。
+                - link "デロイト トーマツ グループ Think Ahead The CFO Program":
+                  - /url: https://toyokeizai.net/sp/media/deloitte_cfo/
+                  - generic: デロイト トーマツ グループ
+                  - text: Think Ahead The CFO Program
+                - link "BRAND記事一覧":
+                  - /url: /list/brand
+                - generic:
+                  - link "資料（ホワイトペーパー）一覧":
+                    - /url: /list/leads
+            - listitem:
+              - list
+        - button "タブを編集" [ref=e53] [cursor=pointer]
+    - iframe [ref=e57]:
+      - link [ref=f14e2] [cursor=pointer]:
+        - /url: https://googleads.g.doubleclick.net/pcs/click?xai=AKAOjstOMyOFQdv9hTb8IOEo02m16J7s9kSOspkzDAPyWiO2aQEd_4nTe_cUVqJ84kNklec3w3NDr9-64WE0wlSFJ8nzO0mIY00inVG8NFFd4a9MV_nWnNPoaHULxfo70_Cpxtdt-LizgoDZ1CejGjEw2r0X87Fwsyd86WqyYKCQmLj-2Hk56ssYdN35rv568W7yVpRIO62M3sf-6ow2G4fY4ApcoYBKuOGgsOO44XgTHQy4vn_mNghBOc5EW1WjeIbEqoT9h3oH-jlh20JqXgTSp2r7nYpqC70nJOcOJb5BMNXHyPpKVsf90oaj-DxpOBreoKSgyLtZaQN_oM0GknUibwESPLdMFyL1HO2X5IXej2esZDCW78j6IfiFs3f0iZDhRtfo_-W39WdDS5Kpgw1QHlE3IQ&sai=AMfl-YR0QDnqL5n5aFKQp7mw-PxEDZ1YflWaatBny-ZBU_x4eGTlo6wu4iKIVGWFhKHkLURQn4zT3GENPKFjm35o6YU914djredkWX11Y0b6lREy8NEqwVUo_Pi6Tuo02XaNHe_OSYNqJ4aeNLWiGhOgotRCi9P_H_ms7vSRiJhVEfNdMcxN9nPy7J-YcBZCy05_4zaITQAWppWbh2PQTkqBkXQxVDl6VoCi5bZksmV3kKSe1mocmeCryl6hnvSWdFEjlK8MQ282z7ED_WU2_pl-2llizvorleprYiT0HfJfTMv8dCV9BCFod8MMtH7jieOdr2e-2x5c5LDZvGreN4cwmnVIiECozKhTPPIMVi0m746oMjeb1JRQNv2ZNGISYiLgqdjdjjszonBuJTto86XCjcFL&sig=Cg0ArKJSzIjxt8i8i_Ci&fbs_aeid=%5Bgw_fbsaeid%5D&adurl=https://toyokeizai.net/
+    - generic [ref=e58]:
+      - main [ref=e59]:
+        - article [ref=e60]:
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - generic [ref=e63]:
+                - link "キャリア・教育" [ref=e64] [cursor=pointer]:
+                  - /url: /list/genre/career-and-education
+                - link "#秒で使えるパワポ術" [ref=e65] [cursor=pointer]:
+                  - /url: /list/column/69d30f436b208de19b0004d9
+              - navigation [ref=e66]:
+                - link "前の記事" [ref=e67] [cursor=pointer]:
+                  - /url: /articles/-/621549?display=b
+                - link "次の記事" [ref=e68] [cursor=pointer]:
+                  - /url: /articles/-/627559?display=b
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - heading [level=1] [ref=e71]:
+                  - link "悩むパワポの色使い｢グレー｣選べば失敗しない訳 メッセージが明確な資料に｢派手な色｣は不要" [ref=e72] [cursor=pointer]:
+                    - /url: ""
+                - generic [ref=e73]:
+                  - generic [ref=e74]: 5分で読める
+                  - time [ref=e75]: 公開日時：2022/10/13 09:00
+              - list [ref=e79]:
+                - listitem [ref=e80]:
+                  - generic [ref=e81]:
+                    - link "豊間根 青地（トヨマネ）：" [ref=e82] [cursor=pointer]:
+                      - /url: /list/author/5657
+                    - generic [ref=e83]: パワポ芸人
+                  - button "フォロー" [ref=e84] [cursor=pointer]
+              - generic [ref=e85]:
+                - button "ブックマーク" [ref=e86] [cursor=pointer]
+                - button "プリント" [pressed] [ref=e87] [cursor=pointer]
+          - generic [ref=e88]:
+            - paragraph [ref=e92] [cursor=pointer]: INDEX
+            - generic [ref=e93]: 伝わるパワーポイント資料を作るコツの1つは「色」にあります（写真：mits／PIXTA）
+            - generic [ref=e95]: せっかく時間をかけて作った資料なのに、なぜかわかりにくかったり、いまいちカッコ悪かったり、評価されなかったり……。そんな悩みを解決するパワーポイントの即効テクニックを、SNSにアップロードしたパワポ画像のわかりやすさと面白さが話題になっている“パワポ芸人”の豊間根青地（とよまね・せいち）氏が伝授します。今回は「色の使い方」です。
+            - generic [ref=e96]:
+              - text: ※本稿は豊間根氏の新著『
+              - link "秒で使えるパワポ術 一瞬で操作、一瞬で解決" [ref=e97] [cursor=pointer]:
+                - /url: https://www.amazon.co.jp/dp/4041124263?tag=toyokeizaia-22&linkCode=ogi&th=1&psc=1
+              - text: 』を一部抜粋・再構成したものです。
+            - link "【写真を見る】悩むパワポの色使い｢グレー｣選べば失敗しない訳 メッセージが明確な資料に｢派手な色｣は不要(17枚)" [ref=e99] [cursor=pointer]:
+              - /url: /articles/photo/624368
+            - generic [ref=e103]:
+              - iframe [ref=e104]:
+                - generic [ref=f27e1]:
+                  - generic [ref=f27e2]:
+                    - button "Ad"
+                  - generic [ref=f27e3] [cursor=pointer]:
+                    - text: 
+                    - button "play video" [ref=f27e5]: 
+                    - text:      
+              - iframe [ref=e105]
+            - heading "思い切って「グレーの世界」に飛び込んでみよう" [level=2] [ref=e106]
+            - generic [ref=e107]: グレーは最強
+            - paragraph [ref=e108]: 「Gray is the greatest.」――これは私がいつも口を酸っぱくしてお伝えしている格言です。青を使うか赤を使うかに迷っている時間があったら、とりあえず最強の色「グレー」を使ってみましょう。グレーは、あらゆるスライドで活躍する最強の武器だからです。
+            - generic [ref=e109]: （筆者作成）
+            - paragraph [ref=e111]: （外部配信先では図や画像を全部閲覧できない場合があります。その際は東洋経済オンライン内でお読みください）
+            - strong [ref=e113]: カラフルにするとどこを見たらいいかわからない
+            - paragraph [ref=e114]: グレーが最強な理由は、われわれ人間は派手な部分に自然と目が行く生き物だからです。あれも重要、これも重要……とあれこれといろんな色を使ってしまうと、どこを見たらいいのかよくわからないスライドができてしまいます。とにかく目を引くことが目的のチラシや看板ならそれでいい場合もありますが、スライドではそうはいきません。
+            - strong [ref=e116]: まずグレー、重要部分に色
+            - paragraph [ref=e117]: スライドを作る時は必ず最初に思い切って「グレーの世界」に飛び込みましょう。グレーの世界はいささか寂しいですが、本質を見定めるには絶好の舞台です。すべてをグレーの濃淡で示した後、重要な部分だけに絞って色を付けることで、見るべきポイントがわかりやすいスライドを作ることができるのです。
+            - generic [ref=e118]: （筆者作成）
+            - generic [ref=e120]: （筆者作成）
+            - generic [ref=e122]: （筆者作成）
+            - link "次ページが続きます： 【色を頑張って選ぶのは時間の無駄】" [ref=e125]:
+              - /url: /articles/-/624368?page=2
+              - text: 次ページが続きます：【色を頑張って選ぶのは時間の無駄】
+            - generic [ref=e129]:
+              - generic [ref=e130] [cursor=pointer]
+              - generic [ref=e132] [cursor=pointer]
+            - generic [ref=e135]:
+              - generic: "2"
+              - text: /4 PAGES
+            - generic [ref=e137]:
+              - generic: "3"
+              - text: /4 PAGES
+            - generic [ref=e139]:
+              - generic: "4"
+              - text: /4 PAGES
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - navigation [ref=e143]:
+                - heading "関連キーワード" [level=3] [ref=e144]
+                - list [ref=e145]:
+                  - listitem [ref=e146]:
+                    - link "#ICT活用" [ref=e147] [cursor=pointer]:
+                      - /url: /list/tag/ICT活用
+                    - button [ref=e148] [cursor=pointer]
+                  - listitem [ref=e149]:
+                    - link "#資格・スキル" [ref=e150] [cursor=pointer]:
+                      - /url: /list/tag/資格・スキル
+                    - button [ref=e151] [cursor=pointer]
+              - navigation [ref=e152]:
+                - heading "関連業界" [level=3] [ref=e153]
+                - list [ref=e154]:
+                  - listitem [ref=e155]:
+                    - link "#出版" [ref=e156] [cursor=pointer]:
+                      - /url: /list/industry/326
+                    - button [ref=e157] [cursor=pointer]
+                  - listitem [ref=e158]:
+                    - link "#広告" [ref=e159] [cursor=pointer]:
+                      - /url: /list/industry/124
+                    - button [ref=e160] [cursor=pointer]
+                  - listitem [ref=e161]:
+                    - link "#コンサルティング" [ref=e162] [cursor=pointer]:
+                      - /url: /list/industry/88
+                    - button [ref=e163] [cursor=pointer]
+              - paragraph [ref=e164]:
+                - text: 各タグの
+                - generic [ref=e165]: フォローボタン
+                - text: をクリックしフォローすると、関連する新着記事をメールで受け取ることができます
+            - generic [ref=e167]:
+              - generic [ref=e168] [cursor=pointer]:
+                - generic [ref=e170]:
+                  - link "秒で使えるパワポ術" [ref=e171]:
+                    - /url: /list/column/69d30f436b208de19b0004d9
+                  - generic [ref=e172]:
+                    - time [ref=e173]: 2022/10/26 更新
+                    - generic [ref=e174]: 3 記事
+                - button "フォロー" [ref=e175]
+              - navigation [ref=e176]:
+                - generic [ref=e177] [cursor=pointer]:
+                  - link "次の記事" [ref=e178]:
+                    - /url: /articles/-/627559?display=b
+                  - paragraph [ref=e179]: パワポで悩む｢グラフの見せ方｣瞬時改善の簡単技 見栄えの悪い資料は｢無駄な要素｣が多すぎる
+                - generic [ref=e180] [cursor=pointer]:
+                  - link "前の記事" [ref=e181]:
+                    - /url: /articles/-/621549?display=b
+                  - paragraph [ref=e182]: 見栄え悪いパワポ､実は｢フォント｣で改善できる訳 ポイントは｢書体｣｢メリハリ｣｢行間･字間｣
+            - generic [ref=e183]:
+              - generic [ref=e184]:
+                - heading "関連記事" [level=3] [ref=e185]
+                - paragraph [ref=e186]: 本文の内容に基づいた記事をピックアップしています
+              - generic [ref=e187]:
+                - article [ref=e188] [cursor=pointer]:
+                  - link "グーグルの人が｢メールしない｣本質的な理由 仕事が速い人がやっている仕事のコツ" [ref=e189]:
+                    - /url: /articles/-/163430
+                - article [ref=e191] [cursor=pointer]
+                - article [ref=e193] [cursor=pointer]:
+                  - link "整理整頓でバレる｢心底､二流の人｣の3大欠陥 ｢机とカバン｣に要注意！あなたは大丈夫？" [ref=e194]:
+                    - /url: /articles/-/132697
+                - article [ref=e196] [cursor=pointer]:
+                  - link "｢メモ｣でバレる！凡人と一流の致命的な差 会議､営業､打ち合せ…あなたは大丈夫？" [ref=e197]:
+                    - /url: /articles/-/129432
+                - article [ref=e199] [cursor=pointer]
+                - article [ref=e201] [cursor=pointer]:
+                  - link "｢エクセルの鬼｣が実践する5つの高速ワザ ｢1％の工夫｣で今すぐスピードアップできる" [ref=e202]:
+                    - /url: /articles/-/170171
+                - article [ref=e204] [cursor=pointer]:
+                  - link "仕事が速い人がやっている｢スゴ技｣ベスト3 成果にこだわる､外資系マネジャーの頭の中" [ref=e205]:
+                    - /url: /articles/-/83772
+                - article [ref=e207] [cursor=pointer]:
+                  - link "仕事が速い人の｢超効率｣文房具ベスト8 ペン1本にこだわり抜け！" [ref=e208]:
+                    - /url: /articles/-/119994
+            - generic [ref=e211]:
+              - generic [ref=e212] [cursor=pointer]:
+                - generic [ref=e213]:
+                  - link "豊間根 青地（トヨマネ）：" [ref=e214]:
+                    - /url: /list/author/5657
+                  - generic [ref=e215]: パワポ芸人
+                - button "フォロー" [ref=e216]
+                - paragraph [ref=e217]: フォローすると、最新記事をメールでお知らせします。
+              - text: /
+            - generic [ref=e218]:
+              - generic [ref=e219]:
+                - paragraph [ref=e220]: この記事はいかがでしたか？
+                - generic [ref=e221]:
+                  - button "仕事に役立つ 0" [ref=e222] [cursor=pointer]:
+                    - generic [ref=e223]: 仕事に役立つ
+                    - generic [ref=e224]: "0"
+                  - button "新たな気づき 0" [ref=e225] [cursor=pointer]:
+                    - generic [ref=e226]: 新たな気づき
+                    - generic [ref=e227]: "0"
+                  - button "もっと知りたい 0" [ref=e228] [cursor=pointer]:
+                    - generic [ref=e229]: もっと知りたい
+                    - generic [ref=e230]: "0"
+              - generic [ref=e232]:
+                - button "ブックマーク" [ref=e233] [cursor=pointer]
+                - button "プリント" [pressed] [ref=e234] [cursor=pointer]
+                - generic [ref=e235] [cursor=pointer]
+      - complementary [ref=e236]:
+        - link [ref=e238] [cursor=pointer]:
+          - /url: https://toyokeizai.net/sp/about-service/
+        - iframe [ref=e243]:
+          - generic:
+            - iframe [ref=f15e1]:
+              - generic [ref=f20e2] [cursor=pointer]
+            - iframe
+        - generic [ref=e244]:
+          - heading "人気記事 HOT" [level=3] [ref=e245]:
+            - link "人気記事" [ref=e246] [cursor=pointer]:
+              - /url: /list/ranking
+            - generic [ref=e247]: HOT
+          - generic [ref=e248]:
+            - tablist [ref=e249]:
+              - tab "総合" [selected] [ref=e250] [cursor=pointer]
+              - tab "有料会員限定" [ref=e251] [cursor=pointer]
+            - tabpanel [ref=e253]:
+              - listitem [ref=e254]:
+                - generic [ref=e255]: "1"
+                - link "平均年齢86歳｢夕食だけ一緒｣の超快適シニアライフ…老人ホームとも違う､食事で…" [ref=e256] [cursor=pointer]:
+                  - /url: /articles/-/958604
+                - generic [ref=e257]: 桜井 美貴子
+              - listitem [ref=e258]:
+                - generic [ref=e259]: "2"
+                - link "｢幼稚園で元素周期表を暗記｣｢独学で5カ国語習得｣生活保護世帯に生まれた\"ギフ…" [ref=e260] [cursor=pointer]:
+                  - /url: /articles/-/958137
+                - generic [ref=e261]: 新倉 和花
+              - listitem [ref=e262]:
+                - generic [ref=e263]: "3"
+                - link "｢店員が営業中に飲酒？｣｢記念撮影がまずダメ｣…資さんうどん｢乾杯動画｣炎上に…" [ref=e264] [cursor=pointer]:
+                  - /url: /articles/-/958801
+                - generic [ref=e265]: 徳重 龍徳
+              - listitem [ref=e266]:
+                - generic [ref=e267]: "4"
+                - link "｢就活生に人気が高い会社｣男女別ランキング！ 就活生1.3万人が実際に選んだ企…" [ref=e268] [cursor=pointer]:
+                  - /url: /articles/-/958662
+                - generic [ref=e269]: 東洋経済オンライン編集部
+              - listitem [ref=e270]:
+                - generic [ref=e271]: "5"
+                - link "3列シート7人乗り､フレンチテイストなコンパクトSUV…シトロエン新型｢C3エ…" [ref=e272] [cursor=pointer]:
+                  - /url: /articles/-/958079
+                - generic [ref=e273]: 小川 フミオ
+              - listitem [ref=e274]:
+                - generic [ref=e275]: "6"
+                - link "歌舞伎町で45年続く《宮崎料理の居酒屋》の店主…早稲田を3浪で断念｢中途半端だ…" [ref=e276] [cursor=pointer]:
+                  - /url: /articles/-/958056
+                - generic [ref=e277]: 濱井 正吾
+              - listitem [ref=e278]:
+                - generic [ref=e279]: "7"
+                - link "｢駅から5分で大渓谷｣｢香りとビールにほっこり｣最高すぎた\"森林セラピー\"の休…" [ref=e280] [cursor=pointer]:
+                  - /url: /articles/-/957993
+                - generic [ref=e281]: ありを
+              - listitem [ref=e282]:
+                - generic [ref=e283]: "8"
+                - link "髙嶋ちさ子父･弘之さん（92歳）ダウン症の長女と囲む食卓…《週1でケンタ･脂身…" [ref=e284] [cursor=pointer]:
+                  - /url: /articles/-/957937
+                - generic [ref=e285]: 桜井 美貴子
+              - listitem [ref=e286]:
+                - generic [ref=e287]: "9"
+                - link "｢ドパガキ｣をやめられないのはなぜ？ 東大生149人へのアンケートで検証してみ…" [ref=e288] [cursor=pointer]:
+                  - /url: /articles/-/957319
+                - generic [ref=e289]: 西岡 壱誠
+              - listitem [ref=e290]:
+                - generic [ref=e291]: "10"
+                - link "｢必要だった？｣と無情な声も…NHK『風､薫る』ヒロインの相手役｢シマケン｣が…" [ref=e292] [cursor=pointer]:
+                  - /url: /articles/-/958600
+                - generic [ref=e293]: 木俣 冬
+          - generic [ref=e294]: ※過去1ヶ月以内に配信した記事の閲覧数
+        - iframe [ref=e300]:
+          - generic [ref=f32e1]:
+            - generic [ref=f32e4]:
+              - link "全社員約3000人でAIを使い倒す企業の正体" [ref=f32e5] [cursor=pointer]:
+                - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjssaSQ1sbhBGDXUkVOQ9n9kbXz9LO3jFpjSjJqc6DgD9hUOJp-_WMzof4OedLhxTKt9WLZxVE8e_fDF9-z6c7Nn7nvaE_cY8MZVTQUnHjuYacE5M-mTF9ilvctpxt6Pm_mSPDpaMTECNsGVk9E-5lNxqUC6m5XNErrrHXNMJBUHgK-h_6LZnTBWk8xL28HxNboNtA0EtqR4KBRWsQH2BoV4XNwGXb1RdFIanP91urJJ2pOz6uNZjrzG_HQWF2_3PXFho19UG2LpjwVeCVZLKRR5beIHh-9_OQThG3IGkynrnySYdn5n-b92KVJDM7HGt8C0NTMXGPXr54TVL7MNCTj2FRFNmuajFHpy1EpDmD_q0Cz_AnUx7N25V-t4o91rkTg_9rT2u-edjMyAaRqQ-vgQBt2yhsqxMKjl4A-SaLKpCGq-Ypyc&sai=AMfl-YR38-l1pFeHNJv_3xCP7zxa5Dr8sqox3IseFwQAqBLxfHYoa31YeFECgOYftVZYfwuznZ-YC_BTh5VZduFVUXkinu2K9Rh8Cax9I4kBL545ZcVSPYmEof5_JJDTUMBsjmFbzp03fSvrcxJxnwAXA0HmgLMaw_gCITjKTygh5XAZXfwusedv-EMA2fdt5NxhIbVVTWibqE4OfOXxWZXodAh4sQw4OP3JrKDS-zcC1efGCuJxvLpCQ-OMTRTfOT1urOLjfvnNLOm3ayed1w_HudxwaeLZ0XLDn4cAEzEYm0X1k9E6QGikoZI72XlO41RQzmIcP_GDIPE_5Zr8e4qOfpXAu76O8e9Pu9VEONO5hO6w0EYIenTN03tkPX3oK08LI3uQO48GwUYR0qQL_N6siSko&sig=Cg0ArKJSzG_-MfHpfwodEAE&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://toyokeizai.net/articles/-/955129
+              - generic [ref=f32e10]: AD
+            - iframe
+        - generic [ref=e301]:
+          - heading "人気の特集・連載 HOT" [level=3] [ref=e302]:
+            - link "人気の特集・連載" [ref=e303] [cursor=pointer]:
+              - /url: /list/ranking-column
+            - generic [ref=e304]: HOT
+          - generic [ref=e305]:
+            - tablist [ref=e306]:
+              - tab "1日" [selected] [ref=e307] [cursor=pointer]
+              - tab "週間" [ref=e308] [cursor=pointer]
+            - tabpanel [ref=e310]:
+              - listitem [ref=e311]:
+                - generic [ref=e312]: "1"
+                - link "神童だったあの子の今" [ref=e313] [cursor=pointer]:
+                  - /url: /feature/69f03983b57622fbec000000
+              - listitem [ref=e314]:
+                - generic [ref=e315]: "2"
+                - link "長寿の食卓" [ref=e316] [cursor=pointer]:
+                  - /url: /feature/6a9657a5a53aeffc0a000001
+              - listitem [ref=e317]:
+                - generic [ref=e318]: "3"
+                - link "廃墟モールの経済学" [ref=e319] [cursor=pointer]:
+                  - /url: /feature/69b3b06312621721ba000000
+              - listitem [ref=e320]:
+                - generic [ref=e321]: "4"
+                - link "ホットイシュー" [ref=e322] [cursor=pointer]:
+                  - /url: /feature/6a02b867a53aef9ba5000000
+              - listitem [ref=e323]:
+                - generic [ref=e324]: "5"
+                - link "秀吉を天下人にした男、豊臣秀長の実像" [ref=e325] [cursor=pointer]:
+                  - /url: /feature/69d30f316b208de19b0001b7
+              - listitem [ref=e326]:
+                - generic [ref=e327]: "6"
+                - link "浪人したら人生「劇的に」変わった" [ref=e328] [cursor=pointer]:
+                  - /url: /feature/694384dd6b208d3b9c0001de
+              - listitem [ref=e329]:
+                - generic [ref=e330]: "7"
+                - link "チェーン店最強のモーニングを探して" [ref=e331] [cursor=pointer]:
+                  - /url: /feature/694384dd6b208d3b9c0001d1
+              - listitem [ref=e332]:
+                - generic [ref=e333]: "8"
+                - link "自動車最前線" [ref=e334] [cursor=pointer]:
+                  - /url: /feature/69d30f236b208de19b000000
+              - listitem [ref=e335]:
+                - generic [ref=e336]: "9"
+                - link "鉄道最前線" [ref=e337] [cursor=pointer]:
+                  - /url: /feature/69e9fc89b57622c292000001
+              - listitem [ref=e338]:
+                - generic [ref=e339]: "10"
+                - link "森口将之の自動車デザイン考" [ref=e340] [cursor=pointer]:
+                  - /url: /feature/694384d96b208d3b9c00008d
+          - generic [ref=e341]: ※過去1ヶ月以内に更新した特集・連載の閲覧数
+        - generic [ref=e342]:
+          - heading [level=3] [ref=e343]:
+            - link "注目の特集・連載" [ref=e344] [cursor=pointer]:
+              - /url: /list/columns
+          - generic [ref=e345]:
+            - img "自動車最前線" [ref=e347]
+            - link "自動車最前線" [ref=e348] [cursor=pointer]:
+              - /url: /feature/69d30f236b208de19b000000
+            - generic [ref=e349]: 特集 2026/09/21 10:00 更新 3997記事
+        - generic [ref=e350]:
+          - heading [level=3] [ref=e351]:
+            - link "注目キーワード" [ref=e352] [cursor=pointer]:
+              - /url: /list/tags
+          - generic [ref=e353]:
+            - link "#進路・就職" [ref=e354] [cursor=pointer]:
+              - /url: /list/tag/進路・就職
+            - link "#健康" [ref=e355] [cursor=pointer]:
+              - /url: /list/tag/健康
+            - link "#就職・転職" [ref=e356] [cursor=pointer]:
+              - /url: /list/tag/就職・転職
+        - generic [ref=e357]:
+          - heading "今月のおすすめ書籍" [level=3] [ref=e358]
+          - list [ref=e359]:
+            - listitem [ref=e360]:
+              - img "疲れ切った人のための勉強法" [ref=e362]
+              - generic [ref=e363]:
+                - link "疲れ切った人のための勉強法" [ref=e364] [cursor=pointer]:
+                  - /url: https://str.toyokeizai.net/books/9784492048320/
+                - generic [ref=e365]: 勉強しながら脳は回復できる！最新科学が解き明かす、体力ゼロでもできる勉強法
+            - listitem [ref=e366]:
+              - img "ヤングケアラーの僕が東大に合格するまで" [ref=e368]
+              - generic [ref=e369]:
+                - link "ヤングケアラーの僕が東大に合格するまで" [ref=e370] [cursor=pointer]:
+                  - /url: https://str.toyokeizai.net/books/9784492048412/
+                - generic [ref=e371]: 生活保護世帯・ヤングケアラーから東大へ……小さな勇者が挑んだ、1000日間の実話
+            - listitem [ref=e372]:
+              - img "プライベート・エクイティ資本主義が世界を食い尽くす" [ref=e374]
+              - generic [ref=e375]:
+                - link "プライベート・エクイティ資本主義が世界を食い尽くす" [ref=e376] [cursor=pointer]:
+                  - /url: https://str.toyokeizai.net/books/9784492444979/
+                - generic [ref=e377]: ついに日本にも本格上陸！買収した企業から富を搾取する「略奪」のメカニズムとは？
+    - generic [ref=e379]:
+      - heading "こちらの記事もおすすめ" [level=2] [ref=e380]
+      - generic [ref=e382]:
+        - heading "あなたにおすすめ" [level=2] [ref=e384]
+        - generic [ref=e385]:
+          - generic [ref=e387]:
+            - link [ref=e388] [cursor=pointer]:
+              - /url: https://toyokeizai.net/articles/-/958813
+              - heading "【株式投資はメンタルで勝つ】資産10億円・上岡正明の必勝法/ブレないメンタルをどう構築?/一貫した「投資哲学」最速で培う方法/投資家の行動を歪める「損失回避バイアス」/チャートの癖を突く「うねり取り」" [level=3] [ref=e389]
+              - paragraph [ref=e390]: 東洋経済オンラインYouTubeチャンネル
+              - paragraph [ref=e391]: 2026/09/21 19:00
+            - link [ref=e392] [cursor=pointer]:
+              - /url: https://toyokeizai.net/articles/-/956997
+              - heading "編集部厳選、注目の経済ニュース!【9月5日】 今週のトピックス&来週のスケジュール" [level=3] [ref=e393]
+              - paragraph [ref=e394]: 東洋経済 編集部
+              - paragraph [ref=e395]: 2026/09/05 09:00
+            - link [ref=e396] [cursor=pointer]:
+              - /url: https://toyokeizai.net/articles/-/949399
+              - heading "定年後「気づけば家庭に居場所がなかった」男性の末路 医師が語る\"孤独で惨めな老後を回避する\"ため50代からすべきこと" [level=3] [ref=e397]
+              - paragraph [ref=e398]: 野上 徳子
+              - paragraph [ref=e399]: 2026/07/13 09:00
+          - article [ref=e401]
+      - generic [ref=e403]:
+        - heading "キャリア・教育" [level=2] [ref=e405]
+        - list [ref=e406]:
+          - listitem [ref=e407]:
+            - article [ref=e408]:
+              - img "10月法改正で企業並みの｢カスハラ対策｣が学校にも…どこからアウト？文科省指針に見る境界線と学校ならではの難しさ" [ref=e410]
+              - generic [ref=e411]:
+                - generic [ref=e412]: 学校教育最前線
+                - link "10月法改正で企業並みの｢カスハラ対策｣が学校にも…どこからアウト？文科省指針に見る境界線と学校ならではの難しさ" [ref=e413] [cursor=pointer]:
+                  - /url: /articles/-/958290
+              - generic [ref=e414]:
+                - generic [ref=e415]: 妹尾 昌俊
+                - time [ref=e416]: 2026/09/21 06:00
+                - button "ブックマーク" [ref=e417] [cursor=pointer]
+          - listitem [ref=e418]:
+            - article [ref=e419]:
+              - img "《豊臣兄弟！》秀吉の出陣を拒否！秀長が\"わずか2カ月\"で､四国の覇者｢長宗我部元親｣を降伏に追い込んだ背景" [ref=e421]
+              - generic [ref=e422]:
+                - generic [ref=e423]: 秀吉を天下人にした男、豊臣秀長の実像
+                - link "《豊臣兄弟！》秀吉の出陣を拒否！秀長が\"わずか2カ月\"で､四国の覇者｢長宗我部元親｣を降伏に追い込んだ背景" [ref=e424] [cursor=pointer]:
+                  - /url: /articles/-/957822
+              - generic [ref=e425]:
+                - generic [ref=e426]: 真山 知幸
+                - time [ref=e427]: 2026/09/20 09:30
+                - button "ブックマーク" [ref=e428] [cursor=pointer]
+          - listitem [ref=e429]:
+            - article [ref=e430]:
+              - img "【学校の悩み相談】モンスターペアレント猛攻で休職､対処法は？元校長が導き出したNGな対応と｢解決に導く｣4ステップ" [ref=e432]
+              - generic [ref=e433]:
+                - generic [ref=e434]: 前例と慣習をぶち破れ！ 学校改革のすすめ
+                - link "【学校の悩み相談】モンスターペアレント猛攻で休職､対処法は？元校長が導き出したNGな対応と｢解決に導く｣4ステップ" [ref=e435] [cursor=pointer]:
+                  - /url: /articles/-/957487
+              - generic [ref=e436]:
+                - generic [ref=e437]: 森 万喜子
+                - time [ref=e438]: 2026/09/20 06:00
+                - button "ブックマーク" [ref=e439] [cursor=pointer]
+          - listitem [ref=e440]:
+            - article [ref=e441]:
+              - img "会社を壊すのは｢パワハラ｣でも｢不正｣でもない…日本企業にはびこる\"本当の大問題\"" [ref=e443]
+              - link "会社を壊すのは｢パワハラ｣でも｢不正｣でもない…日本企業にはびこる\"本当の大問題\"" [ref=e445] [cursor=pointer]:
+                - /url: /articles/-/946230
+              - generic [ref=e446]:
+                - generic [ref=e447]: 三村 真宗
+                - time [ref=e448]: 2026/09/19 10:30
+                - button "ブックマーク" [ref=e449] [cursor=pointer]
+    - generic [ref=e450]:
+      - generic [ref=e452]:
+        - heading "人気記事 HOT" [level=3] [ref=e453]:
+          - link "人気記事" [ref=e454] [cursor=pointer]:
+            - /url: /list/ranking
+          - generic [ref=e455]: HOT
+        - generic [ref=e456]:
+          - tablist [ref=e457]:
+            - tab "総合" [selected] [ref=e458] [cursor=pointer]
+            - tab "有料会員限定" [ref=e459] [cursor=pointer]
+          - tabpanel [ref=e461]:
+            - listitem [ref=e462]:
+              - generic [ref=e463]: "1"
+              - link "平均年齢86歳｢夕食だけ一緒｣の超快適シニアライフ…老人ホームとも違う､食事で…" [ref=e464] [cursor=pointer]:
+                - /url: /articles/-/958604
+              - generic [ref=e465]: 桜井 美貴子
+            - listitem [ref=e466]:
+              - generic [ref=e467]: "2"
+              - link "｢幼稚園で元素周期表を暗記｣｢独学で5カ国語習得｣生活保護世帯に生まれた\"ギフ…" [ref=e468] [cursor=pointer]:
+                - /url: /articles/-/958137
+              - generic [ref=e469]: 新倉 和花
+            - listitem [ref=e470]:
+              - generic [ref=e471]: "3"
+              - link "｢店員が営業中に飲酒？｣｢記念撮影がまずダメ｣…資さんうどん｢乾杯動画｣炎上に…" [ref=e472] [cursor=pointer]:
+                - /url: /articles/-/958801
+              - generic [ref=e473]: 徳重 龍徳
+            - listitem [ref=e474]:
+              - generic [ref=e475]: "4"
+              - link "｢就活生に人気が高い会社｣男女別ランキング！ 就活生1.3万人が実際に選んだ企…" [ref=e476] [cursor=pointer]:
+                - /url: /articles/-/958662
+              - generic [ref=e477]: 東洋経済オンライン編集部
+            - listitem [ref=e478]:
+              - generic [ref=e479]: "5"
+              - link "3列シート7人乗り､フレンチテイストなコンパクトSUV…シトロエン新型｢C3エ…" [ref=e480] [cursor=pointer]:
+                - /url: /articles/-/958079
+              - generic [ref=e481]: 小川 フミオ
+            - listitem [ref=e482]:
+              - generic [ref=e483]: "6"
+              - link "歌舞伎町で45年続く《宮崎料理の居酒屋》の店主…早稲田を3浪で断念｢中途半端だ…" [ref=e484] [cursor=pointer]:
+                - /url: /articles/-/958056
+              - generic [ref=e485]: 濱井 正吾
+            - listitem [ref=e486]:
+              - generic [ref=e487]: "7"
+              - link "｢駅から5分で大渓谷｣｢香りとビールにほっこり｣最高すぎた\"森林セラピー\"の休…" [ref=e488] [cursor=pointer]:
+                - /url: /articles/-/957993
+              - generic [ref=e489]: ありを
+            - listitem [ref=e490]:
+              - generic [ref=e491]: "8"
+              - link "髙嶋ちさ子父･弘之さん（92歳）ダウン症の長女と囲む食卓…《週1でケンタ･脂身…" [ref=e492] [cursor=pointer]:
+                - /url: /articles/-/957937
+              - generic [ref=e493]: 桜井 美貴子
+            - listitem [ref=e494]:
+              - generic [ref=e495]: "9"
+              - link "｢ドパガキ｣をやめられないのはなぜ？ 東大生149人へのアンケートで検証してみ…" [ref=e496] [cursor=pointer]:
+                - /url: /articles/-/957319
+              - generic [ref=e497]: 西岡 壱誠
+            - listitem [ref=e498]:
+              - generic [ref=e499]: "10"
+              - link "｢必要だった？｣と無情な声も…NHK『風､薫る』ヒロインの相手役｢シマケン｣が…" [ref=e500] [cursor=pointer]:
+                - /url: /articles/-/958600
+              - generic [ref=e501]: 木俣 冬
+        - generic [ref=e502]: ※過去1ヶ月以内に配信した記事の閲覧数
+      - generic [ref=e504]:
+        - heading "人気の特集・連載 HOT" [level=3] [ref=e505]:
+          - link "人気の特集・連載" [ref=e506] [cursor=pointer]:
+            - /url: /list/ranking?tab=columns
+          - generic [ref=e507]: HOT
+        - generic [ref=e508]:
+          - tablist [ref=e509]:
+            - tab "1日" [selected] [ref=e510] [cursor=pointer]
+            - tab "週間" [ref=e511] [cursor=pointer]
+          - tabpanel [ref=e513]:
+            - listitem [ref=e514]:
+              - generic [ref=e515]: "1"
+              - link "神童だったあの子の今" [ref=e516] [cursor=pointer]:
+                - /url: /feature/69f03983b57622fbec000000
+            - listitem [ref=e517]:
+              - generic [ref=e518]: "2"
+              - link "長寿の食卓" [ref=e519] [cursor=pointer]:
+                - /url: /feature/6a9657a5a53aeffc0a000001
+            - listitem [ref=e520]:
+              - generic [ref=e521]: "3"
+              - link "廃墟モールの経済学" [ref=e522] [cursor=pointer]:
+                - /url: /feature/69b3b06312621721ba000000
+            - listitem [ref=e523]:
+              - generic [ref=e524]: "4"
+              - link "ホットイシュー" [ref=e525] [cursor=pointer]:
+                - /url: /feature/6a02b867a53aef9ba5000000
+            - listitem [ref=e526]:
+              - generic [ref=e527]: "5"
+              - link "秀吉を天下人にした男、豊臣秀長の実像" [ref=e528] [cursor=pointer]:
+                - /url: /feature/69d30f316b208de19b0001b7
+            - listitem [ref=e529]:
+              - generic [ref=e530]: "6"
+              - link "浪人したら人生「劇的に」変わった" [ref=e531] [cursor=pointer]:
+                - /url: /feature/694384dd6b208d3b9c0001de
+            - listitem [ref=e532]:
+              - generic [ref=e533]: "7"
+              - link "チェーン店最強のモーニングを探して" [ref=e534] [cursor=pointer]:
+                - /url: /feature/694384dd6b208d3b9c0001d1
+            - listitem [ref=e535]:
+              - generic [ref=e536]: "8"
+              - link "自動車最前線" [ref=e537] [cursor=pointer]:
+                - /url: /feature/69d30f236b208de19b000000
+            - listitem [ref=e538]:
+              - generic [ref=e539]: "9"
+              - link "鉄道最前線" [ref=e540] [cursor=pointer]:
+                - /url: /feature/69e9fc89b57622c292000001
+            - listitem [ref=e541]:
+              - generic [ref=e542]: "10"
+              - link "森口将之の自動車デザイン考" [ref=e543] [cursor=pointer]:
+                - /url: /feature/694384d96b208d3b9c00008d
+        - generic [ref=e544]: ※過去1ヶ月以内に更新した特集・連載の閲覧数
+      - generic [ref=e546]:
+        - heading [level=3] [ref=e547]:
+          - link "注目の特集・連載" [ref=e548] [cursor=pointer]:
+            - /url: /list/columns
+        - generic [ref=e549]:
+          - link [ref=e550] [cursor=pointer]:
+            - /url: /feature/69d30f236b208de19b000000
+            - img "自動車最前線" [ref=e551]
+          - generic [ref=e552]: 特集 3997記事
+        - generic [ref=e553]:
+          - article [ref=e554]:
+            - img "3列シート7人乗り､フレンチテイストなコンパクトSUV…シトロエン新型｢C3エアロクロス ハイブリッド｣の隠れた美点" [ref=e556]
+            - link "3列シート7人乗り､フレンチテイストなコンパクトSUV…シトロエン新型｢C3エアロクロス ハイブリッド｣の隠れた美点" [ref=e558] [cursor=pointer]:
+              - /url: /articles/-/958079
+            - generic [ref=e559]:
+              - time [ref=e560]: 2026/09/21 10:00
+              - generic [ref=e561]: 小川 フミオ
+              - button "ブックマーク" [ref=e562] [cursor=pointer]
+          - article [ref=e563]:
+            - img "日産｢エルグランド｣と｢アルヴェル｣の関係がメルセデス･ベンツとBMWに似ていると思うワケ" [ref=e565]
+            - link "日産｢エルグランド｣と｢アルヴェル｣の関係がメルセデス･ベンツとBMWに似ていると思うワケ" [ref=e567] [cursor=pointer]:
+              - /url: /articles/-/957907
+            - generic [ref=e568]:
+              - time [ref=e569]: 2026/09/20 07:00
+              - generic [ref=e570]: 森口 将之
+              - button "ブックマーク" [ref=e571] [cursor=pointer]
+    - generic [ref=e573]:
+      - link "注目キーワード" [ref=e575] [cursor=pointer]:
+        - /url: /list/tags
+      - generic [ref=e576]:
+        - link "#進路・就職" [ref=e577] [cursor=pointer]:
+          - /url: /list/tag/進路・就職
+        - link "#健康" [ref=e578] [cursor=pointer]:
+          - /url: /list/tag/健康
+        - link "#就職・転職" [ref=e579] [cursor=pointer]:
+          - /url: /list/tag/就職・転職
+    - navigation "パンくずリスト" [ref=e580]:
+      - list [ref=e582]:
+        - listitem [ref=e583]:
+          - link "トップ" [ref=e584] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e585]:
+          - link "キャリア・教育" [ref=e586] [cursor=pointer]:
+            - /url: /list/genre/career-and-education
+        - listitem [ref=e587]:
+          - generic [ref=e588]: 悩むパワポの色使い｢グレー｣選べば失敗しない訳 メッセージが明確な資料に｢派手な色｣は不要
+    - contentinfo [ref=e589]:
+      - generic [ref=e590]:
+        - link [ref=e591] [cursor=pointer]:
+          - /url: /
+          - img "東洋経済オンライン" [ref=e592]
+        - navigation [ref=e593]:
+          - list [ref=e594]:
+            - listitem [ref=e595]:
+              - link [ref=e596] [cursor=pointer]:
+                - /url: https://www.facebook.com/ToyokeizaiOnline
+                - img "Facebook" [ref=e597]
+            - listitem [ref=e598]:
+              - link [ref=e599] [cursor=pointer]:
+                - /url: https://twitter.com/Toyokeizai
+                - img "X" [ref=e600]
+            - listitem [ref=e601]:
+              - link [ref=e602] [cursor=pointer]:
+                - /url: https://line.me/R/ti/p/%40oa-toyokeizaionline
+                - img "LINE" [ref=e603]
+            - listitem [ref=e604]:
+              - link [ref=e605] [cursor=pointer]:
+                - /url: https://www.youtube.com/channel/UCN36kFB7Lh4tptI4rsy5vFw
+                - img "YouTube" [ref=e606]
+            - listitem [ref=e607]:
+              - link [ref=e608] [cursor=pointer]:
+                - /url: /list/feed/rss
+                - img "RSS" [ref=e609]
+        - navigation [ref=e610]:
+          - list [ref=e611]:
+            - listitem [ref=e612]:
+              - link "トップ" [ref=e613] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e614]:
+              - link "最新順" [ref=e615] [cursor=pointer]:
+                - /url: /category/tk-articles
+            - listitem [ref=e616]:
+              - link "特集・連載" [ref=e617] [cursor=pointer]:
+                - /url: /list/columns
+            - listitem [ref=e618]:
+              - link "人気順" [ref=e619] [cursor=pointer]:
+                - /url: /list/ranking
+            - listitem [ref=e620]:
+              - link "動画" [ref=e621] [cursor=pointer]:
+                - /url: /list/video
+            - listitem [ref=e622]:
+              - link "マンガ" [ref=e623] [cursor=pointer]:
+                - /url: /list/comics
+            - listitem [ref=e624]:
+              - link "セミナー" [ref=e625] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/event/
+            - listitem [ref=e626]:
+              - link "四季報" [ref=e627] [cursor=pointer]:
+                - /url: https://shikiho.toyokeizai.net/
+            - listitem [ref=e628]:
+              - link "書籍" [ref=e629] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/
+          - list [ref=e630]:
+            - listitem [ref=e631]:
+              - link "ビジネス" [ref=e632] [cursor=pointer]:
+                - /url: /list/genre/business
+            - listitem [ref=e633]:
+              - link "政治・経済・投資" [ref=e634] [cursor=pointer]:
+                - /url: /list/genre/economy-and-politics
+            - listitem [ref=e635]:
+              - link "キャリア・教育" [ref=e636] [cursor=pointer]:
+                - /url: /list/genre/career-and-education
+            - listitem [ref=e637]:
+              - link "ライフ" [ref=e638] [cursor=pointer]:
+                - /url: /list/genre/life
+      - generic [ref=e639]:
+        - navigation [ref=e640]:
+          - heading "テーマ" [level=4] [ref=e641]
+          - list [ref=e642]:
+            - listitem [ref=e643]:
+              - link "education×ICT" [ref=e644] [cursor=pointer]:
+                - /url: /list/theme/ict-edu
+            - listitem [ref=e645]:
+              - link "サイバーセキュリティ" [ref=e646] [cursor=pointer]:
+                - /url: /list/theme/security
+            - listitem [ref=e647]:
+              - link "鉄道最前線" [ref=e648] [cursor=pointer]:
+                - /url: /list/theme/tetsudosaizensen
+        - navigation [ref=e649]:
+          - heading "関連サービス" [level=4] [ref=e650]
+          - list [ref=e651]:
+            - listitem [ref=e652]:
+              - link "The ORIENTAL ECONOMIST" [ref=e653] [cursor=pointer]:
+                - /url: /tbt
+            - listitem [ref=e654]:
+              - link "会社四季報オンライン" [ref=e655] [cursor=pointer]:
+                - /url: https://shikiho.toyokeizai.net/
+            - listitem [ref=e656]:
+              - link "東洋経済STORE" [ref=e657] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/
+            - listitem [ref=e658]:
+              - link "東洋経済デジタルコンテンツライブラリー" [ref=e659] [cursor=pointer]:
+                - /url: https://dcl.toyokeizai.net/ap/bz/login
+            - listitem [ref=e660]:
+              - link "シキホー！Mine" [ref=e661] [cursor=pointer]:
+                - /url: https://mine.toyokeizai.net/
+        - navigation [ref=e662]:
+          - heading "法人向け関連サービス" [level=4] [ref=e663]
+          - list [ref=e664]:
+            - listitem [ref=e665]:
+              - link "東洋経済オンライン法人プラン" [ref=e666] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/-/tkm_corp/
+            - listitem [ref=e667]:
+              - link "会社四季報オンライン法人プラン" [ref=e668] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/-/sol/business/
+            - listitem [ref=e669]:
+              - link "東洋経済データサービス" [ref=e670] [cursor=pointer]:
+                - /url: https://biz.toyokeizai.net/data/
+            - listitem [ref=e671]:
+              - link "東洋経済セミナー" [ref=e672] [cursor=pointer]:
+                - /url: https://biz.toyokeizai.net/seminar/
+            - listitem [ref=e673]:
+              - link "東洋経済広告" [ref=e674] [cursor=pointer]:
+                - /url: https://biz.toyokeizai.net/digital/
+            - listitem [ref=e675]:
+              - link "東洋経済カスタム出版" [ref=e676] [cursor=pointer]:
+                - /url: https://biz.toyokeizai.net/custom/
+            - listitem [ref=e677]:
+              - link "教科書の森" [ref=e678] [cursor=pointer]:
+                - /url: https://book.toyokeizai.net/textbook/
+        - navigation [ref=e679]:
+          - heading "このサイトについて" [level=4] [ref=e680]
+          - list [ref=e681]:
+            - listitem [ref=e682]:
+              - link "東洋経済オンラインとは" [ref=e683] [cursor=pointer]:
+                - /url: /sp/about-service
+            - listitem [ref=e684]:
+              - link "コンテンツについて" [ref=e685] [cursor=pointer]:
+                - /url: /sp/about-service/contents
+            - listitem [ref=e686]:
+              - link "有料プラン" [ref=e687] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/-/tkm/
+            - listitem [ref=e688]:
+              - link "法人プラン" [ref=e689] [cursor=pointer]:
+                - /url: https://str.toyokeizai.net/-/tkm_corp/
+            - listitem [ref=e690]:
+              - link "ユーザーガイド" [ref=e691] [cursor=pointer]:
+                - /url: /sp/about-service/userguide
+            - listitem [ref=e692]:
+              - link "利用規約" [ref=e693] [cursor=pointer]:
+                - /url: /list/base-terms
+      - generic [ref=e694]:
+        - navigation [ref=e695]:
+          - heading "東洋経済新報社について" [level=4] [ref=e696]
+          - list [ref=e697]:
+            - listitem [ref=e698]:
+              - link "運営会社" [ref=e699] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/aboutus/outline/
+            - listitem [ref=e700]:
+              - link "採用情報" [ref=e701] [cursor=pointer]:
+                - /url: https://recruit.toyokeizai.net/
+            - listitem [ref=e702]:
+              - link "公式アカウント一覧" [ref=e703] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/social-media/
+            - listitem [ref=e704]:
+              - link "広告掲載" [ref=e705] [cursor=pointer]:
+                - /url: https://biz.toyokeizai.net/digital/
+        - navigation [ref=e706]:
+          - list [ref=e707]:
+            - listitem [ref=e708]:
+              - link "WEBサービスでの情報収集" [ref=e709] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/privacy-policy/webpolicy/
+            - listitem [ref=e710]:
+              - link "プライバシーポリシー" [ref=e711] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/privacy-policy/
+            - listitem [ref=e712]:
+              - link "知的財産" [ref=e713] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/copyright/
+            - listitem [ref=e714]:
+              - link "特定商取引法に基づく表示" [ref=e715] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/tradelaw/
+            - listitem [ref=e716]:
+              - link "東洋経済ID利用規約" [ref=e717] [cursor=pointer]:
+                - /url: https://s.toyokeizai.net/ext/kiyaku.html
+            - listitem [ref=e718]:
+              - link "カスハラ基本方針" [ref=e719] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/customer-harassment/
+            - listitem [ref=e720]:
+              - link "お問い合わせ" [ref=e721] [cursor=pointer]:
+                - /url: https://corp.toyokeizai.net/contact/list/
+      - generic [ref=e723]:
+        - generic [ref=e724]:
+          - link [ref=e725] [cursor=pointer]:
+            - /url: https://corp.toyokeizai.net/
+            - img "東洋経済新報社" [ref=e726]
+          - generic [ref=e727]: Copyright © Toyo Keizai Inc.All Rights Reserved.
+        - link [ref=e728] [cursor=pointer]:
+          - /url: https://corp.toyokeizai.net/copyright/#abj
+          - img "ABJマークは、この電子書店・電子書籍配信サービスが、著作権者からコンテンツ使用許諾を得た正規版配信サービスであることを示す登録商標（登録番号第12121000号）です。" [ref=e729]
+  - iframe [ref=e732]:
+    - link [ref=f16e2] [cursor=pointer]:
+      - /url: https://googleads.g.doubleclick.net/pcs/click?xai=AKAOjstpKe25yi3PVqNRH6krExMVWKcAsBFRR59Fm6wEkWREgmiVL6laNiwP_jSyDWJO7_VrPT3RVqJWTnGnDEOXVCWOztuatMk_F7i-1SSHnkhgvBtciOYb1dPAQFm-EXGdk8ryiHfUURrdVO5jEcogof9-IkVy520CL6K3qPVNsbTtOIvvhPoyPQkwuc_tZ4iozvNZAcndctVney1LV-jCzdVjKh393jOkG1PvgRVK2JJQroWegYIOqSNJh99F-INBqkPv5OYu_5KxNIvMUH_DW_ebP0r-MDFsEyo_dB2ngEf7NMCHcU79fwOASSpUURF030brVeghzHkw3zr6r7wDbPs02cNrd2b-o52aEMwuDJWHcycckCZMGp00f_3aqdUMhsWUud8pLIaOvApPHB4m9es9&sai=AMfl-YT4hCcL6vC8kKMqsJIofam5-aYyMjnDUE9sZRL0ZZbo1L5Ie1Zt4UsKCiOvIj9YRvCYYX2-5CG2HUQVGCO2OhzBIIkCFIJ78Jl2YASIxxqBeoNAWHJkDj9siRmCirFt3ljZxqpGQqEu-H4Nxj1uT1xFhCmFteKzkg3O2Kt4I93BtIKLajj8a--TqYfdqA3piaPQNpJcPkXFWsdrqdLJgH23MtLU8pgqqGDWjWjKuSpZmUcDvY4twWh9Oa4X__u6d99NID68FyIpY0tLWvBL6HMeu98Ez-_R33F5_snvMrE7TrIOp0qQc9eiHnDd1rkJLM3bOhEs3_aVIE8nAS3sS09572pTvQCbTNI6mcd3E2XBwax0codinboUthjHF7eJ2-q0W-JV9FcONKHBr9TN2W-v&sig=Cg0ArKJSzJ1shZSnM2je&fbs_aeid=%5Bgw_fbsaeid%5D&adurl=https://toyokeizai.net/
+  - link [ref=e734] [cursor=pointer]:
+    - /url: https://gcmtrk.goldspotmedia.com/eng/rd?__cb=GGyOnrgkKuGQFSN1&guid=e069d636-6f9e-4687-b639-67c310e043c6&sys=gcm&cmpn=69f2d44f-45df-45ef-a90d-36f3949bf68f&crtv=3dcdc045-ff87-4719-93fe-dcab720e8208&tag=1465669d-6dee-403b-84de-6b2b34999d15&nck=1&__loc=toyokeizai.net&unit=ad78cd6f-fc1d-4fc7-8b0e-62516988b1d4&ctr=true&name=Click_Left&ru=https%3A%2F%2Fadclick.g.doubleclick.net%2Fpcs%2Fclick%3Fxai%3DAKAOjssjErF1EtRCHAsXQMKUBbIRB2r5ZsUjoHPsOoK7pphlQ0tpNC9lD8YOEd9ChA-BvUmEk2Obb1HxSKI2dMq-OborAbcH7nxrkENrP1bNgXS_woaqcq0UlmX8fLX8Bll_6E0XUv24q5lPeehNN6n6L0iBRWXFW8YlbXbWJstUJYnDjdyE_Fe1sES0U1fiwXKS0b2WcbPVv05HRy4fTDEunoFQ4M_XQCeShH8BD6fxwfUjcssKuh_xbBpDFdQ41eTDcvdcGDysneU2QmdBS66FO5_d21u5gLSxGpBhzsWmvSmL4bgE59EFMduAj-GX7DL1wzfl1iVSkXo_UJ6Uav1T-Lb5_9xzZQDV4fO0xHzVMHXxh7AW9eN-4kc725XytUaTVUCnFBgwoQi44mwiut_PoQ%26sai%3DAMfl-YTJev2gYNrG0vqxJQRUHf7XZO9lVbq-V8hQWUzb7mxttKSaTt01nEr2CF0maSBJNc59V09khErfEJTF2w9dZwYOq-GDNWBbH44WxmeoPOw71Em5Cxy8VeZ8mtsJGFt-16G72NHFTvdjbOysht8-q0vcU-t_jqbaquigWZ_Ze8rbUy4vewacSzNRg2qflhBZOdwlH8WkY7Pmsj0zKp5OQpPrRgGfO-fEmKffHzY1VrvklgJKGsWosq0uAqplLdo64GmUQ3wKTz_JZ6JpTGfB9c3KWVIbwT8IIVvD8vPCnfv3GlAO5gake_7B8wJdl2nzfdBjL23OK4Ydio5GPjjA_oirovItfbBAs7kggDm3k0G4TAFbus9NbZIrSofM1BzOWI5kDthJEnjCkhIPKk4jqPhs%26sig%3DCg0ArKJSzHH6ppqMJEbrEAE%26fbs_aeid%3D%255Bgw_fbsaeid%255D%26urlfix%3D1%26adurl%3Dhttps%253A%252F%252Fwww.sap.com%252Fjapan%252Fproducts%252Ferp%252Fgrow.html%253Fpttid%253D7860%2526campaigncode%253Dcrm-yd26-bms-434751%2526source%253Donlinedisplay-jp-toyokeizai-disp-toyokeizai-axtkxxxdxcx01x1220x80xpxt-brand_cerp-axtkxxxdxcx01x1220x80xpxt-x-aam%2526dfa%253D1
+  - link [ref=e737] [cursor=pointer]:
+    - /url: https://gcmtrk.goldspotmedia.com/eng/rd?__cb=xshk0eOn5KujG47t&guid=e069d636-6f9e-4687-b639-67c310e043c6&sys=gcm&cmpn=69f2d44f-45df-45ef-a90d-36f3949bf68f&crtv=3dcdc045-ff87-4719-93fe-dcab720e8208&tag=1465669d-6dee-403b-84de-6b2b34999d15&nck=1&__loc=toyokeizai.net&unit=ad78cd6f-fc1d-4fc7-8b0e-62516988b1d4&ctr=true&name=Click_Right&ru=https%3A%2F%2Fadclick.g.doubleclick.net%2Fpcs%2Fclick%3Fxai%3DAKAOjssjErF1EtRCHAsXQMKUBbIRB2r5ZsUjoHPsOoK7pphlQ0tpNC9lD8YOEd9ChA-BvUmEk2Obb1HxSKI2dMq-OborAbcH7nxrkENrP1bNgXS_woaqcq0UlmX8fLX8Bll_6E0XUv24q5lPeehNN6n6L0iBRWXFW8YlbXbWJstUJYnDjdyE_Fe1sES0U1fiwXKS0b2WcbPVv05HRy4fTDEunoFQ4M_XQCeShH8BD6fxwfUjcssKuh_xbBpDFdQ41eTDcvdcGDysneU2QmdBS66FO5_d21u5gLSxGpBhzsWmvSmL4bgE59EFMduAj-GX7DL1wzfl1iVSkXo_UJ6Uav1T-Lb5_9xzZQDV4fO0xHzVMHXxh7AW9eN-4kc725XytUaTVUCnFBgwoQi44mwiut_PoQ%26sai%3DAMfl-YTJev2gYNrG0vqxJQRUHf7XZO9lVbq-V8hQWUzb7mxttKSaTt01nEr2CF0maSBJNc59V09khErfEJTF2w9dZwYOq-GDNWBbH44WxmeoPOw71Em5Cxy8VeZ8mtsJGFt-16G72NHFTvdjbOysht8-q0vcU-t_jqbaquigWZ_Ze8rbUy4vewacSzNRg2qflhBZOdwlH8WkY7Pmsj0zKp5OQpPrRgGfO-fEmKffHzY1VrvklgJKGsWosq0uAqplLdo64GmUQ3wKTz_JZ6JpTGfB9c3KWVIbwT8IIVvD8vPCnfv3GlAO5gake_7B8wJdl2nzfdBjL23OK4Ydio5GPjjA_oirovItfbBAs7kggDm3k0G4TAFbus9NbZIrSofM1BzOWI5kDthJEnjCkhIPKk4jqPhs%26sig%3DCg0ArKJSzHH6ppqMJEbrEAE%26fbs_aeid%3D%255Bgw_fbsaeid%255D%26urlfix%3D1%26adurl%3Dhttps%253A%252F%252Fwww.sap.com%252Fjapan%252Fproducts%252Ferp%252Fgrow.html%253Fpttid%253D7860%2526campaigncode%253Dcrm-yd26-bms-434751%2526source%253Donlinedisplay-jp-toyokeizai-disp-toyokeizai-axtkxxxdxcx01x1220x80xpxt-brand_cerp-axtkxxxdxcx01x1220x80xpxt-x-aam%2526dfa%253D1
+  - link [ref=e740] [cursor=pointer]:
+    - /url: https://gcmtrk.goldspotmedia.com/eng/rd?__cb=QtpffmgJ2NFjQE7n&guid=e069d636-6f9e-4687-b639-67c310e043c6&sys=gcm&cmpn=69f2d44f-45df-45ef-a90d-36f3949bf68f&crtv=3dcdc045-ff87-4719-93fe-dcab720e8208&tag=1465669d-6dee-403b-84de-6b2b34999d15&nck=1&__loc=toyokeizai.net&unit=ad78cd6f-fc1d-4fc7-8b0e-62516988b1d4&ctr=true&name=Click_Header&ru=https%3A%2F%2Fadclick.g.doubleclick.net%2Fpcs%2Fclick%3Fxai%3DAKAOjssjErF1EtRCHAsXQMKUBbIRB2r5ZsUjoHPsOoK7pphlQ0tpNC9lD8YOEd9ChA-BvUmEk2Obb1HxSKI2dMq-OborAbcH7nxrkENrP1bNgXS_woaqcq0UlmX8fLX8Bll_6E0XUv24q5lPeehNN6n6L0iBRWXFW8YlbXbWJstUJYnDjdyE_Fe1sES0U1fiwXKS0b2WcbPVv05HRy4fTDEunoFQ4M_XQCeShH8BD6fxwfUjcssKuh_xbBpDFdQ41eTDcvdcGDysneU2QmdBS66FO5_d21u5gLSxGpBhzsWmvSmL4bgE59EFMduAj-GX7DL1wzfl1iVSkXo_UJ6Uav1T-Lb5_9xzZQDV4fO0xHzVMHXxh7AW9eN-4kc725XytUaTVUCnFBgwoQi44mwiut_PoQ%26sai%3DAMfl-YTJev2gYNrG0vqxJQRUHf7XZO9lVbq-V8hQWUzb7mxttKSaTt01nEr2CF0maSBJNc59V09khErfEJTF2w9dZwYOq-GDNWBbH44WxmeoPOw71Em5Cxy8VeZ8mtsJGFt-16G72NHFTvdjbOysht8-q0vcU-t_jqbaquigWZ_Ze8rbUy4vewacSzNRg2qflhBZOdwlH8WkY7Pmsj0zKp5OQpPrRgGfO-fEmKffHzY1VrvklgJKGsWosq0uAqplLdo64GmUQ3wKTz_JZ6JpTGfB9c3KWVIbwT8IIVvD8vPCnfv3GlAO5gake_7B8wJdl2nzfdBjL23OK4Ydio5GPjjA_oirovItfbBAs7kggDm3k0G4TAFbus9NbZIrSofM1BzOWI5kDthJEnjCkhIPKk4jqPhs%26sig%3DCg0ArKJSzHH6ppqMJEbrEAE%26fbs_aeid%3D%255Bgw_fbsaeid%255D%26urlfix%3D1%26adurl%3Dhttps%253A%252F%252Fwww.sap.com%252Fjapan%252Fproducts%252Ferp%252Fgrow.html%253Fpttid%253D7860%2526campaigncode%253Dcrm-yd26-bms-434751%2526source%253Donlinedisplay-jp-toyokeizai-disp-toyokeizai-axtkxxxdxcx01x1220x80xpxt-brand_cerp-axtkxxxdxcx01x1220x80xpxt-x-aam%2526dfa%253D1

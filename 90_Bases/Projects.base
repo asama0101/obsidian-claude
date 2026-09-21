@@ -1,7 +1,7 @@
 filters:
   and:
-    - 'type == "project"'
-    - 'file.inFolder("10_Projects")'
+    - type == "project"
+    - file.inFolder("10_Projects")
 properties:
   start_date:
     displayName: 開始日
@@ -10,6 +10,13 @@ properties:
 views:
   - type: table
     name: Active
-    filters:
-      '!file.inFolder("40_Archives")'
-    order: [file.name, start_date, due_date]
+    filters: '!file.inFolder("40_Archives")'
+    order:
+      - file.name
+      - start_date
+      - due_date
+    sort:
+      - property: file.name
+        direction: ASC
+    columnSize:
+      file.name: 219

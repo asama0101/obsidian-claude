@@ -1,5 +1,5 @@
 {
   "types": {
-    "status": "multitext"
+    "status": "text"
   }
 }

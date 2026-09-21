@@ -20,6 +20,7 @@ _TEMPLATE_TEXT = (
     "---\n"
     "type: task\n"
     'project: ""\n'
+    'source_meeting: ""\n'
     'start_date: "{{date:YYYY-MM-DD}}"\n'
     'due_date: "{{date:YYYY-MM-DD}}"\n'
     "status: 1_todo\n"
@@ -88,6 +89,29 @@ class TestBuildNoteText(unittest.TestCase):
         fm_text, _ = self._split(note_text)
         self.assertIn('due_date: "2026-10-01"', fm_text)
 
+    def test_source指定時はsource_meetingが設定される(self):
+        note_text = task_save.build_note_text(
+            _TEMPLATE_TEXT,
+            title="資料を送る",
+            project="[[VaultMigration]]",
+            due_date=None,
+            source="[[2026-09-21 定例MTG]]",
+            dt=self.dt,
+        )
+        fm_text, _ = self._split(note_text)
+        self.assertIn('source_meeting: "[[2026-09-21 定例MTG]]"', fm_text)
+
+    def test_source未指定ならsource_meetingは空欄のまま(self):
+        note_text = task_save.build_note_text(
+            _TEMPLATE_TEXT,
+            title="資料を送る",
+            project="[[VaultMigration]]",
+            due_date=None,
+            dt=self.dt,
+        )
+        fm_text, _ = self._split(note_text)
+        self.assertIn('source_meeting: ""', fm_text)
+
     @staticmethod
     def _split(note_text: str) -> tuple[str, str]:
         lines = note_text.split("\n")
@@ -153,6 +177,23 @@ class TestMain(unittest.TestCase):
             content = note_path.read_text(encoding="utf-8")
             self.assertIn('project: "[[VaultMigration]]"', content)
             self.assertIn("status: 1_todo", content)
+
+    def test_sourceを指定するとsource_meetingが書き込まれる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp, project_names=["VaultMigration"])
+            result = self._run(
+                vault_root,
+                "--title",
+                "資料を送る",
+                "--project",
+                "[[VaultMigration]]",
+                "--source",
+                "[[2026-09-21 定例MTG]]",
+            )
+            self.assertEqual(result.returncode, 0)
+            output = json.loads(result.stdout)
+            content = Path(output["note_path"]).read_text(encoding="utf-8")
+            self.assertIn('source_meeting: "[[2026-09-21 定例MTG]]"', content)
 
     def test_存在しないプロジェクトはエラーになる(self):
         with tempfile.TemporaryDirectory() as tmp:

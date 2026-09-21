@@ -198,6 +198,32 @@ class TestMarkerBlock(unittest.TestCase):
         )
 
 
+class TestFindHeadingSection(unittest.TestCase):
+    def test_見出し直後から次の見出し直前までの範囲を返す(self):
+        import re
+
+        text = "## 見出し1\nline1\nline2\n## 見出し2\nline3\n"
+        pattern = re.compile(r"^## 見出し1[ \t]*$", re.MULTILINE)
+        span = vault_lib.find_heading_section(text, pattern)
+        self.assertIsNotNone(span)
+        self.assertEqual(text[span[0] : span[1]], "\nline1\nline2\n")
+
+    def test_見出しが無ければNone(self):
+        import re
+
+        text = "## 別の見出し\nline1\n"
+        pattern = re.compile(r"^## 見出し1[ \t]*$", re.MULTILINE)
+        self.assertIsNone(vault_lib.find_heading_section(text, pattern))
+
+    def test_見出しが文書末尾のセクションなら末尾までを返す(self):
+        import re
+
+        text = "## 見出し1\nline1\nline2"
+        pattern = re.compile(r"^## 見出し1[ \t]*$", re.MULTILINE)
+        span = vault_lib.find_heading_section(text, pattern)
+        self.assertEqual(text[span[0] : span[1]], "\nline1\nline2")
+
+
 class TestListProjectNames(unittest.TestCase):
     def test_複数ディレクトリがある場合ソートされた名前を返す(self):
         with tempfile.TemporaryDirectory() as tmp:

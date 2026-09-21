@@ -1,0 +1,15 @@
+[    1055ms] [WARNING] [GPT] PubAdsService.setTargeting is deprecated, use googletag.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#170 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609180101/pubads_impl.js?cb=122881143:22
+[    1194ms] [WARNING] [GPT] Slot.updateTargetingFromMap is deprecated, use Slot.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#171 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609180101/pubads_impl.js?cb=122881143:22
+[    3280ms] [LOG] NO STICKY @ https://toyokeizai.net/articles/-/624368?page=3:2184
+[    3655ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://cs.lkqd.net/cs?partnerId=59&redirect=https%3A%2F%2Fcm.g.doubleclick.net%2Fpixel%3Fgoogle_nid%3Dlkqd_dbm%26google_hm%3D%24%24rawlkqduserid%7Cbase64%24%24:0
+[    3710ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://cs.lkqd.net/cs?partnerId=59&partnerUserId=CAESEERIznVf6cP83DsOCdLianA&google_cver=1:0
+[    4286ms] [TIMEEND] a: 0.0009765625 ms @ https://static.adsafeprotected.com/sca.17.6.4.js:31
+[    3655ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://cs.lkqd.net/cs?partnerId=59&redirect=https%3A%2F%2Fcm.g.doubleclick.net%2Fpixel%3Fgoogle_nid%3Dlkqd_dbm%26google_hm%3D%24%24rawlkqduserid%7Cbase64%24%24:0
+[    3710ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://cs.lkqd.net/cs?partnerId=59&partnerUserId=CAESEERIznVf6cP83DsOCdLianA&google_cver=1:0
+[    5907ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://match.prod.bidr.io/cookie-sync/richaudience?gdpr=0&gdpr_consent=:0
+[    7072ms] [LOG] Recent pixels found, Skipping... @ https://usync.ingage.tech/?gdpr=&gdpr_consent=&us_privacy=&redirect=https%3A%2F%2Fcookies.nextmillmedia.com%2Fsetuid%3Fbidder%3Dinsticator%26nmuid%3Dbf49cb13-9519-4373-ae78-56e96422a699%26gdpr%3D%26gdpr_consent%3D%26us_privacy%3D%26uid%3D%24UID:0
+[    7222ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://cs.iqzone.com/6f0476ca45e1d6b67e3ee8d57532a022.gif?redir=https%3A%2F%2Fsync.cootlogix.com%2Fapi%2Fcookie%3FpartnerId%3Diqzone%26gdpr%3D%26gdpr_consent%3D%26us_privacy%3D%26userId%3D%5BUID%5D&gdpr=&gdpr_consent=&ccpa=:0
+[    7519ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://cs.admanmedia.com/292deb7c3c2bf25073c04bb900f3a44a.gif??gdpr=&gdpr_consent=&us_privacy=&redir=https%3A%2F%2Fcookies.nextmillmedia.com%2Fsetuid%3Fbidder%3Dadmanmedia%26nmuid%3Dbf49cb13-9519-4373-ae78-56e96422a699%26gdpr%3D%26gdpr_consent%3D%26us_privacy%3D%26uid%3D%5BUID%5D:0
+[    7704ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ https://us4.shb-sync.com/a760a5a7-e35e-49b8-9f5e-723455346741.gif?puid=c4edec06-cfec-d724-9b79-e7deb6c8ef0f&gdpr=&gdpr_consent=ccpa=:0

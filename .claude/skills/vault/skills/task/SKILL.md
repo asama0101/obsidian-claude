@@ -28,8 +28,9 @@ description: |
    （`{"projects": [...]}`）を取得し、その一覧からどのプロジェクトに
    紐づけるか選んでもらう。
 4. 確認が済んだら item ごとに
-   `python scripts/task_save.py --title <item> --project <project> [--due-date YYYY-MM-DD]`
-   を呼び、タスクノートを作成する。
+   `python scripts/task_save.py --title <item> --project <project> [--due-date YYYY-MM-DD] [--source "[[議事録ノート名]]"]`
+   を呼び、タスクノートを作成する。`--source`は議事録経由で呼ばれた
+   場合のみ指定し、省略可。
 
 ### (b) フリーフォーム入力時
 1. Claude自身がユーザー発言からアクションアイテムを抽出する
@@ -53,3 +54,6 @@ description: |
   する。
 - `status` は常に `1_todo` で作成される。
 - `due_date` は指定が無ければ空欄のまま作成される。
+- `--source` に改行や `"` を含めるとエラー
+  （`{"status": "error", "reason": "invalid_source"}`、exit code 1）を
+  返す。

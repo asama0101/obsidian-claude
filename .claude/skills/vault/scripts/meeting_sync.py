@@ -1,25 +1,46 @@
 """Google Calendar（将来的にはMicrosoft 365も）の予定と議事録ノートを同期するスクリプト。
 
 `--events-json <path>` で渡されたJSONファイル（`{"events": [...]}` または
-イベント配列そのもの）を読み込み、各イベントについて:
+イベント配列そのもの。呼び出し元は本日1日分のみを渡す想定）を読み込み、
+各イベントについて:
 
 - 出席者が1人以下（自分のみ）の予定は新規ノートを作らずスキップする
-  （既存ノート対応済みの予定であれば `status: cancelled` を付ける）。
+  （既存ノート対応済みの予定であれば `attendance` を `3_skip` にする。
+  定例は本文へ `(キャンセル)` 注記も追加する）。
 - 単発予定（`recurringEventId` キー無し）は `Meeting_Template.md` を
-  ベースに新規作成、または既存ノートの `date`/`url` を更新する。
+  ベースに新規作成（`attendance: "1_scheduled"` で初期化）、または
+  既存ノートの `date`/`url` を更新する。
 - 定例予定（`recurringEventId` キー有り）は `Meeting_Series_Template.md` の
   `NEW_MEETING_START`/`END` ブロックを `occurrence_id` で判定しながら
-  再同期・新しい回への遷移・新規作成を行う。
+  再同期・新しい回への遷移・新規作成を行う。各occurrenceの
+  `attendance`/`date` はブロック先頭のHTMLコメントに保持し、
+  frontmatterの `attendance` は常に現在有効なoccurrenceの値をミラーする。
+
+同じ呼び出しの中で、既存の全会議ノートも走査する:
+- 単発予定（`type: meeting`）のうち、開催日が今日で、かつ今日のevents
+  一覧に対応する`calendar_event_id`が無いものは、カレンダー側で
+  キャンセルされたとみなし中身を確認せず物理削除する。
+- `attendance` が `1_scheduled` のまま開催日を過ぎたノート（単発・定例
+  とも）は `needs_attendance_check` として報告する。呼び出し元はこれを
+  ユーザーに確認し、`--set-attendance` で結果を反映する。
 
 結果は `{"created": [...], "updated": [...], "skipped_single_attendee": [...],
-"cancelled": [...], "no_project": [...]}` の形でJSONとしてstdoutへ出力する。
+"cancelled": [...], "no_project": [...], "deleted": [...],
+"needs_attendance_check": [...]}` の形でJSONとしてstdoutへ出力する。
 `no_project` は新規作成されたノートのうちprojectが自動推定できなかった
-ものの `{"note_path": ..., "title": ...}` 一覧。
+ものの `{"note_path": ..., "title": ...}` 一覧。`needs_attendance_check`
+も同じ形。
 
-`--set-project <note_path> --project <value>` を渡すと、指定ノートの
-frontmatter `project` 欄を書き換え、新しいproject値が指す
-`10_Projects/<Name>/Meetings/` または `20_Areas/Meetings/` へ
-ノートを移動する別モードで動作する（`--events-json` とは排他）。
+以下は`--events-json`と排他の別モードとして動作する:
+- `--set-project <note_path> --project <value>`: frontmatter `project`
+  欄を書き換え、新しいproject値が指す`10_Projects/<Name>/Meetings/`
+  または`20_Areas/Meetings/`へノートを移動する。
+- `--set-attendance <note_path> --attendance <value>`: frontmatter
+  `attendance`欄（定例は現在有効なoccurrenceブロックのコメントも）を
+  書き換える。
+- `--link-task <note_path> --item-text <text> [--task-note <name>]`:
+  アクションアイテムセクション内の該当チェックボックス行を
+  チェック済みにし、`--task-note`指定時は`[[<name>]]`を追記する。
 """
 
 from __future__ import annotations
@@ -32,10 +53,17 @@ from pathlib import Path
 
 import vault_lib
 
-# 定例予定ノートの occurrence_id コメント（NEW_MEETING_START 直後）を読み取る正規表現
-_OCCURRENCE_ID_RE = re.compile(
-    r'<!-- NEW_MEETING_START -->\s*<!-- occurrence_id: "([^"]*)" -->'
-)
+# 定例予定ノートの occurrenceメタコメント（occurrence_id/attendance/date を
+# 同じ行に持つ）を読み取る正規表現。NEW_MEETING_START マーカーを含む全文
+# （_get_occurrence_meta呼び出し時）にも、マーカーを除去済みのブロック内容
+# （_set_occurrence_meta呼び出し時。get_marker_blockはマーカー行自体を
+# 結果に含めない）にも対応できるよう、マーカー行の有無に依存せず
+# 「occurrence_id: "..." で始まるコメント」自体を直接探す。
+_OCCURRENCE_COMMENT_RE = re.compile(r'<!-- (occurrence_id: "[^"]*"[^>]*?) -->')
+_META_FIELD_RE = re.compile(r'(\w+): "([^"]*)"')
+
+# 本文冒頭の `# タイトル` 見出し行を読み取る正規表現
+_TITLE_RE = re.compile(r"^# (.+)$", re.MULTILINE)
 
 # 定例予定ノート本文の「開催日時」行を組み立てるためのテンプレート断片
 _MEETING_DATETIME_LINE_TEMPLATE = (
@@ -43,6 +71,13 @@ _MEETING_DATETIME_LINE_TEMPLATE = (
 )
 
 _CANCEL_NOTE = "**(キャンセル)**"
+
+# `## ⚡ アクションアイテム` または `### ⚡ アクションアイテム（今回）` の見出し行
+# (task_extract.pyと同一パターン。スクリプト間でimportし合わない既存規約のため
+# 個別定義とする)
+_ACTION_ITEM_HEADING_PATTERN = re.compile(
+    r"^#{2,3} ⚡ アクションアイテム(?:（今回）)?[ \t]*$", re.MULTILINE
+)
 
 
 # ---------------------------------------------------------------------------
@@ -153,6 +188,7 @@ def _create_single_note(event: dict, vault_root: Path) -> tuple[Path, str | None
     fm_text = vault_lib.set_fm_value(fm_text, "calendar_event_id", event["id"])
     fm_text = vault_lib.set_fm_value(fm_text, "date", start_dt.strftime("%Y-%m-%d"))
     fm_text = vault_lib.set_fm_value(fm_text, "url", event.get("hangoutLink", ""))
+    fm_text = vault_lib.set_fm_value(fm_text, "attendance", "1_scheduled")
 
     dest_dir = _resolve_dest_dir(vault_root, project_match)
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -184,7 +220,7 @@ def _process_single_event(
     path, _text, fm_text, body_text = existing
 
     if low_attendance:
-        fm_text = vault_lib.set_fm_value(fm_text, "status", "cancelled")
+        fm_text = vault_lib.set_fm_value(fm_text, "attendance", "3_skip")
         _save_note(path, fm_text, body_text)
         result["cancelled"].append(str(path))
         return
@@ -205,9 +241,44 @@ def _process_single_event(
 # ---------------------------------------------------------------------------
 # 定例予定
 # ---------------------------------------------------------------------------
+def _get_occurrence_meta(text: str) -> dict[str, str]:
+    """NEW_MEETING_START直後のコメント行からoccurrence_id/attendance/dateを辞書で返す。"""
+    m = _OCCURRENCE_COMMENT_RE.search(text)
+    if not m:
+        return {}
+    return dict(_META_FIELD_RE.findall(m.group(1)))
+
+
+# _set_occurrence_metaが再構築時に補うフィールド既定値。
+# occurrence_id/dateは情報が無ければ空欄のままでよいが、attendanceは
+# 移行前フォーマット(occurrence_idコメントのみ、属性なし)の既存ノートを
+# 書き換えた際に空文字へ壊れると、attendance=="1_scheduled"判定に
+# 一致しなくなりneeds_attendance_checkが永久に検出不能になるため、
+# 未設定時は「未確認」を意味する1_scheduledへ補う。
+_OCCURRENCE_META_DEFAULTS = {"occurrence_id": "", "attendance": "1_scheduled", "date": ""}
+
+
+def _set_occurrence_meta(text: str, **fields: str) -> str:
+    """occurrenceメタコメントのfieldsを更新し、occurrence_id/attendance/dateの順で再構築する。"""
+    m = _OCCURRENCE_COMMENT_RE.search(text)
+    if not m:
+        return text
+    current = dict(_META_FIELD_RE.findall(m.group(1)))
+    current.update(fields)
+    new_inner = " ".join(
+        f'{key}: "{current.get(key) or _OCCURRENCE_META_DEFAULTS[key]}"'
+        for key in ("occurrence_id", "attendance", "date")
+    )
+    return text[: m.start(1)] + new_inner + text[m.end(1) :]
+
+
 def _get_occurrence_id(text: str) -> str | None:
-    m = _OCCURRENCE_ID_RE.search(text)
-    return m.group(1) if m else None
+    return _get_occurrence_meta(text).get("occurrence_id") or None
+
+
+def _get_note_title(body_text: str) -> str:
+    m = _TITLE_RE.search(body_text)
+    return m.group(1) if m else ""
 
 
 def _replace_body_line(inner: str, label: str, new_value: str) -> str:
@@ -219,6 +290,26 @@ def _replace_body_line(inner: str, label: str, new_value: str) -> str:
     pattern = re.compile(rf"(^- \*\*{re.escape(label)}:\*\*) ?.*$", re.MULTILINE)
     suffix = f" {new_value}" if new_value else ""
     return pattern.sub(lambda m: m.group(1) + suffix, inner, count=1)
+
+
+def _check_action_item(scope_text: str, item_text: str, task_note: str | None) -> str | None:
+    """アクションアイテムセクション内の該当チェックボックス行をチェック済みにし、
+    task_note指定時は[[リンク]]を追記する。該当行が無ければNoneを返す。
+    """
+    span = vault_lib.find_heading_section(scope_text, _ACTION_ITEM_HEADING_PATTERN)
+    if span is None:
+        return None
+    section_text = scope_text[span[0] : span[1]]
+
+    pattern = re.compile(rf"^- \[ \] ?{re.escape(item_text)}$", re.MULTILINE)
+    suffix = f" [[{task_note}]]" if task_note else ""
+    new_section_text, count = pattern.subn(
+        lambda m: f"- [x] {item_text}{suffix}", section_text, count=1
+    )
+    if count == 0:
+        return None
+
+    return scope_text[: span[0]] + new_section_text + scope_text[span[1] :]
 
 
 def _annotate_cancelled(inner: str) -> str:
@@ -241,6 +332,7 @@ def _resync_occurrence_block(
     inner = _replace_body_line(inner, "開催日時", dt_value)
     inner = _replace_body_line(inner, "開催場所", event.get("location", ""))
     inner = _replace_body_line(inner, "所要時間", _format_duration(start_dt, end_dt))
+    inner = _set_occurrence_meta(inner, date=start_dt.strftime("%Y-%m-%d"))
     return inner
 
 
@@ -259,6 +351,7 @@ def _fresh_occurrence_block(
     inner = _replace_body_line(
         inner, "参加者", _format_attendees(event.get("attendees", []))
     )
+    inner = _set_occurrence_meta(inner, date=start_dt.strftime("%Y-%m-%d"))
     return inner
 
 
@@ -286,6 +379,7 @@ def _create_series_note(event: dict, vault_root: Path, today: str) -> tuple[Path
     body_text = _replace_body_line(
         body_text, "参加者", _format_attendees(event.get("attendees", []))
     )
+    body_text = _set_occurrence_meta(body_text, date=start_dt.strftime("%Y-%m-%d"))
 
     project_match = vault_lib.fuzzy_project_match(
         summary + description, vault_root / "10_Projects"
@@ -332,6 +426,7 @@ def _process_series_event(
         new_inner = _resync_occurrence_block(text, event, start_dt, end_dt)
         if low_attendance:
             new_inner = _annotate_cancelled(new_inner)
+            new_inner = _set_occurrence_meta(new_inner, attendance="3_skip")
         new_text = vault_lib.set_marker_block(
             text, "NEW_MEETING_START", "NEW_MEETING_END", new_inner
         )
@@ -344,6 +439,7 @@ def _process_series_event(
         new_inner = _fresh_occurrence_block(vault_root, event, start_dt)
         if low_attendance:
             new_inner = _annotate_cancelled(new_inner)
+            new_inner = _set_occurrence_meta(new_inner, attendance="3_skip")
         new_text = vault_lib.set_marker_block(
             archived_text, "NEW_MEETING_START", "NEW_MEETING_END", new_inner
         )
@@ -352,8 +448,61 @@ def _process_series_event(
     fm_text, body_text = vault_lib.split_frontmatter(new_text)
     fm_text = vault_lib.set_fm_value(fm_text, "last_updated", today)
     fm_text = vault_lib.set_fm_value(fm_text, "url", event.get("hangoutLink", ""))
+    current_meta = _get_occurrence_meta(body_text)
+    fm_text = vault_lib.set_fm_value(
+        fm_text, "attendance", current_meta.get("attendance", "1_scheduled")
+    )
     _save_note(path, fm_text, body_text)
     result[result_bucket].append(str(path))
+
+
+# ---------------------------------------------------------------------------
+# 削除・開催確認スキャン
+# ---------------------------------------------------------------------------
+def _scan_stale_and_pending(
+    vault_root: Path, seen_event_ids: set[str], today: str
+) -> tuple[list[str], list[dict]]:
+    """全会議ノートを1回走査し、(削除対象パス一覧, needs_attendance_check一覧) を返す。
+
+    削除は単発予定(type: meeting)のみ対象。開催日(date)が今日で、かつ今日の
+    events一覧に対応するcalendar_event_idが無いノートに限定する(先読み廃止に
+    より、開催日が過去のノートは二度と今日のevents一覧に現れないため、そちら
+    を削除条件に含めると開催確認前に消えてしまう)。
+    """
+    to_delete: list[str] = []
+    needs_check: list[dict] = []
+
+    for path in _iter_meeting_notes(vault_root):
+        text = path.read_text(encoding="utf-8")
+        fm_text, body_text = vault_lib.split_frontmatter(text)
+        note_type = vault_lib.get_fm_value(fm_text, "type")
+
+        if note_type == "meeting":
+            event_id = vault_lib.get_fm_value(fm_text, "calendar_event_id")
+            attendance = vault_lib.get_fm_value(fm_text, "attendance")
+            date = vault_lib.get_fm_value(fm_text, "date")
+
+            if date == today and event_id and event_id not in seen_event_ids:
+                to_delete.append(str(path))
+                continue
+
+            if attendance == "1_scheduled" and date and date < today:
+                needs_check.append(
+                    {"note_path": str(path), "title": _get_note_title(body_text)}
+                )
+
+        elif note_type == "meeting_series":
+            meta = _get_occurrence_meta(body_text)
+            if (
+                meta.get("attendance") == "1_scheduled"
+                and meta.get("date")
+                and meta["date"] < today
+            ):
+                needs_check.append(
+                    {"note_path": str(path), "title": _get_note_title(body_text)}
+                )
+
+    return to_delete, needs_check
 
 
 # ---------------------------------------------------------------------------
@@ -368,9 +517,13 @@ def sync_events(events: list[dict], vault_root: Path) -> dict:
         "skipped_single_attendee": [],
         "cancelled": [],
         "no_project": [],
+        "deleted": [],
+        "needs_attendance_check": [],
     }
 
+    seen_event_ids: set[str] = set()
     for event in events:
+        seen_event_ids.add(event["id"])
         attendees = event.get("attendees", [])
         low_attendance = len(attendees) <= 1
 
@@ -378,6 +531,19 @@ def sync_events(events: list[dict], vault_root: Path) -> dict:
             _process_single_event(event, vault_root, low_attendance, result)
         else:
             _process_series_event(event, vault_root, low_attendance, today, result)
+
+    to_delete, needs_check = _scan_stale_and_pending(vault_root, seen_event_ids, today)
+    deleted: list[str] = []
+    for path_str in to_delete:
+        try:
+            Path(path_str).unlink()
+        except OSError:
+            # ファイルがロックされている等で削除できない場合はスキップし、
+            # 他の正常な同期結果を道連れにしない。次回同期時に再試行される。
+            continue
+        deleted.append(path_str)
+    result["deleted"] = deleted
+    result["needs_attendance_check"] = needs_check
 
     return result
 
@@ -388,6 +554,112 @@ def _load_events(path: Path) -> list[dict]:
     if isinstance(data, list):
         return data
     return data.get("events", [])
+
+
+def _cmd_set_project(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    if args.project is None:
+        parser.error("--set-project には --project の指定が必要です")
+    vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
+    note_path = Path(args.set_project)
+
+    project_match = args.project if args.project not in (None, "", '""') else None
+    if project_match:
+        project_name = _extract_project_name(project_match)
+        if not (vault_root / "10_Projects" / project_name).is_dir():
+            print(
+                json.dumps(
+                    {"status": "error", "reason": "project_not_found"}, ensure_ascii=False
+                )
+            )
+            return 1
+
+    text = note_path.read_text(encoding="utf-8")
+    fm_text, body_text = vault_lib.split_frontmatter(text)
+    fm_text = _set_fm_raw(fm_text, "project", args.project)
+
+    dest_dir = _resolve_dest_dir(vault_root, project_match)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    if note_path.resolve().parent == dest_dir.resolve():
+        dest_path = note_path
+    else:
+        dest_path = vault_lib.unique_path(dest_dir, note_path.name)
+
+    if dest_path != note_path:
+        _save_note(dest_path, fm_text, body_text)
+        note_path.unlink()
+    else:
+        _save_note(note_path, fm_text, body_text)
+
+    print(json.dumps({"status": "ok", "note_path": str(dest_path)}, ensure_ascii=False))
+    return 0
+
+
+def _cmd_set_attendance(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    if args.attendance is None:
+        parser.error("--set-attendance には --attendance の指定が必要です")
+    note_path = Path(args.set_attendance)
+    if not note_path.is_file():
+        print(json.dumps({"status": "error", "reason": "note_not_found"}, ensure_ascii=False))
+        return 1
+
+    text = note_path.read_text(encoding="utf-8")
+    fm_text, body_text = vault_lib.split_frontmatter(text)
+    note_type = vault_lib.get_fm_value(fm_text, "type")
+
+    fm_text = vault_lib.set_fm_value(fm_text, "attendance", args.attendance)
+    if note_type == "meeting_series":
+        body_text = _set_occurrence_meta(body_text, attendance=args.attendance)
+
+    _save_note(note_path, fm_text, body_text)
+    print(json.dumps({"status": "ok", "note_path": str(note_path)}, ensure_ascii=False))
+    return 0
+
+
+def _cmd_link_task(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
+    if args.item_text is None:
+        parser.error("--link-task には --item-text の指定が必要です")
+    if args.task_note and ("]]" in args.task_note or "\n" in args.task_note):
+        parser.error("--task-note に ']]' や改行を含めることはできません")
+    note_path = Path(args.link_task)
+    if not note_path.is_file():
+        print(json.dumps({"status": "error", "reason": "note_not_found"}, ensure_ascii=False))
+        return 1
+
+    text = note_path.read_text(encoding="utf-8")
+    fm_text, body_text = vault_lib.split_frontmatter(text)
+    note_type = vault_lib.get_fm_value(fm_text, "type")
+
+    if note_type == "meeting_series":
+        scope_text = vault_lib.get_marker_block(
+            body_text, "NEW_MEETING_START", "NEW_MEETING_END"
+        )
+    else:
+        scope_text = body_text
+
+    new_scope_text = _check_action_item(scope_text, args.item_text, args.task_note)
+    if new_scope_text is None:
+        print(json.dumps({"status": "error", "reason": "item_not_found"}, ensure_ascii=False))
+        return 1
+
+    if note_type == "meeting_series":
+        body_text = vault_lib.set_marker_block(
+            body_text, "NEW_MEETING_START", "NEW_MEETING_END", new_scope_text
+        )
+    else:
+        body_text = new_scope_text
+
+    _save_note(note_path, fm_text, body_text)
+    print(json.dumps({"status": "ok", "note_path": str(note_path)}, ensure_ascii=False))
+    return 0
+
+
+def _cmd_sync(args: argparse.Namespace) -> int:
+    vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
+    events = _load_events(Path(args.events_json))
+    result = sync_events(events, vault_root)
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -401,10 +673,33 @@ def main(argv: list[str] | None = None) -> int:
     mode_group.add_argument(
         "--set-project", help="project欄のみを書き換える対象ノートのパス"
     )
+    mode_group.add_argument(
+        "--set-attendance", help="attendance欄のみを書き換える対象ノートのパス"
+    )
+    mode_group.add_argument(
+        "--link-task",
+        help="アクションアイテムをチェック済みにし任意でタスクノートへリンクする対象ノートのパス",
+    )
     parser.add_argument(
         "--project",
         default=None,
         help="--set-project使用時に設定するproject欄の値（例: '\"[[Name]]\"' や '\"\"'）",
+    )
+    parser.add_argument(
+        "--attendance",
+        default=None,
+        choices=["1_scheduled", "2_done", "3_skip"],
+        help="--set-attendance使用時に設定するattendanceの値",
+    )
+    parser.add_argument(
+        "--item-text",
+        default=None,
+        help="--link-task使用時、チェックする元のアクションアイテム本文（完全一致）",
+    )
+    parser.add_argument(
+        "--task-note",
+        default=None,
+        help="--link-task使用時、リンクするタスクノート名（省略時はチェックのみ）",
     )
     parser.add_argument(
         "--vault-root", default=None, help="Vaultルート（省略時はvault_lib.VAULT_ROOT）"
@@ -412,49 +707,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.set_project:
-        if args.project is None:
-            parser.error("--set-project には --project の指定が必要です")
-        vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
-        note_path = Path(args.set_project)
-
-        project_match = args.project if args.project not in (None, "", '""') else None
-        if project_match:
-            project_name = _extract_project_name(project_match)
-            if not (vault_root / "10_Projects" / project_name).is_dir():
-                print(
-                    json.dumps(
-                        {"status": "error", "reason": "project_not_found"},
-                        ensure_ascii=False,
-                    )
-                )
-                return 1
-
-        text = note_path.read_text(encoding="utf-8")
-        fm_text, body_text = vault_lib.split_frontmatter(text)
-        fm_text = _set_fm_raw(fm_text, "project", args.project)
-
-        dest_dir = _resolve_dest_dir(vault_root, project_match)
-        dest_dir.mkdir(parents=True, exist_ok=True)
-
-        if note_path.resolve().parent == dest_dir.resolve():
-            dest_path = note_path
-        else:
-            dest_path = vault_lib.unique_path(dest_dir, note_path.name)
-
-        if dest_path != note_path:
-            _save_note(dest_path, fm_text, body_text)
-            note_path.unlink()
-        else:
-            _save_note(note_path, fm_text, body_text)
-
-        print(json.dumps({"status": "ok", "note_path": str(dest_path)}, ensure_ascii=False))
-        return 0
-
-    vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
-    events = _load_events(Path(args.events_json))
-    result = sync_events(events, vault_root)
-    print(json.dumps(result, ensure_ascii=False))
-    return 0
+        return _cmd_set_project(args, parser)
+    if args.set_attendance:
+        return _cmd_set_attendance(args, parser)
+    if args.link_task:
+        return _cmd_link_task(args, parser)
+    return _cmd_sync(args)
 
 
 if __name__ == "__main__":

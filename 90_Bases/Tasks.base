@@ -17,8 +17,8 @@ views:
       and:
         - start_date
         - start_date <= today()
-        - "!status.contains(\"4_done\")"
-        - "!status.contains(\"5_cancel\")"
+        - status != "4_done"
+        - status != "5_cancel"
     groupBy:
       property: status
       direction: ASC
@@ -30,6 +30,8 @@ views:
       - due_date
       - memo
     sort:
+      - property: status
+        direction: ASC
       - property: project
         direction: ASC
   - type: table
@@ -37,21 +39,32 @@ views:
     filters:
       and:
         - project == link(this.file.name)
-        - "!status.contains(\"4_done\")"
-        - "!status.contains(\"5_cancel\")"
+        - status != "4_done"
+        - status != "5_cancel"
+    groupBy:
+      property: status
+      direction: ASC
     order:
       - file.name
       - status
       - start_date
       - due_date
       - memo
+    sort:
+      - property: due_date
+        direction: ASC
+    columnSize:
+      file.name: 150
   - type: table
     name: ProjectCompletedTasks
     filters:
       and:
         - project == link(this.file.name)
-        - status.contains("4_done")
+        - status == "4_done"
     order:
       - file.name
+      - status
       - due_date
       - memo
+    columnSize:
+      file.name: 144

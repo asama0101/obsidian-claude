@@ -1,0 +1,6 @@
+[    1109ms] [WARNING] [GPT] PubAdsService.setTargeting is deprecated, use googletag.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#170 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609180101/pubads_impl.js?cb=122881143:22
+[    2646ms] [WARNING] [GPT] Slot.updateTargetingFromMap is deprecated, use Slot.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#171 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609180101/pubads_impl.js?cb=122881143:22
+[    3381ms] [LOG] NO STICKY @ https://toyokeizai.net/articles/-/624368?page=2:2186
+[    4350ms] [TIMEEND] a: 0.00390625 ms @ https://static.adsafeprotected.com/sca.17.6.4.js:31

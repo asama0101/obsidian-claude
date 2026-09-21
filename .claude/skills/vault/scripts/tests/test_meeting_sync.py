@@ -185,7 +185,8 @@ class TestSingleMeetingCancel(unittest.TestCase):
             fm, _body = vault_lib.split_frontmatter(
                 note_path.read_text(encoding="utf-8")
             )
-            self.assertEqual(vault_lib.get_fm_value(fm, "status"), "cancelled")
+            self.assertIsNone(vault_lib.get_fm_value(fm, "status"))
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "3_skip")
 
 
 class TestSeriesCreate(unittest.TestCase):
@@ -206,7 +207,7 @@ class TestSeriesCreate(unittest.TestCase):
                 vault_lib.get_fm_value(fm, "last_updated"),
                 datetime.date.today().isoformat(),
             )
-            self.assertIn('<!-- occurrence_id: "occA" -->', body)
+            self.assertIn('occurrence_id: "occA"', body)
             self.assertIn("<!-- NEW_MEETING_START -->", body)
             self.assertIn("<!-- NEW_MEETING_END -->", body)
 
@@ -241,7 +242,7 @@ class TestSeriesResync(unittest.TestCase):
             updated_text = note_path.read_text(encoding="utf-8")
 
             # occurrence_id は変わらず、丸ごと置き換えられていない(手書き内容が残る)
-            self.assertIn('<!-- occurrence_id: "occA" -->', updated_text)
+            self.assertIn('occurrence_id: "occA"', updated_text)
             self.assertIn("進捗確認完了", updated_text)
             self.assertIn("会議室B", updated_text)
             self.assertIn("15:00", updated_text)
@@ -652,6 +653,618 @@ class TestSetProjectMode(unittest.TestCase):
             self.assertTrue(existing_path.exists())
             self.assertIn("body-B", existing_path.read_text(encoding="utf-8"))
             self.assertIn("body-A", moved_path.read_text(encoding="utf-8"))
+
+
+class TestAttendanceInit(unittest.TestCase):
+    def test_単発新規作成でattendanceがscheduledになる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            fm, _body = vault_lib.split_frontmatter(
+                note_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "1_scheduled")
+
+    def test_定例新規作成でfrontmatterとコメント両方にattendanceとdateが入る(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            fm, body = vault_lib.split_frontmatter(text)
+
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "1_scheduled")
+            self.assertIn('attendance: "1_scheduled"', body)
+            self.assertIn('date: "2026-09-21"', body)
+
+
+class TestSeriesResyncDate(unittest.TestCase):
+    def test_同一occurrenceの日付またぎリスケジュールでコメント内dateが更新される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+
+            event2 = make_event(
+                id="occA",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                start={"dateTime": "2026-09-22T13:00:00+09:00"},
+                end={"dateTime": "2026-09-22T14:00:00+09:00"},
+            )
+            meeting_sync.sync_events([event2], vault_root)
+
+            updated_text = note_path.read_text(encoding="utf-8")
+            self.assertIn('date: "2026-09-22"', updated_text)
+            self.assertNotIn('date: "2026-09-21"', updated_text)
+
+
+class TestSeriesCancelAttendance(unittest.TestCase):
+    def test_定例で出席者1人以下ならattendanceがskipになる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+
+            event2 = make_event(
+                id="occA",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                attendees=[{"email": "a@example.com"}],
+            )
+            meeting_sync.sync_events([event2], vault_root)
+
+            text = note_path.read_text(encoding="utf-8")
+            fm, body = vault_lib.split_frontmatter(text)
+            self.assertIn("(キャンセル)", body)
+            self.assertIn('attendance: "3_skip"', body)
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "3_skip")
+
+
+class TestSeriesTransitionAttendance(unittest.TestCase):
+    def test_次回遷移で新ブロックはscheduledにリセットされ旧ブロックの値は退避される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+
+            # occAの回を「実施済み」に確定した想定
+            meeting_sync.main(
+                [
+                    "--set-attendance",
+                    str(note_path),
+                    "--attendance",
+                    "2_done",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            event2 = make_event(
+                id="occB",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                start={"dateTime": "2026-09-28T13:00:00+09:00"},
+                end={"dateTime": "2026-09-28T14:00:00+09:00"},
+            )
+            meeting_sync.sync_events([event2], vault_root)
+
+            final_text = note_path.read_text(encoding="utf-8")
+            start_idx = final_text.find("<!-- NEW_MEETING_START -->")
+            end_idx = final_text.find("<!-- NEW_MEETING_END -->")
+            current_block = final_text[start_idx:end_idx]
+            archive_area = final_text[end_idx:]
+
+            self.assertIn('attendance: "1_scheduled"', current_block)
+            self.assertIn('date: "2026-09-28"', current_block)
+            self.assertIn('attendance: "2_done"', archive_area)
+
+            fm, _body = vault_lib.split_frontmatter(final_text)
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "1_scheduled")
+
+
+class TestLegacyOccurrenceFormatMigration(unittest.TestCase):
+    def test_旧書式コメントのノートを再同期してもattendanceが空文字に壊れない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+
+            # 移行前フォーマット(occurrence_idのみ、attendance/date無し)を再現する
+            text = note_path.read_text(encoding="utf-8")
+            text = text.replace(
+                '<!-- occurrence_id: "occA" attendance: "1_scheduled" date: "2026-09-21" -->',
+                '<!-- occurrence_id: "occA" -->',
+            )
+            note_path.write_text(text, encoding="utf-8")
+
+            event2 = make_event(
+                id="occA",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                start={"dateTime": "2026-09-22T13:00:00+09:00"},
+                end={"dateTime": "2026-09-22T14:00:00+09:00"},
+            )
+            meeting_sync.sync_events([event2], vault_root)
+
+            updated_text = note_path.read_text(encoding="utf-8")
+            fm, _body = vault_lib.split_frontmatter(updated_text)
+            self.assertIn('attendance: "1_scheduled"', updated_text)
+            self.assertNotIn('attendance: ""', updated_text)
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "1_scheduled")
+
+
+class TestDeletion(unittest.TestCase):
+    def _set_date(self, note_path: Path, date: str) -> None:
+        text = note_path.read_text(encoding="utf-8")
+        fm, body = vault_lib.split_frontmatter(text)
+        fm = vault_lib.set_fm_value(fm, "date", date)
+        note_path.write_text(f"---\n{fm}\n---\n{body}", encoding="utf-8")
+
+    def test_今日開催予定でイベントが消えたら物理削除される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self.assertTrue(note_path.exists())
+            # make_eventの開催日は固定値のため、テスト実行日に合わせる
+            # (実行日をまたぐとdate==today判定がずれてテストが偽装的に
+            # 失敗/成功するのを防ぐ)
+            self._set_date(note_path, datetime.date.today().isoformat())
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertFalse(note_path.exists())
+            self.assertEqual(result2["deleted"], [str(note_path)])
+
+    def test_開催日が過去のノートはイベントが消えていても削除されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+
+            # 開催日を過去日付に書き換える(先読み廃止後は当日ノートしか作られないため
+            # 過去日ノートを人工的に作って検証する)
+            text = note_path.read_text(encoding="utf-8")
+            fm, body = vault_lib.split_frontmatter(text)
+            fm = vault_lib.set_fm_value(fm, "date", "2020-01-01")
+            note_path.write_text(f"---\n{fm}\n---\n{body}", encoding="utf-8")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertTrue(note_path.exists())
+            self.assertEqual(result2["deleted"], [])
+
+    def test_定例ノートはイベントが消えても削除されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertTrue(note_path.exists())
+            self.assertEqual(result2["deleted"], [])
+
+    def test_今日のevents一覧に対応するイベントがあれば削除されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+
+            result2 = meeting_sync.sync_events([event], vault_root)
+
+            self.assertTrue(note_path.exists())
+            self.assertEqual(result2["deleted"], [])
+
+
+class TestNeedsAttendanceCheck(unittest.TestCase):
+    def _set_date(self, note_path: Path, date: str) -> None:
+        text = note_path.read_text(encoding="utf-8")
+        fm, body = vault_lib.split_frontmatter(text)
+        fm = vault_lib.set_fm_value(fm, "date", date)
+        note_path.write_text(f"---\n{fm}\n---\n{body}", encoding="utf-8")
+
+    def test_単発で開催日が過去かつscheduledのままなら検出される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_date(note_path, "2020-01-01")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(
+                result2["needs_attendance_check"],
+                [{"note_path": str(note_path), "title": "定例1on1"}],
+            )
+
+    def test_単発で開催日が今日なら検出されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            # make_eventの開催日は固定値のため、開催日が実行日(今日)になる
+            # よう明示的に指定する。
+            today = datetime.date.today()
+            start_dt = datetime.datetime.combine(today, datetime.time(13, 0))
+            end_dt = datetime.datetime.combine(today, datetime.time(14, 0))
+            event = make_event(
+                id="evt1",
+                summary="定例1on1",
+                start={"dateTime": start_dt.isoformat()},
+                end={"dateTime": end_dt.isoformat()},
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+
+            result2 = meeting_sync.sync_events([event], vault_root)
+
+            self.assertEqual(result2["needs_attendance_check"], [])
+
+    def test_単発でattendanceが確定済みなら開催日が過去でも検出されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            self._set_date(note_path, "2020-01-01")
+            meeting_sync.main(
+                [
+                    "--set-attendance",
+                    str(note_path),
+                    "--attendance",
+                    "2_done",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(result2["needs_attendance_check"], [])
+
+    def test_定例で現在occurrenceの開催日が過去かつscheduledのままなら検出される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            text = text.replace('date: "2026-09-21"', 'date: "2020-01-01"')
+            note_path.write_text(text, encoding="utf-8")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(
+                result2["needs_attendance_check"],
+                [{"note_path": str(note_path), "title": "週次定例"}],
+            )
+
+    def test_定例でattendanceが確定済みなら開催日が過去でも検出されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(
+                id="occA", summary="週次定例", recurringEventId="seriesX"
+            )
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            meeting_sync.main(
+                [
+                    "--set-attendance",
+                    str(note_path),
+                    "--attendance",
+                    "2_done",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+            text = note_path.read_text(encoding="utf-8")
+            text = text.replace('date: "2026-09-21"', 'date: "2020-01-01"')
+            note_path.write_text(text, encoding="utf-8")
+
+            result2 = meeting_sync.sync_events([], vault_root)
+
+            self.assertEqual(result2["needs_attendance_check"], [])
+
+
+class TestSetAttendanceMode(unittest.TestCase):
+    def test_単発ノートのattendanceが書き換わる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+
+            exit_code = meeting_sync.main(
+                [
+                    "--set-attendance",
+                    str(note_path),
+                    "--attendance",
+                    "3_skip",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            fm, _body = vault_lib.split_frontmatter(
+                note_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "3_skip")
+
+    def test_定例ノートはfrontmatterと現在ブロック両方が書き換わりアーカイブは変わらない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+
+            event2 = make_event(
+                id="occB",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                start={"dateTime": "2026-09-28T13:00:00+09:00"},
+                end={"dateTime": "2026-09-28T14:00:00+09:00"},
+            )
+            meeting_sync.sync_events([event2], vault_root)
+
+            exit_code = meeting_sync.main(
+                [
+                    "--set-attendance",
+                    str(note_path),
+                    "--attendance",
+                    "2_done",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            final_text = note_path.read_text(encoding="utf-8")
+            fm, _body = vault_lib.split_frontmatter(final_text)
+            self.assertEqual(vault_lib.get_fm_value(fm, "attendance"), "2_done")
+
+            start_idx = final_text.find("<!-- NEW_MEETING_START -->")
+            end_idx = final_text.find("<!-- NEW_MEETING_END -->")
+            current_block = final_text[start_idx:end_idx]
+            archive_area = final_text[end_idx:]
+            self.assertIn('attendance: "2_done"', current_block)
+            # アーカイブされた旧occurrence(occA)のattendanceは
+            # 1_scheduledのまま上書きされていない
+            self.assertIn('occurrence_id: "occA" attendance: "1_scheduled"', archive_area)
+            self.assertNotIn('occurrence_id: "occA" attendance: "2_done"', archive_area)
+
+    def test_存在しないノートを指定するとエラーになる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            missing_path = vault_root / "20_Areas" / "Meetings" / "no-such.md"
+
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = meeting_sync.main(
+                    [
+                        "--set-attendance",
+                        str(missing_path),
+                        "--attendance",
+                        "2_done",
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(
+                json.loads(stdout.getvalue()),
+                {"status": "error", "reason": "note_not_found"},
+            )
+
+    def test_不正なattendance値はargparseレベルで拒否される(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            note_path = vault_root / "dummy.md"
+            note_path.write_text("---\ntype: meeting\n---\nbody", encoding="utf-8")
+
+            with self.assertRaises(SystemExit):
+                meeting_sync.main(
+                    [
+                        "--set-attendance",
+                        str(note_path),
+                        "--attendance",
+                        "invalid_value",
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+
+
+class TestLinkTaskMode(unittest.TestCase):
+    def test_単発ノートでチェックしリンクを追記する(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            text = text.replace(
+                "## ⚡ アクションアイテム\n- [ ] ",
+                "## ⚡ アクションアイテム\n- [ ] 資料を送る",
+            )
+            note_path.write_text(text, encoding="utf-8")
+
+            exit_code = meeting_sync.main(
+                [
+                    "--link-task",
+                    str(note_path),
+                    "--item-text",
+                    "資料を送る",
+                    "--task-note",
+                    "資料を送る",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            self.assertEqual(exit_code, 0)
+            updated = note_path.read_text(encoding="utf-8")
+            self.assertIn("- [x] 資料を送る [[資料を送る]]", updated)
+
+    def test_task_note省略時はチェックのみでリンクは付かない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            text = text.replace(
+                "## ⚡ アクションアイテム\n- [ ] ",
+                "## ⚡ アクションアイテム\n- [ ] 不要な項目",
+            )
+            note_path.write_text(text, encoding="utf-8")
+
+            meeting_sync.main(
+                [
+                    "--link-task",
+                    str(note_path),
+                    "--item-text",
+                    "不要な項目",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            updated = note_path.read_text(encoding="utf-8")
+            self.assertIn("- [x] 不要な項目\n", updated)
+            self.assertNotIn("[[", updated)
+
+    def test_該当行が無ければエラーでファイルは変更されない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            before_text = note_path.read_text(encoding="utf-8")
+
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = meeting_sync.main(
+                    [
+                        "--link-task",
+                        str(note_path),
+                        "--item-text",
+                        "存在しない項目",
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 1)
+            self.assertEqual(
+                json.loads(stdout.getvalue()),
+                {"status": "error", "reason": "item_not_found"},
+            )
+            self.assertEqual(note_path.read_text(encoding="utf-8"), before_text)
+
+    def test_アクションアイテムセクション外の同一文言は誤爆しない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event = make_event(id="evt1", summary="定例1on1")
+            result1 = meeting_sync.sync_events([event], vault_root)
+            note_path = Path(result1["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            # 決定事項セクションにアクションアイテムと同一文言の行を仕込む
+            text = text.replace(
+                "## 📝 決定事項\n- ", "## 📝 決定事項\n- [ ] 資料を送る"
+            )
+            text = text.replace(
+                "## ⚡ アクションアイテム\n- [ ] ",
+                "## ⚡ アクションアイテム\n- [ ] 資料を送る",
+            )
+            note_path.write_text(text, encoding="utf-8")
+
+            meeting_sync.main(
+                [
+                    "--link-task",
+                    str(note_path),
+                    "--item-text",
+                    "資料を送る",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            updated = note_path.read_text(encoding="utf-8")
+            self.assertIn("## ⚡ アクションアイテム\n- [x] 資料を送る", updated)
+            # 決定事項セクション側の同一文言はチェックされない
+            self.assertIn("## 📝 決定事項\n- [ ] 資料を送る", updated)
+
+    def test_定例ノートは現在ブロックのみ置換されアーカイブ領域は変わらない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = make_vault(Path(tmp))
+            event1 = make_event(id="occA", summary="週次定例", recurringEventId="seriesX")
+            result1 = meeting_sync.sync_events([event1], vault_root)
+            note_path = Path(result1["created"][0])
+            text = note_path.read_text(encoding="utf-8")
+            text = text.replace(
+                "### ⚡ アクションアイテム（今回）\n- [ ] ",
+                "### ⚡ アクションアイテム（今回）\n- [ ] 共通の文言",
+            )
+            note_path.write_text(text, encoding="utf-8")
+
+            event2 = make_event(
+                id="occB",
+                summary="週次定例",
+                recurringEventId="seriesX",
+                start={"dateTime": "2026-09-28T13:00:00+09:00"},
+                end={"dateTime": "2026-09-28T14:00:00+09:00"},
+            )
+            meeting_sync.sync_events([event2], vault_root)
+            text2 = note_path.read_text(encoding="utf-8")
+            text2 = text2.replace(
+                "### ⚡ アクションアイテム（今回）\n- [ ] ",
+                "### ⚡ アクションアイテム（今回）\n- [ ] 共通の文言",
+                1,
+            )
+            note_path.write_text(text2, encoding="utf-8")
+
+            meeting_sync.main(
+                [
+                    "--link-task",
+                    str(note_path),
+                    "--item-text",
+                    "共通の文言",
+                    "--task-note",
+                    "共通タスク",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+
+            final_text = note_path.read_text(encoding="utf-8")
+            start_idx = final_text.find("<!-- NEW_MEETING_START -->")
+            end_idx = final_text.find("<!-- NEW_MEETING_END -->")
+            current_block = final_text[start_idx:end_idx]
+            archive_area = final_text[end_idx:]
+
+            self.assertIn("- [x] 共通の文言 [[共通タスク]]", current_block)
+            self.assertIn("- [ ] 共通の文言", archive_area)
+            self.assertNotIn("[[共通タスク]]", archive_area)
 
 
 class TestLoadEvents(unittest.TestCase):

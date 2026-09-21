@@ -1,0 +1,1879 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - generic [ref=e10]:
+            - link [ref=e12] [cursor=pointer]:
+              - /url: /
+              - img "LEON" [ref=e14]
+            - generic [ref=e15]:
+              - list [ref=e16]:
+                - listitem [ref=e17]:
+                  - link [ref=e18] [cursor=pointer]:
+                    - /url: https://twitter.com/web_leon
+                    - img "Twitter" [ref=e19]
+                - listitem [ref=e20]:
+                  - link [ref=e21] [cursor=pointer]:
+                    - /url: https://www.facebook.com/LEON.OFFICAL
+                    - img "Facebook" [ref=e23]
+                - listitem [ref=e24]:
+                  - link [ref=e25] [cursor=pointer]:
+                    - /url: https://www.instagram.com/leon_magazine/
+                    - img "Instagram" [ref=e27]
+                - listitem [ref=e28]:
+                  - link [ref=e29] [cursor=pointer]:
+                    - /url: https://line.me/R/ti/p/%40oa-leon
+                    - img "LINE" [ref=e31]
+                - listitem [ref=e32]:
+                  - link [ref=e33] [cursor=pointer]:
+                    - /url: https://www.youtube.com/channel/UCnbOG94YjAg9gvWV8bAfcQQ
+                    - img "YouTube" [ref=e35]
+                - listitem [ref=e36]:
+                  - link [ref=e37] [cursor=pointer]:
+                    - /url: https://feedly.com/i/subscription/feed/https://www.leon.jp/api/feed/
+                    - img "Feedly" [ref=e39]
+              - button [ref=e40] [cursor=pointer]
+              - button [ref=e41] [cursor=pointer]
+          - navigation [ref=e47]:
+            - list [ref=e48]:
+              - listitem [ref=e49]:
+                - link "Club LEON" [ref=e50] [cursor=pointer]:
+                  - /url: /clubleon
+              - listitem [ref=e51]:
+                - link "FASHION" [ref=e52] [cursor=pointer]:
+                  - /url: /fashions
+              - listitem [ref=e53]:
+                - link "CARS" [ref=e54] [cursor=pointer]:
+                  - /url: /cars
+              - listitem [ref=e55]:
+                - link "WATCHES" [ref=e56] [cursor=pointer]:
+                  - /url: /watches
+              - listitem [ref=e57]:
+                - link "ELECTRONICS" [ref=e58] [cursor=pointer]:
+                  - /url: /electronics
+              - listitem [ref=e59]:
+                - link "BEAUTY&HEALTH" [ref=e60] [cursor=pointer]:
+                  - /url: /health
+              - listitem [ref=e61]:
+                - link "PEOPLE" [ref=e62] [cursor=pointer]:
+                  - /url: /peoples
+              - listitem [ref=e63]:
+                - link "LIFESTYLE" [ref=e64] [cursor=pointer]:
+                  - /url: /lifestyle
+              - listitem [ref=e65]:
+                - link "EVENTS" [ref=e66] [cursor=pointer]:
+                  - /url: /events
+              - listitem [ref=e67]:
+                - link "SNAP" [ref=e68] [cursor=pointer]:
+                  - /url: /snaps
+              - listitem [ref=e69]:
+                - link "GOURMET" [ref=e70] [cursor=pointer]:
+                  - /url: /gourmet
+              - listitem [ref=e71]:
+                - link "STAY&TRAVEL" [ref=e72] [cursor=pointer]:
+                  - /url: /staytravel
+              - listitem [ref=e73]:
+                - link "ITEMS" [ref=e74] [cursor=pointer]:
+                  - /url: /items
+            - button "Next slide" [ref=e75] [cursor=pointer]
+            - button "Previous slide" [disabled] [ref=e76] [cursor=pointer]
+        - generic [ref=e78]:
+          - link [ref=e80] [cursor=pointer]:
+            - /url: /
+            - img "LEON" [ref=e82]
+          - navigation [ref=e83]:
+            - list [ref=e84]:
+              - listitem [ref=e85]:
+                - link "Club LEON" [ref=e86] [cursor=pointer]:
+                  - /url: /clubleon
+              - listitem [ref=e87]:
+                - link "FASHION" [ref=e88] [cursor=pointer]:
+                  - /url: /fashions
+              - listitem [ref=e89]:
+                - link "CARS" [ref=e90] [cursor=pointer]:
+                  - /url: /cars
+              - listitem [ref=e91]:
+                - link "WATCHES" [ref=e92] [cursor=pointer]:
+                  - /url: /watches
+              - listitem [ref=e93]:
+                - link "ELECTRONICS" [ref=e94] [cursor=pointer]:
+                  - /url: /electronics
+              - listitem [ref=e95]:
+                - link "BEAUTY&HEALTH" [ref=e96] [cursor=pointer]:
+                  - /url: /health
+              - listitem [ref=e97]:
+                - link "PEOPLE" [ref=e98] [cursor=pointer]:
+                  - /url: /peoples
+              - listitem [ref=e99]:
+                - link "LIFESTYLE" [ref=e100] [cursor=pointer]:
+                  - /url: /lifestyle
+              - listitem [ref=e101]:
+                - link "EVENTS" [ref=e102] [cursor=pointer]:
+                  - /url: /events
+              - listitem [ref=e103]:
+                - link "SNAP" [ref=e104] [cursor=pointer]:
+                  - /url: /snaps
+              - listitem [ref=e105]:
+                - link "GOURMET" [ref=e106] [cursor=pointer]:
+                  - /url: /gourmet
+              - listitem [ref=e107]:
+                - link "STAY&TRAVEL" [ref=e108] [cursor=pointer]:
+                  - /url: /staytravel
+              - listitem [ref=e109]:
+                - link "ITEMS" [ref=e110] [cursor=pointer]:
+                  - /url: /items
+            - button "Next slide" [ref=e111] [cursor=pointer]
+            - button "Previous slide" [disabled] [ref=e112] [cursor=pointer]
+          - generic [ref=e113]:
+            - button [ref=e114] [cursor=pointer]
+            - button [ref=e115] [cursor=pointer]
+      - iframe [ref=e123]
+      - generic [ref=e124]:
+        - link [ref=e125] [cursor=pointer]:
+          - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjstZWmbMVhtefhHsJiYglB-CfzuZPeyufHeCxkJFELnSrsmO0wzzZhGMzSGICWBHzkA4XFoRScoQprjZaUmjAyVeMRZH6XQNSQb3nIJu7dIVAEt_YJubi1Dfc8L31gs2ZFBEYsE0fdX_UYwvKrRQIcXKaOiO9o5xFU0_Uycb0wsqh5QvYbH0HzWL3X2b27-MG2irwpAx9SFTILMVRZMPSM86CP5WOTZd5arxRGkTrUJpQAn8bPsbz_lCnjZ0CNYZd2m6PBbOuc0nn3GKaimTNe34vMQ4ze19huBoNtri0_uYp1T5IMKXzlkU_lQ8aScburpIOtqbfdn9C-07R1yM8vKi7bZSPd7bYO-lxcxF-0j8tk99TfKVp7JLEdLGinuXRvgeoR9uzlqQwRtx9mAS9o6oYHunW-Q3hw&sai=AMfl-YSduvW_DEtUxeXPmsMHi-1UfR9MIHmdu5Uq-4Pm7znZZDysZ3SJPp5gj4XMaHSRd7cWggjjrvvTyeXUY1OeIUA7aC2-GpwHC-rGpuDN6unBHA4feTeOZ7Rv2SPYd79G-PHKTKoCP1mS5Y6-6iVQSiLnlqYOJqUA2jxg7K2JfBSfjnj7NgPzE5I4qhfXa0DY6BVCsU8bDB7JVCFJjIyvgLGIY6jXVmKXEQaMUI1f1MjucmD6WF6DZAQgPfjj6sWr9cznA2PHrV7mDRAII1-ghig6X-vDERr7KbmzbCeYU8iuXhwx6F4_QnX02jTrbqN_ZZi_XACYdkj2kswDIntVnrE-TV1fT16ZURydTHBCkG50cvkz_Gluu_esCdZFLlXUoUnL5iCpkt2KsZ8JR6QItrBY&sig=Cg0ArKJSzOEytFOJNtQyEAE&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://www.mitsubishi-motors.co.jp/lineup/pajero/teaser/%3Fcid%3Do_dis-p_anym_skin-leon_pajero_fy2608rec709-1_hy_20260821
+        - generic [ref=e127] [cursor=pointer]
+      - generic [ref=e131]:
+        - list [ref=e134]:
+          - listitem [ref=e135]:
+            - link "TOP" [ref=e136] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e137]:
+            - link "LIFESTYLE" [ref=e138] [cursor=pointer]:
+              - /url: /lifestyle
+          - listitem [ref=e139]: ｢話がつまらない人｣と面白い人の決定的な差とは？
+        - generic [ref=e142]:
+          - main [ref=e143]:
+            - article [ref=e144]:
+              - generic [ref=e145]:
+                - list [ref=e147]:
+                  - listitem [ref=e148]:
+                    - link "Twitter" [ref=e149] [cursor=pointer]:
+                      - /url: http://twitter.com/share?url=https://www.leon.jp/lifestyle/12988&text=%EF%BD%A2%E8%A9%B1%E3%81%8C%E3%81%A4%E3%81%BE%E3%82%89%E3%81%AA%E3%81%84%E4%BA%BA%EF%BD%A3%E3%81%A8%E9%9D%A2%E7%99%BD%E3%81%84%E4%BA%BA%E3%81%AE%E6%B1%BA%E5%AE%9A%E7%9A%84%E3%81%AA%E5%B7%AE%E3%81%A8%E3%81%AF%EF%BC%9F%20%7C%20%E3%83%A9%E3%82%A4%E3%83%95%E3%82%B9%E3%82%BF%E3%82%A4%E3%83%AB%20%7C%20LEON%20%E3%83%AC%E3%82%AA%E3%83%B3%20%E3%82%AA%E3%83%95%E3%82%A3%E3%82%B7%E3%83%A3%E3%83%ABWeb%E3%82%B5%E3%82%A4%E3%83%88
+                  - listitem [ref=e150]:
+                    - link "Facebook" [ref=e151] [cursor=pointer]:
+                      - /url: http://www.facebook.com/sharer.php?u=https://www.leon.jp/lifestyle/12988
+                  - listitem [ref=e152]:
+                    - link "Pocket" [ref=e153] [cursor=pointer]:
+                      - /url: http://getpocket.com/edit?url=https://www.leon.jp/lifestyle/12988
+                  - listitem [ref=e154]:
+                    - link "Hatena" [ref=e155] [cursor=pointer]:
+                      - /url: http://b.hatena.ne.jp/entry/https://www.leon.jp/lifestyle/12988
+                - generic [ref=e159]:
+                  - generic [ref=e161]:
+                    - link "LIFESTYLE" [ref=e163] [cursor=pointer]:
+                      - /url: /lifestyle
+                    - generic [ref=e164]:
+                      - paragraph [ref=e165]: 2019.11.16
+                      - heading "｢話がつまらない人｣と面白い人の決定的な差とは？" [level=1] [ref=e166]
+                      - paragraph [ref=e167]: 日頃頑張っているのになかなか結果が出ない、うまくいかないと悩んでいるアナタ。その原因は相手に対するアプローチの方法が間違っているだけかもしれません。『うまくやる ～コミュニケーションが変わる25のレッスン～』を上梓したクリエイティブディレクター熊野森人さんが、直面する壁を乗り越えるヒントを教えてくれました。
+                      - generic [ref=e168]:
+                        - term [ref=e169]: "CREDIT :"
+                        - definition [ref=e170]:
+                          - paragraph [ref=e171]: 文／熊野森人（クリエイティブディレクター）
+                      - list [ref=e172]:
+                        - listitem [ref=e173]:
+                          - link "#LIFESTYLE" [ref=e174] [cursor=pointer]:
+                            - /url: /lifestyle
+                        - listitem [ref=e175]:
+                          - link "#東洋経済ONLINE" [ref=e176] [cursor=pointer]:
+                            - /url: /tags/toyokeizai_online
+                  - generic [ref=e179]:
+                    - text: 記事提供／
+                    - link "東洋経済ONLINE" [ref=e180] [cursor=pointer]:
+                      - /url: https://toyokeizai.net/
+                  - figure [ref=e182]
+                  - generic [ref=e187]: 会議でも、営業先でも、一生懸命プレゼンしているのに、なかなか伝わらないし、共感や賛同を得られない。そんなうまくいかない「壁」を前にして、「どうせ自分は……」と諦めてしまっていることはないだろうか？ そして、その原因が自分のコミュニケーション能力が劣るからでも、努力が足りないからでもなく、相手に対するアプローチの方法が間違っているだけだとしたらどうだろう？今回は初の著書となる『うまくやる ～コミュニケーションが変わる25のレッスン～』を上梓した、クリエイティブディレクターであり大学講師の熊野森人氏が、ちょっと意識するだけで「つまらない話がわかりやすく魅力的な話へと変わる」コミュニケーションのポイントを解説する。
+                  - generic [ref=e190]: PAGE 2
+                  - heading "例える時には相手が知っていることで！" [level=2] [ref=e195]
+                  - generic [ref=e196]: 私はクリエイティブディレクターという仕事柄、たくさんの人とお会いしますが、どんなに難しい分野のお仕事をされていても、スマートな人に限って、わかりやすく、やさしく、かつ面白くお話しくださいます。今回はそのような方たちがどんなふうにお話をしているのか？ そのポイントを紹介していきたいと思います。
+                  - figure [ref=e200]:
+                    - generic [ref=e205]: わかりやすく話す人はどんなふうに話しているのでしょうか（イラスト：柳田義幸 『うまくやる～コミュニケーションが変わる25のレッスン～』より）
+                  - generic [ref=e207]: まずはテクニックから。よく聞き上手は話し上手などと言われますが、例え上手も、聞き上手に勝るとも劣らないコミュニケーションテクニックと言えます。例えるというのは、じぶんがわかっていても、相手がわからない場合に、その相手がわかるようなものに、形を変えて説明することです。その道の一流と言われる人は例え話もわかりやすいものです。では、わかりやすく例えるにはどうしたらいいのでしょうか？例えるコツは、相手が知っているであろうことで細かく伝えるということが大事です。ただそう言われてもパッとできるものではありませんよね。ただ、次の3ステップを踏めば、誰でも大体は例えられるようになります。
+                  - heading "ステップ1：例えるものを、色、形、音、香り、手触り、味など五感に分解し、色なら同じ色のものを集めます。 ステップ2：次にその中から特に似ているものを選びます。このタイミングで、相手の年齢や性別、性格などを考慮したうえで伝わるものなのかどうかを思案します。 ステップ3：伝わるだろうなと思うベスト3の1位から順に相手に説明していきます。" [level=4] [ref=e214]: ステップ1：例えるものを、色、形、音、香り、手触り、味など五感に分解し、色なら同じ色のものを集めます。ステップ2：次にその中から特に似ているものを選びます。このタイミングで、相手の年齢や性別、性格などを考慮したうえで伝わるものなのかどうかを思案します。ステップ3：伝わるだろうなと思うベスト3の1位から順に相手に説明していきます。
+                  - generic [ref=e215]: PAGE 3
+                  - generic [ref=e217]: では、実際に日本の蕎麦をまったく知らない外国の方に、蕎麦を説明する場合を考えてみましょう。みなさんも頭の中で例えてみてください。私の例えはこうです。蕎麦はまずパスタのような麺類であり、中華麺のように縮れておらずまっすぐで、スパゲティの3分の2くらいの長さと、同じくらいの太さである。また、スパゲティ同様乾麺なので、食べる際には湯がいて柔らかくして食べる。色は、クリーム色ではなくブラウングレーで、蕎麦の種類によっては、バニラビーンズのような小さな粒々が見えるものもある。あえて言うならば黒ゴマプリンか？ 蕎麦自体の味はスパゲティと同じく穀物の味で淡白なので、味付けは濃いコンソメスープのようなものにつけて食べる。みたいな感じになります。いかがでしょうか？ 黒ゴマプリンがちょっと厳しかったかもしれませんね。ただ、これを繰り返していたら例える力は自然と身に付きます。
+                  - heading "いまやブランディングはストーリー全盛" [level=2] [ref=e223]
+                  - generic [ref=e224]: 次は話の内容、ストーリーについてです。今や人気アイドルでさえ、生活感あふれる話や失敗談など一見、イメージを損なうような話を取り入れてファンに親近感を与えようとしています。なぜなら、今の時代は個々人の演出の仕方において、完璧に見せようとすればするほど、人はそこに違和感覚えてしまうから。では、実際に人はどんな話に反応をするのでしょうか。昨今のブランディングでは必ず用いられる手法にストーリーテリングというものがあります。これは、事実をただ単に伝えることではなく、人の想いが感じられる物語や、話をつくることを指します。小説、映画、ゲーム、ドキュメンタリー、なんでもそうですが、人は話に共感するもの。事実や、コンセプト、機能といった単発の情報よりも、話として組み立てられているほうが、認知や共感が深いのです。面白いストーリー、感動するストーリー、考えさせられるストーリー、すべてに共通すること、それは涙と笑いの両方があるということです。例えば、恵まれない環境から山あり谷ありの努力でじぶんと新しい環境を切り開き、最後には思いもよらなかった大成功が待っていた、みたいな話は多くの人が好むストーリーと言えるでしょう。つまり、あまりよくない状況が描かれてからの、よい状況への好転が、人の心を揺さぶるわけです。ただ、これをじぶんごと化するとなった途端に、あまりよくない状況＝じぶんの「弱さ」を出すことに多くの人が臆病になります。キレイなじぶんだけを（会社だけを）見せていたい、すごいと思わせたい、だからじぶんたちの弱さなんて見せたら大変な損失だ、みたいな思考に大抵は陥って、そこで止まってしまうのです。
+                  - generic [ref=e227]: PAGE 4
+                  - generic [ref=e229]: 基本的に人は、ストーリーに織り込まれる事柄が、「こんなにもうまくいった」「じぶんすごい！」という情報だけだと、その人や会社に対して悲しいかな、嫌悪感を持ちます。嫌な自慢しいの奴とでも言うのでしょうか。結果、よく見せたいのに、これでは、逆効果となってしまいます。人生、うまくいくことばかりではないのは、全人類共通の実感としてあるのに、そのうまくいっていないことは恥として隠す。まだ、昔であれば隠し通せたかもしれないですが、インターネットがあり、全人類ジャーナリストとなった今、隠すことのほうがイメージに弊害があることが多くなってきています。とはいえ、お笑い芸人でもないのに、自分の弱みで惹きつけるなんて嫌だなと思う人も多いでしょう。ただこれは何も現在進行中のうまくいってないことや、問題をリアルタイムで開示して、自分を切り売りするということではまったくありません。過去にあったうまくいかなかったこと、失敗した話など、そこからの教訓や、復活、修復の仕方などとセットで弱さを共有することで、魅力的なストーリーとして人の心に響きます。
+                  - heading "エンゲージメントを強固にするのは人間味" [level=2] [ref=e235]
+                  - generic [ref=e236]: マーケティングの世界に「エンゲージメント」という言葉がありますが、これは人や、企業、商品、サービス、ブランドなどに対してお客さんがどれだけ愛着を持っているかの状態を測るものです。
+                  - generic [ref=e246]:
+                    - heading "『うまくやる ～コミュニケーションが変わる25のレッスン～』" [level=4] [ref=e248]
+                    - paragraph [ref=e252]: 京都精華大デザイン学部で10年以上続いているコミュニケーション論の講義をまとめた一冊。著者が長年ブランディングや、広告制作、大学での講義を通して培ってきたコミュニケーションデザインをベースに、日常生活やビジネスシーンでも使える考え方や知恵を紹介します。日頃頑張っているのになかなか結果が出ない事柄やうまくいかない事柄といった「壁」のようなものを乗り越えるヒントが詰まっています。著者／熊野森人 あさ出版刊 本体1400円＋税
+                  - generic [ref=e253]: PAGE 5
+                  - generic [ref=e255]: このエンゲージメントが強ければ強いほど、商品やサービスを新たに買ってくれる、または継続的に買ってくれることになります。例えば、ミュージシャンや俳優のファンの方に多かったりしますが、彼ら、彼女らが何かしら軽度の不祥事を起こしても、その関係性が崩れることがほぼない関係。これこそが本当にエンゲージメントが高い関係だと言えるでしょう。誰しもがじぶんのことを世間に公開して、いろいろな批判にさらされ、平常でいられるハートを持っているとも思わないですが、なんらかの関係性を望むために、じぶんを公開することを選ばれた人は、ぜひうまくいっている面だけでなく、うまくいっていなかった面、プラスそこからの復活も見せることを意識してストーリーを演出してみるといいでしょう。個人なら、過去の恋愛話、先生や上司に怒られた話、イキがっていた時代の香ばしい話、組織なら、業績が悪かった商品やサービスの話、返品が相次いだ話、開発時のもめ事などなど、いろんなお話が人の心をつかみます。これらは総じて人間味があるから、面白いのです。そう考えると、いろんな演出よりも、等身大の人間がいちばんのコンテンツなのかもしません。
+                  - table [ref=e262]:
+                    - rowgroup [ref=e263]:
+                      - row [ref=e264]:
+                        - cell [ref=e265]:
+                          - link [ref=e266] [cursor=pointer]:
+                            - /url: https://toyokeizai.net/
+                      - row [ref=e268]:
+                        - cell "当記事は「東洋経済ONLINE」の提供記事です" [ref=e269]
+                  - generic [ref=e270]: PAGE 6
+            - generic [ref=e273]:
+              - heading "SPECIAL" [level=2] [ref=e275]
+              - generic [ref=e278]:
+                - list [ref=e280]:
+                  - listitem [ref=e281]:
+                    - link [ref=e283] [cursor=pointer]:
+                      - /url: /clubleon/361863
+                    - generic [ref=e285]:
+                      - generic [ref=e286]:
+                        - link "Club LEON" [ref=e288] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e289]: "- 2026.09.18"
+                      - link "【アペLEON東京は9/24（木）開催】ジローラモが店長を務める「ジローラ..." [ref=e291] [cursor=pointer]:
+                        - /url: /clubleon/361863
+                  - listitem [ref=e292]:
+                    - link [ref=e294] [cursor=pointer]:
+                      - /url: /buy_leon/361280
+                    - generic [ref=e296]:
+                      - generic [ref=e297]:
+                        - link "買えるLEON" [ref=e299] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e300]: "- 2026.09.11"
+                      - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e302] [cursor=pointer]:
+                        - /url: /buy_leon/361280
+                  - listitem [ref=e303]:
+                    - link [ref=e305] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e307]:
+                      - generic [ref=e308]:
+                        - link "買えるLEON" [ref=e310] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e311]: "- 2026.09.12"
+                      - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e313] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e314]:
+                    - link [ref=e316] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e318]:
+                      - generic [ref=e319]:
+                        - link "Club LEON" [ref=e321] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e322]: "- 2024.09.13"
+                      - link "LEONファンのためのコミュニティ「Club LEON」に入会しませんか？..." [ref=e324] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e325]:
+                    - link [ref=e327] [cursor=pointer]:
+                      - /url: /watches/353931
+                    - generic [ref=e329]:
+                      - generic [ref=e330]:
+                        - link "WATCHES" [ref=e332] [cursor=pointer]:
+                          - /url: /watches
+                        - generic [ref=e333]: "- SPONSORED"
+                      - link "「ベル＆ロス」の次なるラグスポアイコンは、ロマンティックが止まらない！" [ref=e335] [cursor=pointer]:
+                        - /url: /watches/353931
+                  - listitem [ref=e336]:
+                    - link [ref=e338] [cursor=pointer]:
+                      - /url: /info/360882
+                    - generic [ref=e340]:
+                      - generic [ref=e341]:
+                        - link "INFORMATION" [ref=e343] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e344]: "- SPONSORED"
+                      - link "【FPM Milanoのスーツケース】と、時間を忘れて心を癒やす大人の旅に..." [ref=e346] [cursor=pointer]:
+                        - /url: /info/360882
+                  - listitem [ref=e347]:
+                    - link [ref=e349] [cursor=pointer]:
+                      - /url: /fashions/358680
+                    - generic [ref=e351]:
+                      - generic [ref=e352]:
+                        - link "FASHION" [ref=e354] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e355]: "- SPONSORED"
+                      - link "「フェンディ」の3つのアイコン、バッグ・スーツ・ファーは、なぜ進化を止めな..." [ref=e357] [cursor=pointer]:
+                        - /url: /fashions/358680
+                  - listitem [ref=e358]:
+                    - link [ref=e360] [cursor=pointer]:
+                      - /url: /info/100075
+                    - generic [ref=e362]:
+                      - generic [ref=e363]:
+                        - link "INFORMATION" [ref=e365] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e366]: "- 2025.06.20"
+                      - link "LEONな情報テンコ盛り！ 要チェックです" [ref=e368] [cursor=pointer]:
+                        - /url: /info/100075
+                  - listitem [ref=e369]:
+                    - link [ref=e371] [cursor=pointer]:
+                      - /url: /fashions/358426
+                    - generic [ref=e373]:
+                      - generic [ref=e374]:
+                        - link "FASHION" [ref=e376] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e377]: "- SPONSORED"
+                      - link "オンオフ使える！ いまどきオヤジの「モンブラン」のレザーバッグは品良く色っ..." [ref=e379] [cursor=pointer]:
+                        - /url: /fashions/358426
+                  - listitem [ref=e380]:
+                    - link [ref=e382] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e384]:
+                      - generic [ref=e385]:
+                        - link "買えるLEON" [ref=e387] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e388]: "- 2026.08.07"
+                      - link "【モテる夏のセール】開催中！ お洒落を賢く楽しむのもイケオジです" [ref=e390] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e391]:
+                    - link [ref=e393] [cursor=pointer]:
+                      - /url: /clubleon/361863
+                    - generic [ref=e395]:
+                      - generic [ref=e396]:
+                        - link "Club LEON" [ref=e398] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e399]: "- 2026.09.18"
+                      - link "【アペLEON東京は9/24（木）開催】ジローラモが店長を務める「ジローラ..." [ref=e401] [cursor=pointer]:
+                        - /url: /clubleon/361863
+                  - listitem [ref=e402]:
+                    - link [ref=e404] [cursor=pointer]:
+                      - /url: /buy_leon/361280
+                    - generic [ref=e406]:
+                      - generic [ref=e407]:
+                        - link "買えるLEON" [ref=e409] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e410]: "- 2026.09.11"
+                      - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e412] [cursor=pointer]:
+                        - /url: /buy_leon/361280
+                  - listitem [ref=e413]:
+                    - link [ref=e415] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e417]:
+                      - generic [ref=e418]:
+                        - link "買えるLEON" [ref=e420] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e421]: "- 2026.09.12"
+                      - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e423] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e424]:
+                    - link [ref=e426] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e428]:
+                      - generic [ref=e429]:
+                        - link "Club LEON" [ref=e431] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e432]: "- 2024.09.13"
+                      - link "LEONファンのためのコミュニティ「Club LEON」に入会しませんか？..." [ref=e434] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e435]:
+                    - link [ref=e437] [cursor=pointer]:
+                      - /url: /watches/353931
+                    - generic [ref=e439]:
+                      - generic [ref=e440]:
+                        - link "WATCHES" [ref=e442] [cursor=pointer]:
+                          - /url: /watches
+                        - generic [ref=e443]: "- SPONSORED"
+                      - link "「ベル＆ロス」の次なるラグスポアイコンは、ロマンティックが止まらない！" [ref=e445] [cursor=pointer]:
+                        - /url: /watches/353931
+                  - listitem [ref=e446]:
+                    - link [ref=e448] [cursor=pointer]:
+                      - /url: /info/360882
+                    - generic [ref=e450]:
+                      - generic [ref=e451]:
+                        - link "INFORMATION" [ref=e453] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e454]: "- SPONSORED"
+                      - link "【FPM Milanoのスーツケース】と、時間を忘れて心を癒やす大人の旅に..." [ref=e456] [cursor=pointer]:
+                        - /url: /info/360882
+                  - listitem [ref=e457]:
+                    - link [ref=e459] [cursor=pointer]:
+                      - /url: /fashions/358680
+                    - generic [ref=e461]:
+                      - generic [ref=e462]:
+                        - link "FASHION" [ref=e464] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e465]: "- SPONSORED"
+                      - link "「フェンディ」の3つのアイコン、バッグ・スーツ・ファーは、なぜ進化を止めな..." [ref=e467] [cursor=pointer]:
+                        - /url: /fashions/358680
+                  - listitem [ref=e468]:
+                    - link [ref=e470] [cursor=pointer]:
+                      - /url: /info/100075
+                    - generic [ref=e472]:
+                      - generic [ref=e473]:
+                        - link "INFORMATION" [ref=e475] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e476]: "- 2025.06.20"
+                      - link "LEONな情報テンコ盛り！ 要チェックです" [ref=e478] [cursor=pointer]:
+                        - /url: /info/100075
+                  - listitem [ref=e479]:
+                    - link [ref=e481] [cursor=pointer]:
+                      - /url: /fashions/358426
+                    - generic [ref=e483]:
+                      - generic [ref=e484]:
+                        - link "FASHION" [ref=e486] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e487]: "- SPONSORED"
+                      - link "オンオフ使える！ いまどきオヤジの「モンブラン」のレザーバッグは品良く色っ..." [ref=e489] [cursor=pointer]:
+                        - /url: /fashions/358426
+                  - listitem [ref=e490]:
+                    - link [ref=e492] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e494]:
+                      - generic [ref=e495]:
+                        - link "買えるLEON" [ref=e497] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e498]: "- 2026.08.07"
+                      - link "【モテる夏のセール】開催中！ お洒落を賢く楽しむのもイケオジです" [ref=e500] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e501]:
+                    - link [ref=e503] [cursor=pointer]:
+                      - /url: /clubleon/361863
+                    - generic [ref=e505]:
+                      - generic [ref=e506]:
+                        - link "Club LEON" [ref=e508] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e509]: "- 2026.09.18"
+                      - link "【アペLEON東京は9/24（木）開催】ジローラモが店長を務める「ジローラ..." [ref=e511] [cursor=pointer]:
+                        - /url: /clubleon/361863
+                  - listitem [ref=e512]:
+                    - link [ref=e514] [cursor=pointer]:
+                      - /url: /buy_leon/361280
+                    - generic [ref=e516]:
+                      - generic [ref=e517]:
+                        - link "買えるLEON" [ref=e519] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e520]: "- 2026.09.11"
+                      - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e522] [cursor=pointer]:
+                        - /url: /buy_leon/361280
+                  - listitem [ref=e523]:
+                    - link [ref=e525] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e527]:
+                      - generic [ref=e528]:
+                        - link "買えるLEON" [ref=e530] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e531]: "- 2026.09.12"
+                      - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e533] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e534]:
+                    - link [ref=e536] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e538]:
+                      - generic [ref=e539]:
+                        - link "Club LEON" [ref=e541] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e542]: "- 2024.09.13"
+                      - link "LEONファンのためのコミュニティ「Club LEON」に入会しませんか？..." [ref=e544] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e545]:
+                    - link [ref=e547] [cursor=pointer]:
+                      - /url: /watches/353931
+                    - generic [ref=e549]:
+                      - generic [ref=e550]:
+                        - link "WATCHES" [ref=e552] [cursor=pointer]:
+                          - /url: /watches
+                        - generic [ref=e553]: "- SPONSORED"
+                      - link "「ベル＆ロス」の次なるラグスポアイコンは、ロマンティックが止まらない！" [ref=e555] [cursor=pointer]:
+                        - /url: /watches/353931
+                  - listitem [ref=e556]:
+                    - link [ref=e558] [cursor=pointer]:
+                      - /url: /info/360882
+                    - generic [ref=e560]:
+                      - generic [ref=e561]:
+                        - link "INFORMATION" [ref=e563] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e564]: "- SPONSORED"
+                      - link "【FPM Milanoのスーツケース】と、時間を忘れて心を癒やす大人の旅に..." [ref=e566] [cursor=pointer]:
+                        - /url: /info/360882
+                  - listitem [ref=e567]:
+                    - link [ref=e569] [cursor=pointer]:
+                      - /url: /fashions/358680
+                    - generic [ref=e571]:
+                      - generic [ref=e572]:
+                        - link "FASHION" [ref=e574] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e575]: "- SPONSORED"
+                      - link "「フェンディ」の3つのアイコン、バッグ・スーツ・ファーは、なぜ進化を止めな..." [ref=e577] [cursor=pointer]:
+                        - /url: /fashions/358680
+                  - listitem [ref=e578]:
+                    - link [ref=e580] [cursor=pointer]:
+                      - /url: /info/100075
+                    - generic [ref=e582]:
+                      - generic [ref=e583]:
+                        - link "INFORMATION" [ref=e585] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e586]: "- 2025.06.20"
+                      - link "LEONな情報テンコ盛り！ 要チェックです" [ref=e588] [cursor=pointer]:
+                        - /url: /info/100075
+                  - listitem [ref=e589]:
+                    - link [ref=e591] [cursor=pointer]:
+                      - /url: /fashions/358426
+                    - generic [ref=e593]:
+                      - generic [ref=e594]:
+                        - link "FASHION" [ref=e596] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e597]: "- SPONSORED"
+                      - link "オンオフ使える！ いまどきオヤジの「モンブラン」のレザーバッグは品良く色っ..." [ref=e599] [cursor=pointer]:
+                        - /url: /fashions/358426
+                  - listitem [ref=e600]:
+                    - link [ref=e602] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e604]:
+                      - generic [ref=e605]:
+                        - link "買えるLEON" [ref=e607] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e608]: "- 2026.08.07"
+                      - link "【モテる夏のセール】開催中！ お洒落を賢く楽しむのもイケオジです" [ref=e610] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e611]:
+                    - link [ref=e613] [cursor=pointer]:
+                      - /url: /clubleon/361863
+                    - generic [ref=e615]:
+                      - generic [ref=e616]:
+                        - link "Club LEON" [ref=e618] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e619]: "- 2026.09.18"
+                      - link "【アペLEON東京は9/24（木）開催】ジローラモが店長を務める「ジローラ..." [ref=e621] [cursor=pointer]:
+                        - /url: /clubleon/361863
+                  - listitem [ref=e622]:
+                    - link [ref=e624] [cursor=pointer]:
+                      - /url: /buy_leon/361280
+                    - generic [ref=e626]:
+                      - generic [ref=e627]:
+                        - link "買えるLEON" [ref=e629] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e630]: "- 2026.09.11"
+                      - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e632] [cursor=pointer]:
+                        - /url: /buy_leon/361280
+                  - listitem [ref=e633]:
+                    - link [ref=e635] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e637]:
+                      - generic [ref=e638]:
+                        - link "買えるLEON" [ref=e640] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e641]: "- 2026.09.12"
+                      - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e643] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e644]:
+                    - link [ref=e646] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e648]:
+                      - generic [ref=e649]:
+                        - link "Club LEON" [ref=e651] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e652]: "- 2024.09.13"
+                      - link "LEONファンのためのコミュニティ「Club LEON」に入会しませんか？..." [ref=e654] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e655]:
+                    - link [ref=e657] [cursor=pointer]:
+                      - /url: /watches/353931
+                    - generic [ref=e659]:
+                      - generic [ref=e660]:
+                        - link "WATCHES" [ref=e662] [cursor=pointer]:
+                          - /url: /watches
+                        - generic [ref=e663]: "- SPONSORED"
+                      - link "「ベル＆ロス」の次なるラグスポアイコンは、ロマンティックが止まらない！" [ref=e665] [cursor=pointer]:
+                        - /url: /watches/353931
+                  - listitem [ref=e666]:
+                    - link [ref=e668] [cursor=pointer]:
+                      - /url: /info/360882
+                    - generic [ref=e670]:
+                      - generic [ref=e671]:
+                        - link "INFORMATION" [ref=e673] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e674]: "- SPONSORED"
+                      - link "【FPM Milanoのスーツケース】と、時間を忘れて心を癒やす大人の旅に..." [ref=e676] [cursor=pointer]:
+                        - /url: /info/360882
+                  - listitem [ref=e677]:
+                    - link [ref=e679] [cursor=pointer]:
+                      - /url: /fashions/358680
+                    - generic [ref=e681]:
+                      - generic [ref=e682]:
+                        - link "FASHION" [ref=e684] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e685]: "- SPONSORED"
+                      - link "「フェンディ」の3つのアイコン、バッグ・スーツ・ファーは、なぜ進化を止めな..." [ref=e687] [cursor=pointer]:
+                        - /url: /fashions/358680
+                  - listitem [ref=e688]:
+                    - link [ref=e690] [cursor=pointer]:
+                      - /url: /info/100075
+                    - generic [ref=e692]:
+                      - generic [ref=e693]:
+                        - link "INFORMATION" [ref=e695] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e696]: "- 2025.06.20"
+                      - link "LEONな情報テンコ盛り！ 要チェックです" [ref=e698] [cursor=pointer]:
+                        - /url: /info/100075
+                  - listitem [ref=e699]:
+                    - link [ref=e701] [cursor=pointer]:
+                      - /url: /fashions/358426
+                    - generic [ref=e703]:
+                      - generic [ref=e704]:
+                        - link "FASHION" [ref=e706] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e707]: "- SPONSORED"
+                      - link "オンオフ使える！ いまどきオヤジの「モンブラン」のレザーバッグは品良く色っ..." [ref=e709] [cursor=pointer]:
+                        - /url: /fashions/358426
+                  - listitem [ref=e710]:
+                    - link [ref=e712] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e714]:
+                      - generic [ref=e715]:
+                        - link "買えるLEON" [ref=e717] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e718]: "- 2026.08.07"
+                      - link "【モテる夏のセール】開催中！ お洒落を賢く楽しむのもイケオジです" [ref=e720] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e721]:
+                    - link [ref=e723] [cursor=pointer]:
+                      - /url: /clubleon/361863
+                    - generic [ref=e725]:
+                      - generic [ref=e726]:
+                        - link "Club LEON" [ref=e728] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e729]: "- 2026.09.18"
+                      - link "【アペLEON東京は9/24（木）開催】ジローラモが店長を務める「ジローラ..." [ref=e731] [cursor=pointer]:
+                        - /url: /clubleon/361863
+                  - listitem [ref=e732]:
+                    - link [ref=e734] [cursor=pointer]:
+                      - /url: /buy_leon/361280
+                    - generic [ref=e736]:
+                      - generic [ref=e737]:
+                        - link "買えるLEON" [ref=e739] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e740]: "- 2026.09.11"
+                      - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e742] [cursor=pointer]:
+                        - /url: /buy_leon/361280
+                  - listitem [ref=e743]:
+                    - link [ref=e745] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e747]:
+                      - generic [ref=e748]:
+                        - link "買えるLEON" [ref=e750] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e751]: "- 2026.09.12"
+                      - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e753] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e754]:
+                    - link [ref=e756] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e758]:
+                      - generic [ref=e759]:
+                        - link "Club LEON" [ref=e761] [cursor=pointer]:
+                          - /url: /clubleon
+                        - generic [ref=e762]: "- 2024.09.13"
+                      - link "LEONファンのためのコミュニティ「Club LEON」に入会しませんか？..." [ref=e764] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/products/clubleon?utm_source=leonjp&utm_medium=specialbanner
+                  - listitem [ref=e765]:
+                    - link [ref=e767] [cursor=pointer]:
+                      - /url: /watches/353931
+                    - generic [ref=e769]:
+                      - generic [ref=e770]:
+                        - link "WATCHES" [ref=e772] [cursor=pointer]:
+                          - /url: /watches
+                        - generic [ref=e773]: "- SPONSORED"
+                      - link "「ベル＆ロス」の次なるラグスポアイコンは、ロマンティックが止まらない！" [ref=e775] [cursor=pointer]:
+                        - /url: /watches/353931
+                  - listitem [ref=e776]:
+                    - link [ref=e778] [cursor=pointer]:
+                      - /url: /info/360882
+                    - generic [ref=e780]:
+                      - generic [ref=e781]:
+                        - link "INFORMATION" [ref=e783] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e784]: "- SPONSORED"
+                      - link "【FPM Milanoのスーツケース】と、時間を忘れて心を癒やす大人の旅に..." [ref=e786] [cursor=pointer]:
+                        - /url: /info/360882
+                  - listitem [ref=e787]:
+                    - link [ref=e789] [cursor=pointer]:
+                      - /url: /fashions/358680
+                    - generic [ref=e791]:
+                      - generic [ref=e792]:
+                        - link "FASHION" [ref=e794] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e795]: "- SPONSORED"
+                      - link "「フェンディ」の3つのアイコン、バッグ・スーツ・ファーは、なぜ進化を止めな..." [ref=e797] [cursor=pointer]:
+                        - /url: /fashions/358680
+                  - listitem [ref=e798]:
+                    - link [ref=e800] [cursor=pointer]:
+                      - /url: /info/100075
+                    - generic [ref=e802]:
+                      - generic [ref=e803]:
+                        - link "INFORMATION" [ref=e805] [cursor=pointer]:
+                          - /url: /info
+                        - generic [ref=e806]: "- 2025.06.20"
+                      - link "LEONな情報テンコ盛り！ 要チェックです" [ref=e808] [cursor=pointer]:
+                        - /url: /info/100075
+                  - listitem [ref=e809]:
+                    - link [ref=e811] [cursor=pointer]:
+                      - /url: /fashions/358426
+                    - generic [ref=e813]:
+                      - generic [ref=e814]:
+                        - link "FASHION" [ref=e816] [cursor=pointer]:
+                          - /url: /fashions
+                        - generic [ref=e817]: "- SPONSORED"
+                      - link "オンオフ使える！ いまどきオヤジの「モンブラン」のレザーバッグは品良く色っ..." [ref=e819] [cursor=pointer]:
+                        - /url: /fashions/358426
+                  - listitem [ref=e820]:
+                    - link [ref=e822] [cursor=pointer]:
+                      - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                    - generic [ref=e824]:
+                      - generic [ref=e825]:
+                        - link "買えるLEON" [ref=e827] [cursor=pointer]:
+                          - /url: /buy_leon
+                        - generic [ref=e828]: "- 2026.08.07"
+                      - link "【モテる夏のセール】開催中！ お洒落を賢く楽しむのもイケオジです" [ref=e830] [cursor=pointer]:
+                        - /url: https://kaeruleon.jp/collections/sale?utm_source=leonjp&utm_medium=specialbanner
+                - button "Next slide" [ref=e831] [cursor=pointer]
+                - button "Previous slide" [ref=e832] [cursor=pointer]
+                - generic [ref=e834]:
+                  - generic [ref=e835] [cursor=pointer]
+                  - generic [ref=e836] [cursor=pointer]
+                  - generic [ref=e837] [cursor=pointer]
+                  - generic [ref=e838] [cursor=pointer]
+                  - generic [ref=e839] [cursor=pointer]
+            - generic [ref=e842]:
+              - heading "おすすめの記事" [level=3] [ref=e843]
+              - list [ref=e845]:
+                - listitem [ref=e846]:
+                  - link [ref=e848] [cursor=pointer]:
+                    - /url: /lifestyle/359459
+                  - generic [ref=e850]:
+                    - generic [ref=e851]:
+                      - link "LIFESTYLE" [ref=e853] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e854]: "- 2026.09.13"
+                    - link "清楚だけど性にはおてんば「付き合った男性は、なぜかみんな成功します」" [ref=e856] [cursor=pointer]:
+                      - /url: /lifestyle/359459
+                - listitem [ref=e857]:
+                  - link [ref=e859] [cursor=pointer]:
+                    - /url: /lifestyle/359149
+                  - generic [ref=e861]:
+                    - generic [ref=e862]:
+                      - link "LIFESTYLE" [ref=e864] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e865]: "- 2026.09.12"
+                    - link "清楚系美女の思わぬ結婚生活「元夫は百人以上もの女性と浮気していました」" [ref=e867] [cursor=pointer]:
+                      - /url: /lifestyle/359149
+                - listitem [ref=e868]:
+                  - link [ref=e870] [cursor=pointer]:
+                    - /url: /lifestyle/360747
+                  - generic [ref=e872]:
+                    - generic [ref=e873]:
+                      - link "LIFESTYLE" [ref=e875] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e876]: "- 2026.09.11"
+                    - link "これぞイタリア家庭料理の真髄！ 「クチーナ・ポーヴェラ（貧乏人の料理）」..." [ref=e878] [cursor=pointer]:
+                      - /url: /lifestyle/360747
+                - listitem [ref=e879]:
+                  - link [ref=e881] [cursor=pointer]:
+                    - /url: /info/359163
+                  - generic [ref=e883]:
+                    - generic [ref=e884]:
+                      - link "INFORMATION" [ref=e886] [cursor=pointer]:
+                        - /url: /info
+                      - generic [ref=e887]: "- 2026.08.28"
+                    - link "「ハリー・ウィンストン」のブライダルフェアを全国のサロンで開催！ 極上の輝..." [ref=e889] [cursor=pointer]:
+                      - /url: /info/359163
+                - listitem [ref=e890]:
+                  - link [ref=e892] [cursor=pointer]:
+                    - /url: /lifestyle/359017
+                  - generic [ref=e894]:
+                    - generic [ref=e895]:
+                      - link "LIFESTYLE" [ref=e897] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e898]: "- 2026.08.28"
+                    - link "「食事の好みが合わないから、別れましょう」はイタリアのあるある⁉" [ref=e900] [cursor=pointer]:
+                      - /url: /lifestyle/359017
+                - listitem [ref=e901]:
+                  - link [ref=e903] [cursor=pointer]:
+                    - /url: /lifestyle/357589
+                  - generic [ref=e905]:
+                    - generic [ref=e906]:
+                      - link "LIFESTYLE" [ref=e908] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e909]: "- 2026.08.14"
+                    - link "エスプレッソの底に残った甘い砂糖はスプーンですくって舐めるのが正統派⁉ イ..." [ref=e911] [cursor=pointer]:
+                      - /url: /lifestyle/357589
+                - listitem [ref=e912]:
+                  - link [ref=e914] [cursor=pointer]:
+                    - /url: /lifestyle/356191
+                  - generic [ref=e916]:
+                    - generic [ref=e917]:
+                      - link "LIFESTYLE" [ref=e919] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e920]: "- 2026.08.07"
+                    - link "いよいよ会期後半。「杉本博司 絶滅写真」は見逃せない展覧会！" [ref=e922] [cursor=pointer]:
+                      - /url: /lifestyle/356191
+                - listitem [ref=e923]:
+                  - link [ref=e925] [cursor=pointer]:
+                    - /url: /lifestyle/355208
+                  - generic [ref=e927]:
+                    - generic [ref=e928]:
+                      - link "LIFESTYLE" [ref=e930] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e931]: "- 2026.07.31"
+                    - link "LEONが「UMITO」と初コラボ！ 熱海に大人のラブサンクチュアリが完成..." [ref=e933] [cursor=pointer]:
+                      - /url: /lifestyle/355208
+                - listitem [ref=e934]:
+                  - link [ref=e936] [cursor=pointer]:
+                    - /url: /lifestyle/347497
+                  - generic [ref=e938]:
+                    - generic [ref=e939]:
+                      - link "LIFESTYLE" [ref=e941] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e942]: "- 2026.07.30"
+                    - link "【話題のゴルフ女子3人・座談会】 男性ゴルファーのココ好き♡ アレ嫌い！ ..." [ref=e944] [cursor=pointer]:
+                      - /url: /lifestyle/347497
+                - listitem [ref=e945]:
+                  - link [ref=e947] [cursor=pointer]:
+                    - /url: /lifestyle/354638
+                  - generic [ref=e949]:
+                    - generic [ref=e950]:
+                      - link "LIFESTYLE" [ref=e952] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e953]: "- 2026.07.24"
+                    - link "イタリア人は「パスタならなんでも好き」なわけじゃない。では憎むべきパスタと..." [ref=e955] [cursor=pointer]:
+                      - /url: /lifestyle/354638
+                - listitem [ref=e956]:
+                  - link [ref=e958] [cursor=pointer]:
+                    - /url: /lifestyle/350163
+                  - generic [ref=e960]:
+                    - generic [ref=e961]:
+                      - link "LIFESTYLE" [ref=e963] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e964]: "- 2026.07.24"
+                    - link "【話題のゴルフ女子3人・座談会】 男性ゴルファーのココ好き♡ アレ嫌い！ ..." [ref=e966] [cursor=pointer]:
+                      - /url: /lifestyle/350163
+                - listitem [ref=e967]:
+                  - link [ref=e969] [cursor=pointer]:
+                    - /url: /lifestyle/349082
+                  - generic [ref=e971]:
+                    - generic [ref=e972]:
+                      - link "LIFESTYLE" [ref=e974] [cursor=pointer]:
+                        - /url: /lifestyle
+                      - generic [ref=e975]: "- 2026.07.22"
+                    - link "【話題のゴルフ女子3人・座談会】 男性ゴルファーのココ好き♡ アレ嫌い！ ..." [ref=e977] [cursor=pointer]:
+                      - /url: /lifestyle/349082
+          - generic [ref=e979]:
+            - generic [ref=e982]:
+              - heading "SERIES：連載" [level=2] [ref=e983]
+              - list [ref=e985]:
+                - listitem [ref=e986]:
+                  - link [ref=e988] [cursor=pointer]:
+                    - /url: /series/series16
+                  - link "モテる宿にはワケがある 彼女と訪れる旅の楽しみってなんでしょう？ まずは料理、そして景色。気持ちのいい温泉と高いホスピタリティも大切です。さらに設えや歴史などその宿ならではの個性的な魅力があれば、旅はきっと素晴らしい思い出になるはず。そんな恋するふたりの大切な旅時間を演出する“ハズさない”宿を、LEONが実際に訪れた中から自信をもってご紹介します。" [ref=e990] [cursor=pointer]:
+                    - /url: /series/series16
+                    - generic [ref=e991]: モテる宿にはワケがある
+                    - paragraph [ref=e992]: 彼女と訪れる旅の楽しみってなんでしょう？ まずは料理、そして景色。気持ちのいい温泉と高いホスピタリティも大切です。さらに設えや歴史などその宿ならではの個性的な魅力があれば、旅はきっと素晴らしい思い出になるはず。そんな恋するふたりの大切な旅時間を演出する“ハズさない”宿を、LEONが実際に訪れた中から自信をもってご紹介します。
+                - listitem [ref=e993]:
+                  - link [ref=e995] [cursor=pointer]:
+                    - /url: /series/series42
+                  - link "PEOPLE NOW 今、この人の話が聞きたい！ 編集部が独自の目線でセレクトした注目ピープルのオリジナルインタビューをお届けする連載コーナーです。芸能人から文化人、スポーツ選手まで、注目の新人から納得のベテランまで、他では読めないWeb LEONならではのスペシャルトークをお楽しみください！" [ref=e997] [cursor=pointer]:
+                    - /url: /series/series42
+                    - generic [ref=e998]: PEOPLE NOW
+                    - paragraph [ref=e999]: 今、この人の話が聞きたい！ 編集部が独自の目線でセレクトした注目ピープルのオリジナルインタビューをお届けする連載コーナーです。芸能人から文化人、スポーツ選手まで、注目の新人から納得のベテランまで、他では読めないWeb LEONならではのスペシャルトークをお楽しみください！
+                - listitem [ref=e1000]:
+                  - link [ref=e1002] [cursor=pointer]:
+                    - /url: /series/series64
+                  - link "今日のオヤジ美容 女子ウケ抜群の清潔感が失われていくオヤジ世代こそ、美容に取り組むことで、同世代を出し抜けるはず。そこで、 大人男性に役立つ美容トピックを連日公開でお届けするミニ連載です。" [ref=e1004] [cursor=pointer]:
+                    - /url: /series/series64
+                    - generic [ref=e1005]: 今日のオヤジ美容
+                    - paragraph [ref=e1006]: 女子ウケ抜群の清潔感が失われていくオヤジ世代こそ、美容に取り組むことで、同世代を出し抜けるはず。そこで、 大人男性に役立つ美容トピックを連日公開でお届けするミニ連載です。
+                - listitem [ref=e1007]:
+                  - link [ref=e1009] [cursor=pointer]:
+                    - /url: /series/series61
+                  - link "美しい人 ルッキズム批判を生みながらも、「美しさ」の需要は絶えることのない現代。一方で世間が求める「美しさ」はパターン化し、形骸化してはいないか、そんな思いから、新しいグラビア企画「美しい人」が生まれました。グラビアと言えば女性の若さとボディを売りにした企画が多い中、女性であるKaori Oguriさんをプロデューサーに据え、豊かな人生経験を持つ女性たちの、内面から醸し出される“大人の美しさ”に迫る新たなグラビア企画となります。" [ref=e1011] [cursor=pointer]:
+                    - /url: /series/series61
+                    - generic [ref=e1012]: 美しい人
+                    - paragraph [ref=e1013]: ルッキズム批判を生みながらも、「美しさ」の需要は絶えることのない現代。一方で世間が求める「美しさ」はパターン化し、形骸化してはいないか、そんな思いから、新しいグラビア企画「美しい人」が生まれました。グラビアと言えば女性の若さとボディを売りにした企画が多い中、女性であるKaori Oguriさんをプロデューサーに据え、豊かな人生経験を持つ女性たちの、内面から醸し出される“大人の美しさ”に迫る新たなグラビア企画となります。
+                - listitem [ref=e1014]:
+                  - link [ref=e1016] [cursor=pointer]:
+                    - /url: /series/series48
+                  - link "山本益博のラーメン革命！ 日本初の料理評論家、山本益博さんはいま、ラーメンが「美味しい革命」の渦中にあると言います。長らくB級グルメとして愛されてきたラーメンは、ミシュランも認める一流の料理へと変貌を遂げつつあります。新時代に向けて群雄割拠する街のラーメン店を巨匠自らが実食リポートする連載です。" [ref=e1018] [cursor=pointer]:
+                    - /url: /series/series48
+                    - generic [ref=e1019]: 山本益博のラーメン革命！
+                    - paragraph [ref=e1020]: 日本初の料理評論家、山本益博さんはいま、ラーメンが「美味しい革命」の渦中にあると言います。長らくB級グルメとして愛されてきたラーメンは、ミシュランも認める一流の料理へと変貌を遂げつつあります。新時代に向けて群雄割拠する街のラーメン店を巨匠自らが実食リポートする連載です。
+                - listitem [ref=e1021]:
+                  - link [ref=e1023] [cursor=pointer]:
+                    - /url: /series/series67
+                  - link "林 伸次のLove la Bossa ー大人のリアルな恋愛ー 人気連載 美人はスーパーカーである【恋愛編】の100回超を機に、Web LEON編集部は改めて、今の時代、人生において幸せな恋愛とは何か、男性が女性を理解するためのヒントとは何かを考えるようになりました。それは、2019年の連載開始から足かけ5年を経て、世の中の価値観に大きな変化を感じ取ったからでした。そうして始動するのが、本連載「林 伸次のLove la Bossa」。恋愛も結婚もしなくたっていいこの時代に、大人の女性たちはどんな恋愛をしているのか。大人の女性たちは何を求めているのか。奥渋谷のバー「BAR BOSSA」のマスターにして作家の林 伸次さんが、バーテン仕込みの絶妙な話術で大人の女性の本音を深掘りする“愛の研究所”です。" [ref=e1025] [cursor=pointer]:
+                    - /url: /series/series67
+                    - generic [ref=e1026]: 林 伸次のLove la Bossa ー大人のリアルな恋愛ー
+                    - paragraph [ref=e1027]: 人気連載 美人はスーパーカーである【恋愛編】の100回超を機に、Web LEON編集部は改めて、今の時代、人生において幸せな恋愛とは何か、男性が女性を理解するためのヒントとは何かを考えるようになりました。それは、2019年の連載開始から足かけ5年を経て、世の中の価値観に大きな変化を感じ取ったからでした。そうして始動するのが、本連載「林 伸次のLove la Bossa」。恋愛も結婚もしなくたっていいこの時代に、大人の女性たちはどんな恋愛をしているのか。大人の女性たちは何を求めているのか。奥渋谷のバー「BAR BOSSA」のマスターにして作家の林 伸次さんが、バーテン仕込みの絶妙な話術で大人の女性の本音を深掘りする“愛の研究所”です。
+                - listitem [ref=e1028]:
+                  - link [ref=e1030] [cursor=pointer]:
+                    - /url: /series/series72
+                  - link "Web LEON RECOMMENDS BEST30 ファッションや時計はもちろん、グルメからビューティー、エレクトロニクスなどなど、Web LEON編集者がさまざまなジャンルのワクワクするモノ・コトを紹介する連載「Web LEON RECOMMENDS BEST30」。1年間で計30本に厳選された最高にオススメのネタをお届けします！ 毎週土曜日公開予定。" [ref=e1032] [cursor=pointer]:
+                    - /url: /series/series72
+                    - generic [ref=e1033]: Web LEON RECOMMENDS BEST30
+                    - paragraph [ref=e1034]: ファッションや時計はもちろん、グルメからビューティー、エレクトロニクスなどなど、Web LEON編集者がさまざまなジャンルのワクワクするモノ・コトを紹介する連載「Web LEON RECOMMENDS BEST30」。1年間で計30本に厳選された最高にオススメのネタをお届けします！ 毎週土曜日公開予定。
+                - listitem [ref=e1035]:
+                  - link [ref=e1037] [cursor=pointer]:
+                    - /url: /series/series62
+                  - link "腕時計のプロが選ぶ「一本取られました！」 数多の腕時計を日々目にしている腕時計のプロたち。そんな彼らが魅了された、ついつい「一本取られた！」と膝を打ったモデルについて、熱く語っていただきます。" [ref=e1039] [cursor=pointer]:
+                    - /url: /series/series62
+                    - generic [ref=e1040]: 腕時計のプロが選ぶ「一本取られました！」
+                    - paragraph [ref=e1041]: 数多の腕時計を日々目にしている腕時計のプロたち。そんな彼らが魅了された、ついつい「一本取られた！」と膝を打ったモデルについて、熱く語っていただきます。
+                - listitem [ref=e1042]:
+                  - link [ref=e1044] [cursor=pointer]:
+                    - /url: /series/series63
+                  - link "イタリア人マッシの「思考する食欲」 イタリア生まれのフード＆ライフスタイルライター、マッシさん。世界が急速に繋がって、広い視野が求められるこの時代に、日本人とはちょっと違う視点で日本と世界の食に関する文化や習慣、メニューなどについて考える連載です。" [ref=e1046] [cursor=pointer]:
+                    - /url: /series/series63
+                    - generic [ref=e1047]: イタリア人マッシの「思考する食欲」
+                    - paragraph [ref=e1048]: イタリア生まれのフード＆ライフスタイルライター、マッシさん。世界が急速に繋がって、広い視野が求められるこの時代に、日本人とはちょっと違う視点で日本と世界の食に関する文化や習慣、メニューなどについて考える連載です。
+                - listitem [ref=e1049]:
+                  - link [ref=e1051] [cursor=pointer]:
+                    - /url: /series/series40
+                  - link "デキる大人は知っている!? 「腕時計の基礎知識」 腕時計は単なるツールではなく、あなたがどんな人かを表すキーアイテムです。デキる男たちの間では共通言語であり、時には通行手形にもなる。だから、腕時計を知ると世界が広がるのです。一見、難しそうに思える専門用語や知識も、基本を押さえれば、見るべきポイントがわかってくるはず。奥深く魅力的な腕時計の世界へのガイドとして、ご活用ください。" [ref=e1053] [cursor=pointer]:
+                    - /url: /series/series40
+                    - generic [ref=e1054]: デキる大人は知っている!? 「腕時計の基礎知識」
+                    - paragraph [ref=e1055]: 腕時計は単なるツールではなく、あなたがどんな人かを表すキーアイテムです。デキる男たちの間では共通言語であり、時には通行手形にもなる。だから、腕時計を知ると世界が広がるのです。一見、難しそうに思える専門用語や知識も、基本を押さえれば、見るべきポイントがわかってくるはず。奥深く魅力的な腕時計の世界へのガイドとして、ご活用ください。
+                - listitem [ref=e1056]:
+                  - link [ref=e1058] [cursor=pointer]:
+                    - /url: /series/series43
+                  - link "What’s up NEW FACE 『LEON』は創刊時より、“オヤジ”をカッコよく、そして大いにモテる存在にしようと挑戦してまいりました。読者の皆様に支えられてきた我々だからこそ、次世代を応援し、さらなる20年を歩んでいきたい。そこで、本連載では我々が注目する若手ビジネスパーソンにインタビューを実施。先の見えない世の中を前向きに動かそうとする彼らに迫ります。" [ref=e1060] [cursor=pointer]:
+                    - /url: /series/series43
+                    - generic [ref=e1061]: What’s up NEW FACE
+                    - paragraph [ref=e1062]: 『LEON』は創刊時より、“オヤジ”をカッコよく、そして大いにモテる存在にしようと挑戦してまいりました。読者の皆様に支えられてきた我々だからこそ、次世代を応援し、さらなる20年を歩んでいきたい。そこで、本連載では我々が注目する若手ビジネスパーソンにインタビューを実施。先の見えない世の中を前向きに動かそうとする彼らに迫ります。
+                - listitem [ref=e1063]:
+                  - link [ref=e1065] [cursor=pointer]:
+                    - /url: /series/series23
+                  - link "料理初心者男子でもデキる・モテる簡単レシピ 「好きな相手は胃の腑からつかめ」って、昔はオンナに言われてたことですが、今はオトコにも言えること。飲んだ後「ちょっと一杯寄ってかない？」、「今度一緒にアレ作らない？」「週末ホムパしようよ」などなど、さまざまな口実に使える簡単レシピを人気料理研究家がお教えします。" [ref=e1067] [cursor=pointer]:
+                    - /url: /series/series23
+                    - generic [ref=e1068]: 料理初心者男子でもデキる・モテる簡単レシピ
+                    - paragraph [ref=e1069]: 「好きな相手は胃の腑からつかめ」って、昔はオンナに言われてたことですが、今はオトコにも言えること。飲んだ後「ちょっと一杯寄ってかない？」、「今度一緒にアレ作らない？」「週末ホムパしようよ」などなど、さまざまな口実に使える簡単レシピを人気料理研究家がお教えします。
+              - link "READ MORE" [ref=e1070] [cursor=pointer]:
+                - /url: /series
+            - generic [ref=e1071]:
+              - link "LEON 10 OCTOBER 2026 No.299 最新号のご案内" [ref=e1073] [cursor=pointer]:
+                - /url: /magazine/359295
+                - generic [ref=e1075]:
+                  - img "LEON" [ref=e1078]
+                  - generic [ref=e1079]: "10"
+                  - paragraph [ref=e1080]: OCTOBER2026No.299
+                - paragraph [ref=e1083]: 最新号のご案内
+              - generic [ref=e1085]:
+                - heading [level=2] [ref=e1086]:
+                  - img "Official SNS" [ref=e1087]
+                - list [ref=e1088]:
+                  - listitem [ref=e1089]:
+                    - link "X" [ref=e1090] [cursor=pointer]:
+                      - /url: https://twitter.com/web_leon
+                  - listitem [ref=e1093]:
+                    - link "Facebook" [ref=e1094] [cursor=pointer]:
+                      - /url: https://www.facebook.com/LEON.OFFICAL
+                  - listitem [ref=e1097]:
+                    - link "Instagram" [ref=e1098] [cursor=pointer]:
+                      - /url: https://www.instagram.com/leon_magazine/
+        - generic [ref=e1102]:
+          - banner [ref=e1103]:
+            - heading "買えるLEON" [level=2] [ref=e1104]
+          - generic [ref=e1107]:
+            - list [ref=e1109]:
+              - listitem [ref=e1110]:
+                - link [ref=e1112] [cursor=pointer]:
+                  - /url: /buy_leon/361416
+                - generic [ref=e1114]:
+                  - generic [ref=e1115]:
+                    - link "買えるLEON" [ref=e1117] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1118]: "- 2026.09.20"
+                  - link "「厳選・大人シャツ」は、1枚から羽織りまでロングシーズン活躍します【8選】..." [ref=e1120] [cursor=pointer]:
+                    - /url: /buy_leon/361416
+              - listitem [ref=e1121]:
+                - link [ref=e1123] [cursor=pointer]:
+                  - /url: /buy_leon/360483
+                - generic [ref=e1125]:
+                  - generic [ref=e1126]:
+                    - link "買えるLEON" [ref=e1128] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1129]: "- 2026.09.18"
+                  - link "大人はこの時季「シャツのセットアップ」。ジャケットのように上品にキマります..." [ref=e1131] [cursor=pointer]:
+                    - /url: /buy_leon/360483
+              - listitem [ref=e1132]:
+                - link [ref=e1134] [cursor=pointer]:
+                  - /url: /buy_leon/361170
+                - generic [ref=e1136]:
+                  - generic [ref=e1137]:
+                    - link "買えるLEON" [ref=e1139] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1140]: "- 2026.09.16"
+                  - link "【LEON別注】 街でもトレーニングでも！「大人の4点セットアップ」" [ref=e1142] [cursor=pointer]:
+                    - /url: /buy_leon/361170
+              - listitem [ref=e1143]:
+                - link [ref=e1145] [cursor=pointer]:
+                  - /url: /buy_leon/360875
+                - generic [ref=e1147]:
+                  - generic [ref=e1148]:
+                    - link "買えるLEON" [ref=e1150] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1151]: "- 2026.09.13"
+                  - link "コンパクトにしてインパクト大！「クロコの財布＆カードケース」【10選】" [ref=e1153] [cursor=pointer]:
+                    - /url: /buy_leon/360875
+              - listitem [ref=e1154]:
+                - link [ref=e1156] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1158]:
+                  - generic [ref=e1159]:
+                    - link "買えるLEON" [ref=e1161] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1162]: "- 2026.09.12"
+                  - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e1164] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1165]:
+                - link [ref=e1167] [cursor=pointer]:
+                  - /url: /buy_leon/361148
+                - generic [ref=e1169]:
+                  - generic [ref=e1170]:
+                    - link "買えるLEON" [ref=e1172] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1173]: "- 2026.09.12"
+                  - link "美脚も楽チンも叶える「万能パンツ」【10選】" [ref=e1175] [cursor=pointer]:
+                    - /url: /buy_leon/361148
+              - listitem [ref=e1176]:
+                - link [ref=e1178] [cursor=pointer]:
+                  - /url: /buy_leon/361280
+                - generic [ref=e1180]:
+                  - generic [ref=e1181]:
+                    - link "買えるLEON" [ref=e1183] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1184]: "- 2026.09.11"
+                  - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e1186] [cursor=pointer]:
+                    - /url: /buy_leon/361280
+              - listitem [ref=e1187]:
+                - link [ref=e1189] [cursor=pointer]:
+                  - /url: /buy_leon/360807
+                - generic [ref=e1191]:
+                  - generic [ref=e1192]:
+                    - link "買えるLEON" [ref=e1194] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1195]: "- 2026.09.10"
+                  - link "楽チンセットアップも都会的に着こなしてこそ、イケオジです【10選】" [ref=e1197] [cursor=pointer]:
+                    - /url: /buy_leon/360807
+              - listitem [ref=e1198]:
+                - link [ref=e1200] [cursor=pointer]:
+                  - /url: /buy_leon/360481
+                - generic [ref=e1202]:
+                  - generic [ref=e1203]:
+                    - link "買えるLEON" [ref=e1205] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1206]: "- 2026.09.08"
+                  - link "大人のための「エポカ ウォモ」のセットアップ【6選】" [ref=e1208] [cursor=pointer]:
+                    - /url: /buy_leon/360481
+              - listitem [ref=e1209]:
+                - link [ref=e1211] [cursor=pointer]:
+                  - /url: /buy_leon/360371
+                - generic [ref=e1213]:
+                  - generic [ref=e1214]:
+                    - link "買えるLEON" [ref=e1216] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1217]: "- 2026.09.05"
+                  - link "【夏のセールでお得にゲットも ＋7選】 上下でもバラでもOK「魅せるセット..." [ref=e1219] [cursor=pointer]:
+                    - /url: /buy_leon/360371
+              - listitem [ref=e1220]:
+                - link [ref=e1222] [cursor=pointer]:
+                  - /url: /buy_leon/359992
+                - generic [ref=e1224]:
+                  - generic [ref=e1225]:
+                    - link "買えるLEON" [ref=e1227] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1228]: "- 2026.09.04"
+                  - link "【LEON別注】 飛び出すミッキーに彼女も思わずニッコリ♡「ロンT」7選" [ref=e1230] [cursor=pointer]:
+                    - /url: /buy_leon/359992
+              - listitem [ref=e1231]:
+                - link [ref=e1233] [cursor=pointer]:
+                  - /url: /buy_leon/359757
+                - generic [ref=e1235]:
+                  - generic [ref=e1236]:
+                    - link "買えるLEON" [ref=e1238] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1239]: "- 2026.09.02"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その4" [ref=e1241] [cursor=pointer]:
+                    - /url: /buy_leon/359757
+              - listitem [ref=e1242]:
+                - link [ref=e1244] [cursor=pointer]:
+                  - /url: /buy_leon/359654
+                - generic [ref=e1246]:
+                  - generic [ref=e1247]:
+                    - link "買えるLEON" [ref=e1249] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1250]: "- 2026.08.31"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その3" [ref=e1252] [cursor=pointer]:
+                    - /url: /buy_leon/359654
+              - listitem [ref=e1253]:
+                - link [ref=e1255] [cursor=pointer]:
+                  - /url: /buy_leon/359633
+                - generic [ref=e1257]:
+                  - generic [ref=e1258]:
+                    - link "買えるLEON" [ref=e1260] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1261]: "- 2026.08.29"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その2" [ref=e1263] [cursor=pointer]:
+                    - /url: /buy_leon/359633
+              - listitem [ref=e1264]:
+                - link [ref=e1266] [cursor=pointer]:
+                  - /url: /buy_leon/359325
+                - generic [ref=e1268]:
+                  - generic [ref=e1269]:
+                    - link "買えるLEON" [ref=e1271] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1272]: "- 2026.08.27"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その1" [ref=e1274] [cursor=pointer]:
+                    - /url: /buy_leon/359325
+              - listitem [ref=e1275]:
+                - link [ref=e1277] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1279]:
+                  - generic [ref=e1280]:
+                    - link "買えるLEON" [ref=e1282] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1283]: "- 2026.08.26"
+                  - link "【買えるLEON】 最旬ワードローブと別注アイテムを揃えました！" [ref=e1285] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1286]:
+                - link [ref=e1288] [cursor=pointer]:
+                  - /url: /buy_leon/361416
+                - generic [ref=e1290]:
+                  - generic [ref=e1291]:
+                    - link "買えるLEON" [ref=e1293] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1294]: "- 2026.09.20"
+                  - link "「厳選・大人シャツ」は、1枚から羽織りまでロングシーズン活躍します【8選】..." [ref=e1296] [cursor=pointer]:
+                    - /url: /buy_leon/361416
+              - listitem [ref=e1297]:
+                - link [ref=e1299] [cursor=pointer]:
+                  - /url: /buy_leon/360483
+                - generic [ref=e1301]:
+                  - generic [ref=e1302]:
+                    - link "買えるLEON" [ref=e1304] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1305]: "- 2026.09.18"
+                  - link "大人はこの時季「シャツのセットアップ」。ジャケットのように上品にキマります..." [ref=e1307] [cursor=pointer]:
+                    - /url: /buy_leon/360483
+              - listitem [ref=e1308]:
+                - link [ref=e1310] [cursor=pointer]:
+                  - /url: /buy_leon/361170
+                - generic [ref=e1312]:
+                  - generic [ref=e1313]:
+                    - link "買えるLEON" [ref=e1315] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1316]: "- 2026.09.16"
+                  - link "【LEON別注】 街でもトレーニングでも！「大人の4点セットアップ」" [ref=e1318] [cursor=pointer]:
+                    - /url: /buy_leon/361170
+              - listitem [ref=e1319]:
+                - link [ref=e1321] [cursor=pointer]:
+                  - /url: /buy_leon/360875
+                - generic [ref=e1323]:
+                  - generic [ref=e1324]:
+                    - link "買えるLEON" [ref=e1326] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1327]: "- 2026.09.13"
+                  - link "コンパクトにしてインパクト大！「クロコの財布＆カードケース」【10選】" [ref=e1329] [cursor=pointer]:
+                    - /url: /buy_leon/360875
+              - listitem [ref=e1330]:
+                - link [ref=e1332] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1334]:
+                  - generic [ref=e1335]:
+                    - link "買えるLEON" [ref=e1337] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1338]: "- 2026.09.12"
+                  - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e1340] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1341]:
+                - link [ref=e1343] [cursor=pointer]:
+                  - /url: /buy_leon/361148
+                - generic [ref=e1345]:
+                  - generic [ref=e1346]:
+                    - link "買えるLEON" [ref=e1348] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1349]: "- 2026.09.12"
+                  - link "美脚も楽チンも叶える「万能パンツ」【10選】" [ref=e1351] [cursor=pointer]:
+                    - /url: /buy_leon/361148
+              - listitem [ref=e1352]:
+                - link [ref=e1354] [cursor=pointer]:
+                  - /url: /buy_leon/361280
+                - generic [ref=e1356]:
+                  - generic [ref=e1357]:
+                    - link "買えるLEON" [ref=e1359] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1360]: "- 2026.09.11"
+                  - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e1362] [cursor=pointer]:
+                    - /url: /buy_leon/361280
+              - listitem [ref=e1363]:
+                - link [ref=e1365] [cursor=pointer]:
+                  - /url: /buy_leon/360807
+                - generic [ref=e1367]:
+                  - generic [ref=e1368]:
+                    - link "買えるLEON" [ref=e1370] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1371]: "- 2026.09.10"
+                  - link "楽チンセットアップも都会的に着こなしてこそ、イケオジです【10選】" [ref=e1373] [cursor=pointer]:
+                    - /url: /buy_leon/360807
+              - listitem [ref=e1374]:
+                - link [ref=e1376] [cursor=pointer]:
+                  - /url: /buy_leon/360481
+                - generic [ref=e1378]:
+                  - generic [ref=e1379]:
+                    - link "買えるLEON" [ref=e1381] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1382]: "- 2026.09.08"
+                  - link "大人のための「エポカ ウォモ」のセットアップ【6選】" [ref=e1384] [cursor=pointer]:
+                    - /url: /buy_leon/360481
+              - listitem [ref=e1385]:
+                - link [ref=e1387] [cursor=pointer]:
+                  - /url: /buy_leon/360371
+                - generic [ref=e1389]:
+                  - generic [ref=e1390]:
+                    - link "買えるLEON" [ref=e1392] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1393]: "- 2026.09.05"
+                  - link "【夏のセールでお得にゲットも ＋7選】 上下でもバラでもOK「魅せるセット..." [ref=e1395] [cursor=pointer]:
+                    - /url: /buy_leon/360371
+              - listitem [ref=e1396]:
+                - link [ref=e1398] [cursor=pointer]:
+                  - /url: /buy_leon/359992
+                - generic [ref=e1400]:
+                  - generic [ref=e1401]:
+                    - link "買えるLEON" [ref=e1403] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1404]: "- 2026.09.04"
+                  - link "【LEON別注】 飛び出すミッキーに彼女も思わずニッコリ♡「ロンT」7選" [ref=e1406] [cursor=pointer]:
+                    - /url: /buy_leon/359992
+              - listitem [ref=e1407]:
+                - link [ref=e1409] [cursor=pointer]:
+                  - /url: /buy_leon/359757
+                - generic [ref=e1411]:
+                  - generic [ref=e1412]:
+                    - link "買えるLEON" [ref=e1414] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1415]: "- 2026.09.02"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その4" [ref=e1417] [cursor=pointer]:
+                    - /url: /buy_leon/359757
+              - listitem [ref=e1418]:
+                - link [ref=e1420] [cursor=pointer]:
+                  - /url: /buy_leon/359654
+                - generic [ref=e1422]:
+                  - generic [ref=e1423]:
+                    - link "買えるLEON" [ref=e1425] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1426]: "- 2026.08.31"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その3" [ref=e1428] [cursor=pointer]:
+                    - /url: /buy_leon/359654
+              - listitem [ref=e1429]:
+                - link [ref=e1431] [cursor=pointer]:
+                  - /url: /buy_leon/359633
+                - generic [ref=e1433]:
+                  - generic [ref=e1434]:
+                    - link "買えるLEON" [ref=e1436] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1437]: "- 2026.08.29"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その2" [ref=e1439] [cursor=pointer]:
+                    - /url: /buy_leon/359633
+              - listitem [ref=e1440]:
+                - link [ref=e1442] [cursor=pointer]:
+                  - /url: /buy_leon/359325
+                - generic [ref=e1444]:
+                  - generic [ref=e1445]:
+                    - link "買えるLEON" [ref=e1447] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1448]: "- 2026.08.27"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その1" [ref=e1450] [cursor=pointer]:
+                    - /url: /buy_leon/359325
+              - listitem [ref=e1451]:
+                - link [ref=e1453] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1455]:
+                  - generic [ref=e1456]:
+                    - link "買えるLEON" [ref=e1458] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1459]: "- 2026.08.26"
+                  - link "【買えるLEON】 最旬ワードローブと別注アイテムを揃えました！" [ref=e1461] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1462]:
+                - link [ref=e1464] [cursor=pointer]:
+                  - /url: /buy_leon/361416
+                - generic [ref=e1466]:
+                  - generic [ref=e1467]:
+                    - link "買えるLEON" [ref=e1469] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1470]: "- 2026.09.20"
+                  - link "「厳選・大人シャツ」は、1枚から羽織りまでロングシーズン活躍します【8選】..." [ref=e1472] [cursor=pointer]:
+                    - /url: /buy_leon/361416
+              - listitem [ref=e1473]:
+                - link [ref=e1475] [cursor=pointer]:
+                  - /url: /buy_leon/360483
+                - generic [ref=e1477]:
+                  - generic [ref=e1478]:
+                    - link "買えるLEON" [ref=e1480] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1481]: "- 2026.09.18"
+                  - link "大人はこの時季「シャツのセットアップ」。ジャケットのように上品にキマります..." [ref=e1483] [cursor=pointer]:
+                    - /url: /buy_leon/360483
+              - listitem [ref=e1484]:
+                - link [ref=e1486] [cursor=pointer]:
+                  - /url: /buy_leon/361170
+                - generic [ref=e1488]:
+                  - generic [ref=e1489]:
+                    - link "買えるLEON" [ref=e1491] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1492]: "- 2026.09.16"
+                  - link "【LEON別注】 街でもトレーニングでも！「大人の4点セットアップ」" [ref=e1494] [cursor=pointer]:
+                    - /url: /buy_leon/361170
+              - listitem [ref=e1495]:
+                - link [ref=e1497] [cursor=pointer]:
+                  - /url: /buy_leon/360875
+                - generic [ref=e1499]:
+                  - generic [ref=e1500]:
+                    - link "買えるLEON" [ref=e1502] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1503]: "- 2026.09.13"
+                  - link "コンパクトにしてインパクト大！「クロコの財布＆カードケース」【10選】" [ref=e1505] [cursor=pointer]:
+                    - /url: /buy_leon/360875
+              - listitem [ref=e1506]:
+                - link [ref=e1508] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1510]:
+                  - generic [ref=e1511]:
+                    - link "買えるLEON" [ref=e1513] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1514]: "- 2026.09.12"
+                  - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e1516] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1517]:
+                - link [ref=e1519] [cursor=pointer]:
+                  - /url: /buy_leon/361148
+                - generic [ref=e1521]:
+                  - generic [ref=e1522]:
+                    - link "買えるLEON" [ref=e1524] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1525]: "- 2026.09.12"
+                  - link "美脚も楽チンも叶える「万能パンツ」【10選】" [ref=e1527] [cursor=pointer]:
+                    - /url: /buy_leon/361148
+              - listitem [ref=e1528]:
+                - link [ref=e1530] [cursor=pointer]:
+                  - /url: /buy_leon/361280
+                - generic [ref=e1532]:
+                  - generic [ref=e1533]:
+                    - link "買えるLEON" [ref=e1535] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1536]: "- 2026.09.11"
+                  - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e1538] [cursor=pointer]:
+                    - /url: /buy_leon/361280
+              - listitem [ref=e1539]:
+                - link [ref=e1541] [cursor=pointer]:
+                  - /url: /buy_leon/360807
+                - generic [ref=e1543]:
+                  - generic [ref=e1544]:
+                    - link "買えるLEON" [ref=e1546] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1547]: "- 2026.09.10"
+                  - link "楽チンセットアップも都会的に着こなしてこそ、イケオジです【10選】" [ref=e1549] [cursor=pointer]:
+                    - /url: /buy_leon/360807
+              - listitem [ref=e1550]:
+                - link [ref=e1552] [cursor=pointer]:
+                  - /url: /buy_leon/360481
+                - generic [ref=e1554]:
+                  - generic [ref=e1555]:
+                    - link "買えるLEON" [ref=e1557] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1558]: "- 2026.09.08"
+                  - link "大人のための「エポカ ウォモ」のセットアップ【6選】" [ref=e1560] [cursor=pointer]:
+                    - /url: /buy_leon/360481
+              - listitem [ref=e1561]:
+                - link [ref=e1563] [cursor=pointer]:
+                  - /url: /buy_leon/360371
+                - generic [ref=e1565]:
+                  - generic [ref=e1566]:
+                    - link "買えるLEON" [ref=e1568] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1569]: "- 2026.09.05"
+                  - link "【夏のセールでお得にゲットも ＋7選】 上下でもバラでもOK「魅せるセット..." [ref=e1571] [cursor=pointer]:
+                    - /url: /buy_leon/360371
+              - listitem [ref=e1572]:
+                - link [ref=e1574] [cursor=pointer]:
+                  - /url: /buy_leon/359992
+                - generic [ref=e1576]:
+                  - generic [ref=e1577]:
+                    - link "買えるLEON" [ref=e1579] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1580]: "- 2026.09.04"
+                  - link "【LEON別注】 飛び出すミッキーに彼女も思わずニッコリ♡「ロンT」7選" [ref=e1582] [cursor=pointer]:
+                    - /url: /buy_leon/359992
+              - listitem [ref=e1583]:
+                - link [ref=e1585] [cursor=pointer]:
+                  - /url: /buy_leon/359757
+                - generic [ref=e1587]:
+                  - generic [ref=e1588]:
+                    - link "買えるLEON" [ref=e1590] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1591]: "- 2026.09.02"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その4" [ref=e1593] [cursor=pointer]:
+                    - /url: /buy_leon/359757
+              - listitem [ref=e1594]:
+                - link [ref=e1596] [cursor=pointer]:
+                  - /url: /buy_leon/359654
+                - generic [ref=e1598]:
+                  - generic [ref=e1599]:
+                    - link "買えるLEON" [ref=e1601] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1602]: "- 2026.08.31"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その3" [ref=e1604] [cursor=pointer]:
+                    - /url: /buy_leon/359654
+              - listitem [ref=e1605]:
+                - link [ref=e1607] [cursor=pointer]:
+                  - /url: /buy_leon/359633
+                - generic [ref=e1609]:
+                  - generic [ref=e1610]:
+                    - link "買えるLEON" [ref=e1612] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1613]: "- 2026.08.29"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その2" [ref=e1615] [cursor=pointer]:
+                    - /url: /buy_leon/359633
+              - listitem [ref=e1616]:
+                - link [ref=e1618] [cursor=pointer]:
+                  - /url: /buy_leon/359325
+                - generic [ref=e1620]:
+                  - generic [ref=e1621]:
+                    - link "買えるLEON" [ref=e1623] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1624]: "- 2026.08.27"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その1" [ref=e1626] [cursor=pointer]:
+                    - /url: /buy_leon/359325
+              - listitem [ref=e1627]:
+                - link [ref=e1629] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1631]:
+                  - generic [ref=e1632]:
+                    - link "買えるLEON" [ref=e1634] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1635]: "- 2026.08.26"
+                  - link "【買えるLEON】 最旬ワードローブと別注アイテムを揃えました！" [ref=e1637] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1638]:
+                - link [ref=e1640] [cursor=pointer]:
+                  - /url: /buy_leon/361416
+                - generic [ref=e1642]:
+                  - generic [ref=e1643]:
+                    - link "買えるLEON" [ref=e1645] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1646]: "- 2026.09.20"
+                  - link "「厳選・大人シャツ」は、1枚から羽織りまでロングシーズン活躍します【8選】..." [ref=e1648] [cursor=pointer]:
+                    - /url: /buy_leon/361416
+              - listitem [ref=e1649]:
+                - link [ref=e1651] [cursor=pointer]:
+                  - /url: /buy_leon/360483
+                - generic [ref=e1653]:
+                  - generic [ref=e1654]:
+                    - link "買えるLEON" [ref=e1656] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1657]: "- 2026.09.18"
+                  - link "大人はこの時季「シャツのセットアップ」。ジャケットのように上品にキマります..." [ref=e1659] [cursor=pointer]:
+                    - /url: /buy_leon/360483
+              - listitem [ref=e1660]:
+                - link [ref=e1662] [cursor=pointer]:
+                  - /url: /buy_leon/361170
+                - generic [ref=e1664]:
+                  - generic [ref=e1665]:
+                    - link "買えるLEON" [ref=e1667] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1668]: "- 2026.09.16"
+                  - link "【LEON別注】 街でもトレーニングでも！「大人の4点セットアップ」" [ref=e1670] [cursor=pointer]:
+                    - /url: /buy_leon/361170
+              - listitem [ref=e1671]:
+                - link [ref=e1673] [cursor=pointer]:
+                  - /url: /buy_leon/360875
+                - generic [ref=e1675]:
+                  - generic [ref=e1676]:
+                    - link "買えるLEON" [ref=e1678] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1679]: "- 2026.09.13"
+                  - link "コンパクトにしてインパクト大！「クロコの財布＆カードケース」【10選】" [ref=e1681] [cursor=pointer]:
+                    - /url: /buy_leon/360875
+              - listitem [ref=e1682]:
+                - link [ref=e1684] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1686]:
+                  - generic [ref=e1687]:
+                    - link "買えるLEON" [ref=e1689] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1690]: "- 2026.09.12"
+                  - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e1692] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1693]:
+                - link [ref=e1695] [cursor=pointer]:
+                  - /url: /buy_leon/361148
+                - generic [ref=e1697]:
+                  - generic [ref=e1698]:
+                    - link "買えるLEON" [ref=e1700] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1701]: "- 2026.09.12"
+                  - link "美脚も楽チンも叶える「万能パンツ」【10選】" [ref=e1703] [cursor=pointer]:
+                    - /url: /buy_leon/361148
+              - listitem [ref=e1704]:
+                - link [ref=e1706] [cursor=pointer]:
+                  - /url: /buy_leon/361280
+                - generic [ref=e1708]:
+                  - generic [ref=e1709]:
+                    - link "買えるLEON" [ref=e1711] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1712]: "- 2026.09.11"
+                  - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e1714] [cursor=pointer]:
+                    - /url: /buy_leon/361280
+              - listitem [ref=e1715]:
+                - link [ref=e1717] [cursor=pointer]:
+                  - /url: /buy_leon/360807
+                - generic [ref=e1719]:
+                  - generic [ref=e1720]:
+                    - link "買えるLEON" [ref=e1722] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1723]: "- 2026.09.10"
+                  - link "楽チンセットアップも都会的に着こなしてこそ、イケオジです【10選】" [ref=e1725] [cursor=pointer]:
+                    - /url: /buy_leon/360807
+              - listitem [ref=e1726]:
+                - link [ref=e1728] [cursor=pointer]:
+                  - /url: /buy_leon/360481
+                - generic [ref=e1730]:
+                  - generic [ref=e1731]:
+                    - link "買えるLEON" [ref=e1733] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1734]: "- 2026.09.08"
+                  - link "大人のための「エポカ ウォモ」のセットアップ【6選】" [ref=e1736] [cursor=pointer]:
+                    - /url: /buy_leon/360481
+              - listitem [ref=e1737]:
+                - link [ref=e1739] [cursor=pointer]:
+                  - /url: /buy_leon/360371
+                - generic [ref=e1741]:
+                  - generic [ref=e1742]:
+                    - link "買えるLEON" [ref=e1744] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1745]: "- 2026.09.05"
+                  - link "【夏のセールでお得にゲットも ＋7選】 上下でもバラでもOK「魅せるセット..." [ref=e1747] [cursor=pointer]:
+                    - /url: /buy_leon/360371
+              - listitem [ref=e1748]:
+                - link [ref=e1750] [cursor=pointer]:
+                  - /url: /buy_leon/359992
+                - generic [ref=e1752]:
+                  - generic [ref=e1753]:
+                    - link "買えるLEON" [ref=e1755] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1756]: "- 2026.09.04"
+                  - link "【LEON別注】 飛び出すミッキーに彼女も思わずニッコリ♡「ロンT」7選" [ref=e1758] [cursor=pointer]:
+                    - /url: /buy_leon/359992
+              - listitem [ref=e1759]:
+                - link [ref=e1761] [cursor=pointer]:
+                  - /url: /buy_leon/359757
+                - generic [ref=e1763]:
+                  - generic [ref=e1764]:
+                    - link "買えるLEON" [ref=e1766] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1767]: "- 2026.09.02"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その4" [ref=e1769] [cursor=pointer]:
+                    - /url: /buy_leon/359757
+              - listitem [ref=e1770]:
+                - link [ref=e1772] [cursor=pointer]:
+                  - /url: /buy_leon/359654
+                - generic [ref=e1774]:
+                  - generic [ref=e1775]:
+                    - link "買えるLEON" [ref=e1777] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1778]: "- 2026.08.31"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その3" [ref=e1780] [cursor=pointer]:
+                    - /url: /buy_leon/359654
+              - listitem [ref=e1781]:
+                - link [ref=e1783] [cursor=pointer]:
+                  - /url: /buy_leon/359633
+                - generic [ref=e1785]:
+                  - generic [ref=e1786]:
+                    - link "買えるLEON" [ref=e1788] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1789]: "- 2026.08.29"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その2" [ref=e1791] [cursor=pointer]:
+                    - /url: /buy_leon/359633
+              - listitem [ref=e1792]:
+                - link [ref=e1794] [cursor=pointer]:
+                  - /url: /buy_leon/359325
+                - generic [ref=e1796]:
+                  - generic [ref=e1797]:
+                    - link "買えるLEON" [ref=e1799] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1800]: "- 2026.08.27"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その1" [ref=e1802] [cursor=pointer]:
+                    - /url: /buy_leon/359325
+              - listitem [ref=e1803]:
+                - link [ref=e1805] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1807]:
+                  - generic [ref=e1808]:
+                    - link "買えるLEON" [ref=e1810] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1811]: "- 2026.08.26"
+                  - link "【買えるLEON】 最旬ワードローブと別注アイテムを揃えました！" [ref=e1813] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1814]:
+                - link [ref=e1816] [cursor=pointer]:
+                  - /url: /buy_leon/361416
+                - generic [ref=e1818]:
+                  - generic [ref=e1819]:
+                    - link "買えるLEON" [ref=e1821] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1822]: "- 2026.09.20"
+                  - link "「厳選・大人シャツ」は、1枚から羽織りまでロングシーズン活躍します【8選】..." [ref=e1824] [cursor=pointer]:
+                    - /url: /buy_leon/361416
+              - listitem [ref=e1825]:
+                - link [ref=e1827] [cursor=pointer]:
+                  - /url: /buy_leon/360483
+                - generic [ref=e1829]:
+                  - generic [ref=e1830]:
+                    - link "買えるLEON" [ref=e1832] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1833]: "- 2026.09.18"
+                  - link "大人はこの時季「シャツのセットアップ」。ジャケットのように上品にキマります..." [ref=e1835] [cursor=pointer]:
+                    - /url: /buy_leon/360483
+              - listitem [ref=e1836]:
+                - link [ref=e1838] [cursor=pointer]:
+                  - /url: /buy_leon/361170
+                - generic [ref=e1840]:
+                  - generic [ref=e1841]:
+                    - link "買えるLEON" [ref=e1843] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1844]: "- 2026.09.16"
+                  - link "【LEON別注】 街でもトレーニングでも！「大人の4点セットアップ」" [ref=e1846] [cursor=pointer]:
+                    - /url: /buy_leon/361170
+              - listitem [ref=e1847]:
+                - link [ref=e1849] [cursor=pointer]:
+                  - /url: /buy_leon/360875
+                - generic [ref=e1851]:
+                  - generic [ref=e1852]:
+                    - link "買えるLEON" [ref=e1854] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1855]: "- 2026.09.13"
+                  - link "コンパクトにしてインパクト大！「クロコの財布＆カードケース」【10選】" [ref=e1857] [cursor=pointer]:
+                    - /url: /buy_leon/360875
+              - listitem [ref=e1858]:
+                - link [ref=e1860] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1862]:
+                  - generic [ref=e1863]:
+                    - link "買えるLEON" [ref=e1865] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1866]: "- 2026.09.12"
+                  - link "【買えるLEON】で大人気のアイテム、それは「美脚パンツ」です！" [ref=e1868] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/collections/pants?utm_source=leonjp&utm_medium=specialbanner
+              - listitem [ref=e1869]:
+                - link [ref=e1871] [cursor=pointer]:
+                  - /url: /buy_leon/361148
+                - generic [ref=e1873]:
+                  - generic [ref=e1874]:
+                    - link "買えるLEON" [ref=e1876] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1877]: "- 2026.09.12"
+                  - link "美脚も楽チンも叶える「万能パンツ」【10選】" [ref=e1879] [cursor=pointer]:
+                    - /url: /buy_leon/361148
+              - listitem [ref=e1880]:
+                - link [ref=e1882] [cursor=pointer]:
+                  - /url: /buy_leon/361280
+                - generic [ref=e1884]:
+                  - generic [ref=e1885]:
+                    - link "買えるLEON" [ref=e1887] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1888]: "- 2026.09.11"
+                  - link "【今だけポイント3倍！】 9月11日（金）〜24日（木）は「買えるLEON..." [ref=e1890] [cursor=pointer]:
+                    - /url: /buy_leon/361280
+              - listitem [ref=e1891]:
+                - link [ref=e1893] [cursor=pointer]:
+                  - /url: /buy_leon/360807
+                - generic [ref=e1895]:
+                  - generic [ref=e1896]:
+                    - link "買えるLEON" [ref=e1898] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1899]: "- 2026.09.10"
+                  - link "楽チンセットアップも都会的に着こなしてこそ、イケオジです【10選】" [ref=e1901] [cursor=pointer]:
+                    - /url: /buy_leon/360807
+              - listitem [ref=e1902]:
+                - link [ref=e1904] [cursor=pointer]:
+                  - /url: /buy_leon/360481
+                - generic [ref=e1906]:
+                  - generic [ref=e1907]:
+                    - link "買えるLEON" [ref=e1909] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1910]: "- 2026.09.08"
+                  - link "大人のための「エポカ ウォモ」のセットアップ【6選】" [ref=e1912] [cursor=pointer]:
+                    - /url: /buy_leon/360481
+              - listitem [ref=e1913]:
+                - link [ref=e1915] [cursor=pointer]:
+                  - /url: /buy_leon/360371
+                - generic [ref=e1917]:
+                  - generic [ref=e1918]:
+                    - link "買えるLEON" [ref=e1920] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1921]: "- 2026.09.05"
+                  - link "【夏のセールでお得にゲットも ＋7選】 上下でもバラでもOK「魅せるセット..." [ref=e1923] [cursor=pointer]:
+                    - /url: /buy_leon/360371
+              - listitem [ref=e1924]:
+                - link [ref=e1926] [cursor=pointer]:
+                  - /url: /buy_leon/359992
+                - generic [ref=e1928]:
+                  - generic [ref=e1929]:
+                    - link "買えるLEON" [ref=e1931] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1932]: "- 2026.09.04"
+                  - link "【LEON別注】 飛び出すミッキーに彼女も思わずニッコリ♡「ロンT」7選" [ref=e1934] [cursor=pointer]:
+                    - /url: /buy_leon/359992
+              - listitem [ref=e1935]:
+                - link [ref=e1937] [cursor=pointer]:
+                  - /url: /buy_leon/359757
+                - generic [ref=e1939]:
+                  - generic [ref=e1940]:
+                    - link "買えるLEON" [ref=e1942] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1943]: "- 2026.09.02"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その4" [ref=e1945] [cursor=pointer]:
+                    - /url: /buy_leon/359757
+              - listitem [ref=e1946]:
+                - link [ref=e1948] [cursor=pointer]:
+                  - /url: /buy_leon/359654
+                - generic [ref=e1950]:
+                  - generic [ref=e1951]:
+                    - link "買えるLEON" [ref=e1953] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1954]: "- 2026.08.31"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その3" [ref=e1956] [cursor=pointer]:
+                    - /url: /buy_leon/359654
+              - listitem [ref=e1957]:
+                - link [ref=e1959] [cursor=pointer]:
+                  - /url: /buy_leon/359633
+                - generic [ref=e1961]:
+                  - generic [ref=e1962]:
+                    - link "買えるLEON" [ref=e1964] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1965]: "- 2026.08.29"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その2" [ref=e1967] [cursor=pointer]:
+                    - /url: /buy_leon/359633
+              - listitem [ref=e1968]:
+                - link [ref=e1970] [cursor=pointer]:
+                  - /url: /buy_leon/359325
+                - generic [ref=e1972]:
+                  - generic [ref=e1973]:
+                    - link "買えるLEON" [ref=e1975] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1976]: "- 2026.08.27"
+                  - link "【海外イケオジに学ぶ】 魅せるオヤジのブラウン使い その1" [ref=e1978] [cursor=pointer]:
+                    - /url: /buy_leon/359325
+              - listitem [ref=e1979]:
+                - link [ref=e1981] [cursor=pointer]:
+                  - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+                - generic [ref=e1983]:
+                  - generic [ref=e1984]:
+                    - link "買えるLEON" [ref=e1986] [cursor=pointer]:
+                      - /url: /buy_leon
+                    - generic [ref=e1987]: "- 2026.08.26"
+                  - link "【買えるLEON】 最旬ワードローブと別注アイテムを揃えました！" [ref=e1989] [cursor=pointer]:
+                    - /url: https://kaeruleon.jp/blogs/contents/monthly-contents-2026-october?utm_source=leonjp&utm_medium=specialbanner
+            - button "Next slide" [ref=e1990] [cursor=pointer]
+            - button "Previous slide" [ref=e1991] [cursor=pointer]
+            - generic [ref=e1993]:
+              - generic [ref=e1994] [cursor=pointer]
+              - generic [ref=e1995] [cursor=pointer]
+              - generic [ref=e1996] [cursor=pointer]
+              - generic [ref=e1997] [cursor=pointer]
+    - generic [ref=e1999]:
+      - generic [ref=e2001]:
+        - generic [ref=e2002]:
+          - link [ref=e2004] [cursor=pointer]:
+            - /url: /
+            - img "LEON" [ref=e2006]
+          - list [ref=e2007]:
+            - listitem [ref=e2008]:
+              - link [ref=e2009] [cursor=pointer]:
+                - /url: https://twitter.com/web_leon
+                - img "Twitter" [ref=e2010]
+            - listitem [ref=e2011]:
+              - link [ref=e2012] [cursor=pointer]:
+                - /url: https://www.facebook.com/LEON.OFFICAL
+                - img "Facebook" [ref=e2014]
+            - listitem [ref=e2015]:
+              - link [ref=e2016] [cursor=pointer]:
+                - /url: https://www.instagram.com/leon_magazine/
+                - img "Instagram" [ref=e2018]
+            - listitem [ref=e2019]:
+              - link [ref=e2020] [cursor=pointer]:
+                - /url: https://line.me/R/ti/p/%40oa-leon
+                - img "LINE" [ref=e2022]
+            - listitem [ref=e2023]:
+              - link [ref=e2024] [cursor=pointer]:
+                - /url: https://www.youtube.com/channel/UCnbOG94YjAg9gvWV8bAfcQQ
+                - img "YouTube" [ref=e2026]
+            - listitem [ref=e2027]:
+              - link [ref=e2028] [cursor=pointer]:
+                - /url: https://feedly.com/i/subscription/feed/https://www.leon.jp/api/feed/
+                - img "Feedly" [ref=e2030]
+        - list [ref=e2031]:
+          - listitem [ref=e2032]:
+            - link "Club LEON" [ref=e2033] [cursor=pointer]:
+              - /url: /clubleon
+          - listitem [ref=e2034]:
+            - link "FASHION" [ref=e2035] [cursor=pointer]:
+              - /url: /fashions
+          - listitem [ref=e2036]:
+            - link "WATCHES" [ref=e2037] [cursor=pointer]:
+              - /url: /watches
+          - listitem [ref=e2038]:
+            - link "CARS" [ref=e2039] [cursor=pointer]:
+              - /url: /cars
+          - listitem [ref=e2040]:
+            - link "ELECTRONICS" [ref=e2041] [cursor=pointer]:
+              - /url: /electronics
+          - listitem [ref=e2042]:
+            - link "BEAUTY&HEALTH" [ref=e2043] [cursor=pointer]:
+              - /url: /health
+          - listitem [ref=e2044]:
+            - link "PEOPLE" [ref=e2045] [cursor=pointer]:
+              - /url: /peoples
+          - listitem [ref=e2046]:
+            - link "GOURMET" [ref=e2047] [cursor=pointer]:
+              - /url: /gourmet
+          - listitem [ref=e2048]:
+            - link "STAY&TRAVEL" [ref=e2049] [cursor=pointer]:
+              - /url: /staytravel
+          - listitem [ref=e2050]:
+            - link "EVENTS" [ref=e2051] [cursor=pointer]:
+              - /url: /events
+          - listitem [ref=e2052]:
+            - link "LIFESTYLE" [ref=e2053] [cursor=pointer]:
+              - /url: /lifestyle
+          - listitem [ref=e2054]:
+            - link "SNAP" [ref=e2055] [cursor=pointer]:
+              - /url: /snaps
+          - listitem [ref=e2056]:
+            - link "ITEMS" [ref=e2057] [cursor=pointer]:
+              - /url: /items
+          - listitem [ref=e2058]:
+            - link "MAGAZINE" [ref=e2059] [cursor=pointer]:
+              - /url: /magazine
+          - listitem [ref=e2060]:
+            - link "INFORMATION" [ref=e2061] [cursor=pointer]:
+              - /url: /info
+          - listitem [ref=e2062]:
+            - link "FROM EDITORS" [ref=e2063] [cursor=pointer]:
+              - /url: /editors
+          - listitem [ref=e2064]:
+            - link "買えるLEON" [ref=e2065] [cursor=pointer]:
+              - /url: http://kaeruleon.jp/
+      - generic [ref=e2068]:
+        - list [ref=e2069]:
+          - listitem [ref=e2070]:
+            - link "会社情報" [ref=e2071] [cursor=pointer]:
+              - /url: /company
+          - listitem [ref=e2072]:
+            - link "広告掲載のお問い合わせ" [ref=e2073] [cursor=pointer]:
+              - /url: /ad
+          - listitem [ref=e2074]:
+            - link "利用規約" [ref=e2075] [cursor=pointer]:
+              - /url: /terms_of_service
+          - listitem [ref=e2076]:
+            - link "プライバシーポリシー" [ref=e2077] [cursor=pointer]:
+              - /url: /privacy_policy
+          - listitem [ref=e2078]:
+            - link "スタッフ" [ref=e2079] [cursor=pointer]:
+              - /url: /staff
+        - generic [ref=e2080]: © 2026 SHUFU TO SEIKATSU SHA. ALL RIGHTS RESERVED.
+  - generic [ref=e2081]: ｢話がつまらない人｣と面白い人の決定的な差とは？ | ライフスタイル | LEON レオン オフィシャルWebサイト
+  - link [ref=e2083] [cursor=pointer]:
+    - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjstZWmbMVhtefhHsJiYglB-CfzuZPeyufHeCxkJFELnSrsmO0wzzZhGMzSGICWBHzkA4XFoRScoQprjZaUmjAyVeMRZH6XQNSQb3nIJu7dIVAEt_YJubi1Dfc8L31gs2ZFBEYsE0fdX_UYwvKrRQIcXKaOiO9o5xFU0_Uycb0wsqh5QvYbH0HzWL3X2b27-MG2irwpAx9SFTILMVRZMPSM86CP5WOTZd5arxRGkTrUJpQAn8bPsbz_lCnjZ0CNYZd2m6PBbOuc0nn3GKaimTNe34vMQ4ze19huBoNtri0_uYp1T5IMKXzlkU_lQ8aScburpIOtqbfdn9C-07R1yM8vKi7bZSPd7bYO-lxcxF-0j8tk99TfKVp7JLEdLGinuXRvgeoR9uzlqQwRtx9mAS9o6oYHunW-Q3hw&sai=AMfl-YSduvW_DEtUxeXPmsMHi-1UfR9MIHmdu5Uq-4Pm7znZZDysZ3SJPp5gj4XMaHSRd7cWggjjrvvTyeXUY1OeIUA7aC2-GpwHC-rGpuDN6unBHA4feTeOZ7Rv2SPYd79G-PHKTKoCP1mS5Y6-6iVQSiLnlqYOJqUA2jxg7K2JfBSfjnj7NgPzE5I4qhfXa0DY6BVCsU8bDB7JVCFJjIyvgLGIY6jXVmKXEQaMUI1f1MjucmD6WF6DZAQgPfjj6sWr9cznA2PHrV7mDRAII1-ghig6X-vDERr7KbmzbCeYU8iuXhwx6F4_QnX02jTrbqN_ZZi_XACYdkj2kswDIntVnrE-TV1fT16ZURydTHBCkG50cvkz_Gluu_esCdZFLlXUoUnL5iCpkt2KsZ8JR6QItrBY&sig=Cg0ArKJSzOEytFOJNtQyEAE&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://www.mitsubishi-motors.co.jp/lineup/pajero/teaser/%3Fcid%3Do_dis-p_anym_skin-leon_pajero_fy2608rec709-1_hy_20260821
+  - link [ref=e2086] [cursor=pointer]:
+    - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjstZWmbMVhtefhHsJiYglB-CfzuZPeyufHeCxkJFELnSrsmO0wzzZhGMzSGICWBHzkA4XFoRScoQprjZaUmjAyVeMRZH6XQNSQb3nIJu7dIVAEt_YJubi1Dfc8L31gs2ZFBEYsE0fdX_UYwvKrRQIcXKaOiO9o5xFU0_Uycb0wsqh5QvYbH0HzWL3X2b27-MG2irwpAx9SFTILMVRZMPSM86CP5WOTZd5arxRGkTrUJpQAn8bPsbz_lCnjZ0CNYZd2m6PBbOuc0nn3GKaimTNe34vMQ4ze19huBoNtri0_uYp1T5IMKXzlkU_lQ8aScburpIOtqbfdn9C-07R1yM8vKi7bZSPd7bYO-lxcxF-0j8tk99TfKVp7JLEdLGinuXRvgeoR9uzlqQwRtx9mAS9o6oYHunW-Q3hw&sai=AMfl-YSduvW_DEtUxeXPmsMHi-1UfR9MIHmdu5Uq-4Pm7znZZDysZ3SJPp5gj4XMaHSRd7cWggjjrvvTyeXUY1OeIUA7aC2-GpwHC-rGpuDN6unBHA4feTeOZ7Rv2SPYd79G-PHKTKoCP1mS5Y6-6iVQSiLnlqYOJqUA2jxg7K2JfBSfjnj7NgPzE5I4qhfXa0DY6BVCsU8bDB7JVCFJjIyvgLGIY6jXVmKXEQaMUI1f1MjucmD6WF6DZAQgPfjj6sWr9cznA2PHrV7mDRAII1-ghig6X-vDERr7KbmzbCeYU8iuXhwx6F4_QnX02jTrbqN_ZZi_XACYdkj2kswDIntVnrE-TV1fT16ZURydTHBCkG50cvkz_Gluu_esCdZFLlXUoUnL5iCpkt2KsZ8JR6QItrBY&sig=Cg0ArKJSzOEytFOJNtQyEAE&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://www.mitsubishi-motors.co.jp/lineup/pajero/teaser/%3Fcid%3Do_dis-p_anym_skin-leon_pajero_fy2608rec709-1_hy_20260821

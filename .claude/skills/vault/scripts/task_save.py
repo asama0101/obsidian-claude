@@ -31,6 +31,7 @@ def build_note_text(
     project: str,
     due_date: str | None,
     dt: datetime.datetime,
+    source: str | None = None,
 ) -> str:
     """テンプレートを埋め、frontmatterを確定してタスクノート本文を組み立てる。"""
     filled = vault_lib.fill_template(template_text, title=title, dt=dt)
@@ -40,6 +41,8 @@ def build_note_text(
     fm_text = vault_lib.set_fm_value(fm_text, "start_date", dt.strftime("%Y-%m-%d"))
     # due_date は fill_template で今日の日付が入るため、未指定時は明示的に空欄へ戻す
     fm_text = vault_lib.set_fm_value(fm_text, "due_date", due_date or "")
+    if source:
+        fm_text = vault_lib.set_fm_value(fm_text, "source_meeting", source)
 
     return f"---\n{fm_text}\n---\n{body_text}"
 
@@ -49,11 +52,21 @@ def main() -> None:
     parser.add_argument("--title", required=True)
     parser.add_argument("--project", required=True)
     parser.add_argument("--due-date", dest="due_date", default=None)
+    parser.add_argument(
+        "--source",
+        default=None,
+        help='議事録ノートへのwikilink（例: "[[2026-09-21 定例MTG]]"）。議事録経由で'
+        "呼ばれた場合のみ指定し、フリーフォーム入力時は省略する。",
+    )
     parser.add_argument("--vault-root", default=None)
     args = parser.parse_args()
 
     if not args.project:
         print(json.dumps({"status": "error", "reason": "project_required"}, ensure_ascii=False))
+        sys.exit(1)
+
+    if args.source and ("\n" in args.source or '"' in args.source):
+        print(json.dumps({"status": "error", "reason": "invalid_source"}, ensure_ascii=False))
         sys.exit(1)
 
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
@@ -72,6 +85,7 @@ def main() -> None:
         title=args.title,
         project=args.project,
         due_date=args.due_date,
+        source=args.source,
         dt=now,
     )
 

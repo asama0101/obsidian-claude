@@ -1,0 +1,29 @@
+[     672ms] [LOG] %cExcuted AdScript! color: #008000 @ https://www.lifehacker.jp/_next/static/chunks/pages/_app-2fc529fbc1f470f2.js:0
+[     674ms] [WARNING] [GPT] PubAdsService.setTargeting is deprecated, use googletag.setConfig({targeting: ...}) instead.
+https://goo.gle/gpt-message#170 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609140101/pubads_impl.js:22
+[     703ms] [LOG] %cStopped googletag.pubads Check color: #7c7c7c @ https://www.lifehacker.jp/_next/static/chunks/pages/_app-2fc529fbc1f470f2.js:0
+[     706ms] [LOG] %cBodyPCAd : googletag.cmd.push() color: #7c7c7c @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[     706ms] [LOG] %cBodyPCAd : googletag.cmd.push() color: #7c7c7c @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[     706ms] [LOG] %cBodyPCAd : googletag.cmd.push() color: #7c7c7c @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[     707ms] [LOG] %cBodyPCAd : googletag.cmd.push() color: #7c7c7c @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[     707ms] [LOG] %cBodyPCAd : googletag.cmd.push() color: #7c7c7c @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[     921ms] [LOG] CCE module run! @ https://www.lifehacker.jp/_next/static/chunks/6101-e14c900454c4424c.js:0
+[    1394ms] [LOG] Visibility threshold pct=50, Visibility threshold ms = 0 @ https://tag.durationmedia.net/sites/11516/dm.js:0
+[    1772ms] [WARNING] [GPT] Slot.getTargeting is deprecated, use Slot.getConfig('targeting') instead.
+https://goo.gle/gpt-message#201 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202609140101/pubads_impl.js:22
+[    2517ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://match.prod.bidr.io/cookie-sync/gum:0
+[    3702ms] [LOG] Is empty?: false @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[    3702ms] [LOG] Size: [1, 1] @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[    3882ms] [INFO] Magnite Apex 2.3.7 @ https://video-outstream.rubiconproject.com/apex-2.3.7.js:0
+[    4060ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ https://cdn.jwplayer.com/libraries/PmDJ5b8g.js:10
+[    4214ms] [ERROR] Access to video at 'https://v.adsrvr.org/sg2o27m/be166e6/n2kwtihj5e/0uloaxr7_1_57.mp4' from origin 'https://www.lifehacker.jp' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ about:srcdoc:0
+[    4214ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://v.adsrvr.org/sg2o27m/be166e6/n2kwtihj5e/0uloaxr7_1_57.mp4:0
+[    9402ms] [LOG] Is empty?: false @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[    9402ms] [LOG] Size: [300, 600] @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[    9403ms] [LOG] Is empty?: false @ https://www.lifehacker.jp/_next/static/chunks/8560-a7d3550a2723146c.js:0
+[    9403ms] [LOG] Size: [300, 600] @ https://www.lifehacker.jp/_next/static/chunks/8560-a7d3550a2723146c.js:0
+[    9415ms] [LOG] Is empty?: true @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[    9415ms] [LOG] Size: null @ https://www.lifehacker.jp/_next/static/chunks/9386-03bf30c887a53235.js:0
+[   10016ms] [LOG] Registered provider a for configuration resolution. @ https://m.media-amazon.com/images/I/C1VPjFYSMrL.js:19
+[   10063ms] [WARNING] No client strategy found. Metrics will not be enabled. @ https://m.media-amazon.com/images/I/C1VPjFYSMrL.js:27
+[   10159ms] [WARNING] Unrecognized feature: 'attribution-reporting'. @ https://d37unsldgykj8z.cloudfront.net/ara.js?bidRequestId=IeKZlf.1X7oxjE9Xs34AdQ&srcName=CS&gdprConsent=true&campaignId=586204499603418452&ep=%5B%22ara%22%2C%22vue%22%2C%22forensics%22%2C%22forensics-ntd%22%2C%22pst%22%5D&creativeId=584295323615519312&bidId=gnYfiItfy0-MhTMTt6fYSA&advertiserId=588059550920147454&clickDestnUrl=https%3A%2F%2Fwww.ssp.co.jp%2F&gdpr=0&tungstenCSMLoggingFrameworkUrl=tungsten-service.prod.fe.adsqtungsten.a9.amazon.dev%2Fcsm%2F&tsEndpoint=https%3A%2F%2Fsq-tungsten-ts-fe.amazon-adsystem.com%2Fnoop%2F&adId=592254012929434729&au=https%3A%2F%2Faes.ap-southeast.3px.axp.amazon-adsystem.com%2Fx%2Fpx%3Ft%3D%24%7BAAX_TYPE%7D%26bi%3Dv1_CGvnR3M8hdqu7U7yargq0yD9EUBgCeYcuK59mWfUqrIFF6cS4xMEh0Ee-V9LmgC6hokn0oUF3lrIiwadfVtwNnNKT-n_ZPKRaRxcPBssFwP4Rtcm7GMtxqQ1JBSZbLX6Gt7RY02n65FKQBt2wAirHj0RZxRRWZ4hVAI5APthAkHUk6bA8wpqCQXiYMK0af1zWypALoCB1NrqK3N2PMcFIroCjsmuj5w_Ah_ePqovyEoRu8NznLblT08hlUS-glNDADr2KfXSsR1jz1cCPtR6a0OvK0frqxvhN8yr2JG0UNUbBEWn0P2k0j2_YhnnKK64_-I3-shnSv_0u7_fLKflGdgs8uJ5XgIfhqk-5ulHPacFuUVEDRiD0Tnpxa06W3qSUBpQsmutplpUmgjPNe6qaj9la6vVuPJbPOkgBUdNlj19DMYJtxhFKUBj6LxSfm05BL68YfPN4OuEQDBPdSqRg79SCFPUrGW-W3dFSrdm_NujSUh05sbSs0-vMhIZSM_jzK8MqlkXQu1fx0Xa0A7FkWKGDWkDKwxddm7aAmeyJr3DcSKpNi92ynkQE2Guc2reUOA6ucR6ejCJ_9I3y51fQVeRdks6x2smmbzU3cfS5WoFha-J_YM5S3es3y2qOvvIdUsyaMMbMTFv2vlpGYph5h4x_Krffn0lP3Ydsrvdu_fPcyWL2cyiTpGOmOjXnF0%26c%3D%24%7BAAX_PAYLOAD%7D&zone=FE-SIN&is3p=true&ntdUrl=www.btd-pdx.tq-tungsten.com%2F&pm=%7B%22ac%22%3A%5B%22au%22%5D%2C%22at%22%3A%5B%22au%22%5D%2C%22av%22%3A%5B%22au%22%5D%2C%22v%22%3A%5B%22au%22%5D%7D&targetElement=window&instrUrl=https%3A%2F%2Faax-events-cell02-cf.ap-southeast.aps.axp.amazon-adsystem.com%2Fx%2Fpx%2FJIJ2H4iLX8tPjIUzE7en2EgAAAGgw_U8kAUAAA5LAUFhcHNfdHhuX2JpZDEgICBhcHNfdHhuX2ltcDEgICAcgQVl%2F&sourceid=3659&expname=UNITAG_DISPLAY_ROLLOUT_5500&expbucket=C&sourcetype=dtb&traffictype=web&mediatype=display:0

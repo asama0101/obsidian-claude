@@ -189,6 +189,25 @@ def set_marker_block(text: str, start_marker: str, end_marker: str, new_inner: s
     return f"{before}\n{new_inner}\n{after}"
 
 
+# 次の見出し行(セクションの終端)を探すための正規表現
+_NEXT_HEADING_PATTERN = re.compile(r"^#", re.MULTILINE)
+
+
+def find_heading_section(text: str, heading_pattern: re.Pattern) -> tuple[int, int] | None:
+    """heading_patternにマッチする見出し行の直後から、次の見出し行の直前まで
+    (無ければ文書末尾まで)の範囲を(start, end)のインデックスで返す。
+    見出しが見つからなければNone。
+    """
+    heading_match = heading_pattern.search(text)
+    if heading_match is None:
+        return None
+
+    section_start = heading_match.end()
+    next_heading_match = _NEXT_HEADING_PATTERN.search(text, section_start)
+    section_end = next_heading_match.start() if next_heading_match else len(text)
+    return section_start, section_end
+
+
 def list_project_names(projects_dir: Path) -> list[str]:
     """projects_dir直下のサブディレクトリ名をソートして返す。
 
