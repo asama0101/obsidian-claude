@@ -73,6 +73,14 @@ class TestClipSave(unittest.TestCase):
         response.__exit__.return_value = False
         return response
 
+    def _mock_urlopen_by_url(self, responses: dict):
+        """URLごとに異なるレスポンスを返すside_effect関数を作る。"""
+
+        def _side_effect(url, timeout=10.0):
+            return responses[url]
+
+        return _side_effect
+
     def _run_main(self, argv):
         stdout = io.StringIO()
         with redirect_stdout(stdout):
@@ -80,21 +88,31 @@ class TestClipSave(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         return json.loads(stdout.getvalue())
 
-    def test_画像ダウンロード成功時にファイルが保存されノートに埋め込まれる(self):
+    def test_summaryとkey_pointsの項目に紐づく画像がその直下に埋め込まれる(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault_root = self._make_vault(tmp)
             content_path = self._make_content_json(
                 tmp,
                 {
                     "title": "テスト記事",
-                    "summary": ["要約1", "要約2"],
-                    "key_points": ["ポイント1"],
-                    "excerpt": "本文の抜粋です",
-                    "image_urls": ["https://example.com/photo.png"],
+                    "summary": [
+                        {"text": "要約1", "image_url": "https://example.com/s1.png"},
+                        {"text": "要約2"},
+                    ],
+                    "key_points": [
+                        {"text": "ポイント1", "image_url": "https://example.com/k1.jpg"},
+                    ],
+                    "full_text": "本文全文です",
                 },
             )
-            mock_response = self._mock_response(b"fakeimagedata", "image/png")
-            with patch("clip_save.urllib.request.urlopen", return_value=mock_response):
+            responses = {
+                "https://example.com/s1.png": self._mock_response(b"s1data", "image/png"),
+                "https://example.com/k1.jpg": self._mock_response(b"k1data", "image/jpeg"),
+            }
+            with patch(
+                "clip_save.urllib.request.urlopen",
+                side_effect=self._mock_urlopen_by_url(responses),
+            ):
                 result = self._run_main(
                     [
                         "--url",
@@ -106,20 +124,118 @@ class TestClipSave(unittest.TestCase):
                     ]
                 )
 
-            self.assertEqual(len(result["images_saved"]), 1)
+            self.assertEqual(len(result["images_saved"]), 2)
             self.assertEqual(result["images_failed"], [])
 
             note_path = Path(result["note_path"])
-            self.assertTrue(note_path.exists())
             note_text = note_path.read_text(encoding="utf-8")
 
-            saved_filename = result["images_saved"][0]
-            self.assertTrue((vault_root / "80_Attachments" / saved_filename).exists())
-            self.assertIn(f"![[80_Attachments/{saved_filename}]]", note_text)
-            self.assertTrue(saved_filename.endswith(".png"))
-            self.assertIn("要約1", note_text)
-            self.assertIn("ポイント1", note_text)
-            self.assertIn("> 本文の抜粋です", note_text)
+            s1_filename = next(f for f in result["images_saved"] if f.endswith(".png"))
+            k1_filename = next(f for f in result["images_saved"] if f.endswith(".jpg"))
+
+            self.assertIn(
+                f"- 要約1\n  ![[80_Attachments/{s1_filename}]]\n- 要約2", note_text
+            )
+            self.assertIn(
+                f"- ポイント1\n  ![[80_Attachments/{k1_filename}]]", note_text
+            )
+            self.assertIn("> 本文全文です", note_text)
+
+    def test_image_urlを持たない項目には画像が埋め込まれない(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "画像なし記事",
+                    "summary": [{"text": "要約のみ"}],
+                    "key_points": [{"text": "ポイントのみ", "image_url": ""}],
+                    "full_text": "本文",
+                },
+            )
+            with patch("clip_save.urllib.request.urlopen") as mock_urlopen:
+                result = self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/noimage",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+                mock_urlopen.assert_not_called()
+
+            self.assertEqual(result["images_saved"], [])
+            self.assertEqual(result["images_failed"], [])
+
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            self.assertNotIn("![[80_Attachments/", note_text)
+
+    def test_同じimage_urlが複数項目で参照される場合はダウンロードが1回だけになる(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "共有画像記事",
+                    "summary": [
+                        {"text": "要約A", "image_url": "https://example.com/shared.png"}
+                    ],
+                    "key_points": [
+                        {"text": "ポイントB", "image_url": "https://example.com/shared.png"}
+                    ],
+                    "full_text": "本文",
+                },
+            )
+            mock_response = self._mock_response(b"shareddata", "image/png")
+            with patch(
+                "clip_save.urllib.request.urlopen", return_value=mock_response
+            ) as mock_urlopen:
+                result = self._run_main(
+                    [
+                        "--url",
+                        "https://example.com/shared-article",
+                        "--content-json",
+                        str(content_path),
+                        "--vault-root",
+                        str(vault_root),
+                    ]
+                )
+                self.assertEqual(mock_urlopen.call_count, 1)
+
+            self.assertEqual(len(result["images_saved"]), 1)
+            shared_filename = result["images_saved"][0]
+
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            self.assertIn(f"- 要約A\n  ![[80_Attachments/{shared_filename}]]", note_text)
+            self.assertIn(f"- ポイントB\n  ![[80_Attachments/{shared_filename}]]", note_text)
+
+    def test_full_textが加工されず全文そのまま引用形式で本文に入る(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = self._make_vault(tmp)
+            long_text = "あ" * 5000
+            content_path = self._make_content_json(
+                tmp,
+                {
+                    "title": "長文記事",
+                    "summary": [],
+                    "key_points": [],
+                    "full_text": long_text,
+                },
+            )
+            result = self._run_main(
+                [
+                    "--url",
+                    "https://example.com/long",
+                    "--content-json",
+                    str(content_path),
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
+            note_text = Path(result["note_path"]).read_text(encoding="utf-8")
+            self.assertIn(f"> {long_text}", note_text)
 
     def test_画像ダウンロード失敗時はスキップされノート作成は続行される(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -128,10 +244,11 @@ class TestClipSave(unittest.TestCase):
                 tmp,
                 {
                     "title": "失敗テスト記事",
-                    "summary": ["要約"],
-                    "key_points": ["ポイント"],
-                    "excerpt": "抜粋",
-                    "image_urls": ["https://example.com/broken.jpg"],
+                    "summary": [
+                        {"text": "要約", "image_url": "https://example.com/broken.jpg"}
+                    ],
+                    "key_points": [{"text": "ポイント"}],
+                    "full_text": "本文",
                 },
             )
             with patch(
@@ -155,6 +272,10 @@ class TestClipSave(unittest.TestCase):
             self.assertTrue(note_path.exists())
             self.assertEqual(len(list((vault_root / "80_Attachments").iterdir())), 0)
 
+            note_text = note_path.read_text(encoding="utf-8")
+            self.assertIn("- 要約", note_text)
+            self.assertNotIn("![[80_Attachments/", note_text)
+
     def test_project_hintから正しく推定されfrontmatterに設定される(self):
         with tempfile.TemporaryDirectory() as tmp:
             vault_root = self._make_vault(tmp)
@@ -165,8 +286,7 @@ class TestClipSave(unittest.TestCase):
                     "title": "プロジェクト記事",
                     "summary": [],
                     "key_points": [],
-                    "excerpt": "",
-                    "image_urls": [],
+                    "full_text": "",
                 },
             )
             result = self._run_main(
@@ -195,8 +315,7 @@ class TestClipSave(unittest.TestCase):
                     "title": "無関係記事",
                     "summary": [],
                     "key_points": [],
-                    "excerpt": "",
-                    "image_urls": [],
+                    "full_text": "",
                 },
             )
             result = self._run_main(
@@ -224,8 +343,7 @@ class TestClipSave(unittest.TestCase):
                     "title": "日付テスト記事",
                     "summary": [],
                     "key_points": [],
-                    "excerpt": "",
-                    "image_urls": [],
+                    "full_text": "",
                 },
             )
             result = self._run_main(
@@ -253,8 +371,7 @@ class TestClipSave(unittest.TestCase):
                     "title": "重複記事",
                     "summary": [],
                     "key_points": [],
-                    "excerpt": "",
-                    "image_urls": [],
+                    "full_text": "",
                 },
             )
             argv = [

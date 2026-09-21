@@ -1,9 +1,9 @@
 """WebページのクリップをVaultのノートとして保存するスクリプト。
 
-Claude側でWebFetch+要約して作成したJSON(title/summary/key_points/excerpt/
-image_urls)を受け取り、画像をダウンロードして80_Attachments/に保存し、
-WebClip_Template.mdベースのノートを30_Resources/WebClips/に作成する。
-標準ライブラリのみに依存する。
+Claude側でWebFetch+要約して作成したJSON(title/summary/key_points/full_text)を
+受け取り、summary/key_pointsの各項目に紐づく画像をダウンロードして
+80_Attachments/に保存し、WebClip_Template.mdベースのノートを
+30_Resources/WebClips/に作成する。標準ライブラリのみに依存する。
 """
 
 from __future__ import annotations
@@ -47,13 +47,15 @@ def _download_image(url: str, timeout: float = 10.0) -> tuple[bytes, str | None]
     return data, content_type
 
 
-def download_images(image_urls: list[str], title: str, attachments_dir: Path) -> tuple[list[str], list[str]]:
-    """画像URL群をダウンロードしattachments_dirに保存する。
+def download_images(
+    image_urls: list[str], title: str, attachments_dir: Path
+) -> tuple[dict[str, str], list[str]]:
+    """画像URL群(重複無し)をダウンロードしattachments_dirに保存する。
 
     個々のダウンロード失敗は例外を捕捉してスキップし、処理全体は継続する。
-    戻り値: (保存したファイル名のリスト, 失敗したURLのリスト)
+    戻り値: (URL -> 保存したファイル名 のマップ, 失敗したURLのリスト)
     """
-    images_saved: list[str] = []
+    url_to_filename: dict[str, str] = {}
     images_failed: list[str] = []
     base_name = vault_lib.sanitize_filename(title) or "webclip"
 
@@ -67,18 +69,66 @@ def download_images(image_urls: list[str], title: str, attachments_dir: Path) ->
             filename = f"{base_name}-{i}{ext}"
             dest = vault_lib.unique_path(attachments_dir, filename)
             dest.write_bytes(data)
-            images_saved.append(dest.name)
+            url_to_filename[url] = dest.name
         except Exception:
             images_failed.append(url)
 
-    return images_saved, images_failed
+    return url_to_filename, images_failed
 
 
-def _bullet_list(items: list[str]) -> str:
-    """箇条書き項目のリストをMarkdownの箇条書きに変換する。空なら空欄行のままにする。"""
+def _normalize_items(raw_items: list) -> list[dict]:
+    """summary/key_pointsの各項目を{"text": ..., "image_url": ...}に正規化する。
+
+    image_urlキーが無い、または値が空文字列/nullなら空文字列として扱う。
+    """
+    normalized: list[dict] = []
+    for item in raw_items:
+        text = item.get("text", "")
+        image_url = item.get("image_url") or ""
+        normalized.append({"text": text, "image_url": image_url})
+    return normalized
+
+
+def _collect_unique_urls(*item_lists: list[dict]) -> list[str]:
+    """複数の正規化済み項目リストから、image_urlを重複無く出現順で集める。"""
+    seen: list[str] = []
+    for items in item_lists:
+        for item in items:
+            url = item["image_url"]
+            if url and url not in seen:
+                seen.append(url)
+    return seen
+
+
+def _resolve_item_filenames(
+    normalized_items: list[dict], url_to_filename: dict[str, str]
+) -> list[dict]:
+    """正規化済み項目にダウンロード結果のファイル名を紐づける。
+
+    ダウンロードに失敗した(url_to_filenameに存在しない)項目のfilenameはNoneになる。
+    """
+    resolved = []
+    for item in normalized_items:
+        url = item["image_url"]
+        filename = url_to_filename.get(url) if url else None
+        resolved.append({"text": item["text"], "filename": filename})
+    return resolved
+
+
+def _bullet_list_with_images(items: list[dict]) -> str:
+    """項目リストをMarkdownの箇条書きに変換し、画像があれば直下に埋め込む。
+
+    空なら空欄行のままにする。
+    """
     if not items:
         return "- "
-    return "\n".join(f"- {item}" for item in items)
+    lines: list[str] = []
+    for item in items:
+        lines.append(f"- {item['text']}")
+        filename = item.get("filename")
+        if filename:
+            lines.append(f"  ![[80_Attachments/{filename}]]")
+    return "\n".join(lines)
 
 
 def _blockquote(text: str) -> str:
@@ -113,12 +163,14 @@ def build_note_text(
     dt: datetime.datetime,
     url: str,
     project_match: str | None,
-    summary: list[str],
-    key_points: list[str],
-    excerpt: str,
-    images_saved: list[str],
+    summary_items: list[dict],
+    key_points_items: list[dict],
+    full_text: str,
 ) -> str:
-    """テンプレートに内容を差し込み、完成したノート全文を返す。"""
+    """テンプレートに内容を差し込み、完成したノート全文を返す。
+
+    summary_items/key_points_itemsは{"text": str, "filename": str | None}のリスト。
+    """
     text = vault_lib.fill_template(template_text, title=title, dt=dt)
     fm, body = vault_lib.split_frontmatter(text)
 
@@ -126,13 +178,21 @@ def build_note_text(
     if project_match:
         fm = _set_fm_raw(fm, "project", project_match)
 
-    if images_saved:
-        images_md = "\n".join(f"![[80_Attachments/{name}]]" for name in images_saved)
-        body = body.replace(f"# {title}\n\n", f"# {title}\n\n{images_md}\n\n", 1)
-
-    body = body.replace("## \U0001f4cc 概要・要約\n- ", "## \U0001f4cc 概要・要約\n" + _bullet_list(summary), 1)
-    body = body.replace("## \U0001f4a1 キーポイント\n- ", "## \U0001f4a1 キーポイント\n" + _bullet_list(key_points), 1)
-    body = body.replace("## \U0001f4c4 クリップ本文\n>", "## \U0001f4c4 クリップ本文\n" + _blockquote(excerpt), 1)
+    body = body.replace(
+        "## \U0001f4cc 概要・要約\n- ",
+        "## \U0001f4cc 概要・要約\n" + _bullet_list_with_images(summary_items),
+        1,
+    )
+    body = body.replace(
+        "## \U0001f4a1 キーポイント\n- ",
+        "## \U0001f4a1 キーポイント\n" + _bullet_list_with_images(key_points_items),
+        1,
+    )
+    body = body.replace(
+        "## \U0001f4c4 クリップ本文\n>",
+        "## \U0001f4c4 クリップ本文\n" + _blockquote(full_text),
+        1,
+    )
 
     return f"---\n{fm}\n---\n{body}"
 
@@ -149,13 +209,18 @@ def main(argv: list[str] | None = None) -> int:
     content = json.loads(Path(args.content_json).read_text(encoding="utf-8"))
 
     title = content.get("title") or "Untitled"
-    summary = content.get("summary", [])
-    key_points = content.get("key_points", [])
-    excerpt = content.get("excerpt", "")
-    image_urls = content.get("image_urls", [])
+    normalized_summary = _normalize_items(content.get("summary", []))
+    normalized_key_points = _normalize_items(content.get("key_points", []))
+    full_text = content.get("full_text", "")
+
+    unique_urls = _collect_unique_urls(normalized_summary, normalized_key_points)
 
     attachments_dir = vault_root / "80_Attachments"
-    images_saved, images_failed = download_images(image_urls, title, attachments_dir)
+    url_to_filename, images_failed = download_images(unique_urls, title, attachments_dir)
+    images_saved = list(url_to_filename.values())
+
+    summary_items = _resolve_item_filenames(normalized_summary, url_to_filename)
+    key_points_items = _resolve_item_filenames(normalized_key_points, url_to_filename)
 
     project_match = None
     if args.project_hint:
@@ -171,10 +236,9 @@ def main(argv: list[str] | None = None) -> int:
         dt=datetime.datetime.now(),
         url=args.url,
         project_match=project_match,
-        summary=summary,
-        key_points=key_points,
-        excerpt=excerpt,
-        images_saved=images_saved,
+        summary_items=summary_items,
+        key_points_items=key_points_items,
+        full_text=full_text,
     )
 
     dest_dir = vault_root / "30_Resources" / "WebClips"
