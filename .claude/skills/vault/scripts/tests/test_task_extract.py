@@ -55,17 +55,40 @@ class TestExtractActionItems(unittest.TestCase):
 
 
 class TestExtractProject(unittest.TestCase):
-    def test_projectが設定されている場合は取得できる(self):
-        text = '---\nproject: "[[VaultMigration]]"\n---\n# body'
-        self.assertEqual(task_extract.extract_project(text), "[[VaultMigration]]")
+    def test_projectが設定されており対応ディレクトリが実在する場合は取得できる(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = Path(tmp)
+            (vault_root / "10_Projects" / "VaultMigration").mkdir(parents=True)
+            text = '---\nproject: "[[VaultMigration]]"\n---\n# body'
+            self.assertEqual(
+                task_extract.extract_project(text, vault_root), "[[VaultMigration]]"
+            )
 
     def test_projectが空文字の場合はNoneになる(self):
-        text = '---\nproject: ""\n---\n# body'
-        self.assertIsNone(task_extract.extract_project(text))
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = Path(tmp)
+            text = '---\nproject: ""\n---\n# body'
+            self.assertIsNone(task_extract.extract_project(text, vault_root))
 
     def test_projectキーが無い場合はNoneになる(self):
-        text = '---\ntitle: "foo"\n---\n# body'
-        self.assertIsNone(task_extract.extract_project(text))
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = Path(tmp)
+            text = '---\ntitle: "foo"\n---\n# body'
+            self.assertIsNone(task_extract.extract_project(text, vault_root))
+
+    def test_projectが設定されているが対応ディレクトリが実在しない場合はNoneになる(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            vault_root = Path(tmp)
+            text = '---\nproject: "[[アーカイブ済みプロジェクト]]"\n---\n# body'
+            self.assertIsNone(task_extract.extract_project(text, vault_root))
 
 
 class TestMain(unittest.TestCase):
@@ -75,7 +98,9 @@ class TestMain(unittest.TestCase):
         import tempfile
 
         with tempfile.TemporaryDirectory() as tmp:
-            note_path = Path(tmp) / "note.md"
+            vault_root = Path(tmp)
+            (vault_root / "10_Projects" / "VaultMigration").mkdir(parents=True)
+            note_path = vault_root / "note.md"
             note_path.write_text(
                 '---\nproject: "[[VaultMigration]]"\n---\n'
                 "# 議事録\n\n"
@@ -86,7 +111,14 @@ class TestMain(unittest.TestCase):
             )
             script_path = Path(__file__).resolve().parent.parent / "task_extract.py"
             result = subprocess.run(
-                [sys.executable, str(script_path), "--note", str(note_path)],
+                [
+                    sys.executable,
+                    str(script_path),
+                    "--note",
+                    str(note_path),
+                    "--vault-root",
+                    str(vault_root),
+                ],
                 capture_output=True,
                 text=True,
                 check=True,

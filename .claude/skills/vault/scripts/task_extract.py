@@ -36,11 +36,25 @@ def extract_action_items(text: str) -> list[str]:
     return [m.group(1) for m in _CHECKBOX_PATTERN.finditer(section_text)]
 
 
-def extract_project(text: str) -> str | None:
-    """frontmatterから project の値を取得する。未設定なら None。"""
+def extract_project(text: str, vault_root: Path) -> str | None:
+    """frontmatterから project の値を取得する。
+
+    未設定、または対応するプロジェクトが `10_Projects/` 配下に
+    実在しない(アーカイブ済み等)場合は None を返す。
+    """
     fm_text, _ = vault_lib.split_frontmatter(text)
     project = vault_lib.get_fm_value(fm_text, "project")
-    return project or None
+    if not project:
+        return None
+
+    name = project
+    if name.startswith("[[") and name.endswith("]]"):
+        name = name[2:-2]
+
+    if not (vault_root / "10_Projects" / name).is_dir():
+        return None
+
+    return project
 
 
 def main() -> None:
@@ -57,7 +71,7 @@ def main() -> None:
     text = note_path.read_text(encoding="utf-8")
     result = {
         "items": extract_action_items(text),
-        "project": extract_project(text),
+        "project": extract_project(text, vault_root),
     }
     print(json.dumps(result, ensure_ascii=False))
 
