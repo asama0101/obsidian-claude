@@ -189,6 +189,17 @@ def set_marker_block(text: str, start_marker: str, end_marker: str, new_inner: s
     return f"{before}\n{new_inner}\n{after}"
 
 
+def list_project_names(projects_dir: Path) -> list[str]:
+    """projects_dir直下のサブディレクトリ名をソートして返す。
+
+    projects_dirが存在しない、またはディレクトリでない場合は空リストを返す。
+    """
+    if not projects_dir.exists() or not projects_dir.is_dir():
+        return []
+
+    return sorted(entry.name for entry in projects_dir.iterdir() if entry.is_dir())
+
+
 def _tokenize(name: str) -> list[str]:
     """ディレクトリ名を空白/ハイフン/アンダースコアで分割し、3文字以上のトークンを返す。"""
     tokens = re.split(r"[\s\-_]+", name)
@@ -200,16 +211,11 @@ def fuzzy_project_match(text: str, projects_dir: Path) -> str | None:
 
     ちょうど1件一致した場合のみ '"[[ディレクトリ名]]"' を返す。
     """
-    if not projects_dir.exists() or not projects_dir.is_dir():
-        return None
-
     matched_names: list[str] = []
-    for entry in sorted(projects_dir.iterdir()):
-        if not entry.is_dir():
-            continue
-        tokens = _tokenize(entry.name)
+    for name in list_project_names(projects_dir):
+        tokens = _tokenize(name)
         if any(token in text for token in tokens):
-            matched_names.append(entry.name)
+            matched_names.append(name)
 
     if len(matched_names) == 1:
         return f'"[[{matched_names[0]}]]"'
