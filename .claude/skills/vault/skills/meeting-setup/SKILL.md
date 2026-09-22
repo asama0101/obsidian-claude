@@ -20,7 +20,7 @@ description: |
 1. Claudeが接続済みGoogle Calendar MCP（`list_events`）で本日分の予定を
    取得し（先読み廃止、本日1日分のみ）、その結果（`{"events": [...]}`
    または配列そのもの）を一時JSONファイルへ書き出す。
-2. `python .claude/skills/vault/scripts/meeting_sync.py --events-json <path>`
+2. `PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --events-json <path>`
    を実行する（`--vault-root`は省略可。省略時はVaultルート自動検出）。
 3. 標準出力のJSONを見て、結果をユーザーへ要約報告する。各フィールドの内容は次の通り。
 
@@ -46,13 +46,13 @@ description: |
    の3択を、`created`一覧全体でまとめてユーザーに確認する（自動推定できて
    いた場合はその値をデフォルト候補として提示してよい）。
 5. 確定した値をノートごとに
-   `python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project <value>`
+   `PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project <value>`
    で反映する。`<value>`はクォート無し`[[プロジェクト名]]`形式、プロジェクト
    なしの場合は空文字列`""`を渡す（`task_save.py`の`--project`と同じ記法）。
    例えば：
    ```
-   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project [[九州旅行]]
-   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project ""
+   PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project [[九州旅行]]
+   PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project ""
    ```
    このときノートは新しいproject値に応じて`10_Projects/<Name>/Meetings/`
    または`20_Areas/Meetings/`へ自動的に移動される。`--project`が

@@ -78,14 +78,14 @@ Webページの内容を後から参照できる形でVaultに保存する。
    - `full_text`は記事本文の画像を全て、元の記事内での位置関係を保ったまま
      `![alt](元のURL)`形式でインライン埋め込みしたテキスト。
 4. **カテゴリタグを確定する。**
-   `python .claude/skills/vault/scripts/list_categories.py` を実行し、
+   `PYTHONUTF8=1 python .claude/skills/vault/scripts/list_categories.py` を実行し、
    既存の `<category>/<topic>` タグ一覧を取得する。これを候補として
    （「新規作成」の選択肢も併記して）ユーザーに提示し、明示的に選択・
    入力するまで待つ（自動決定はしない。`references/category-tagging.md`
    を参照）。
 5. **`webclip_save.py` を実行する。**
    ```
-   python .claude/skills/vault/scripts/webclip_save.py \
+   PYTHONUTF8=1 python .claude/skills/vault/scripts/webclip_save.py \
      --url <URL> --content-json <JSONファイルパス> --tag <確定したタグ>
    ```
    - `summary`/`key_points`の`image_url`と`full_text`中の`![alt](URL)`を

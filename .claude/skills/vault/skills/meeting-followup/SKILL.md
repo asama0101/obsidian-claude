@@ -28,24 +28,24 @@ description: |
 
 ## 処理
 
-1. `python .claude/skills/vault/scripts/task_extract.py --note <議事録ノートのパス>`
+1. `PYTHONUTF8=1 python .claude/skills/vault/scripts/task_extract.py --note <議事録ノートのパス>`
    を実行し、標準出力のJSON（`{"items": [...], "project": "[[...]]"|null}`）
    から未チェックのアクションアイテム候補（`items`）を取得する。
 2. 抽出結果をユーザーに提示し、タスク化する項目を確認する。
 3. タスク化する各アクションアイテムについて、プロジェクト解決フロー
    （`task-add`スキルと共通の設計）を実行する。
-   `python .claude/skills/vault/scripts/list_projects.py`を実行し、標準出力の
+   `PYTHONUTF8=1 python .claude/skills/vault/scripts/list_projects.py`を実行し、標準出力の
    JSON（`{"projects": [...]}`）から`10_Projects/`直下の候補一覧を取得した
    上で、次の3択をユーザーに確認する（**自動推測はしない**）。
    - 既存プロジェクトから選ぶ
    - 新規プロジェクトを作成する（`project-add`スキルを呼び出す）
    - プロジェクトなしで進める（保存先は`20_Areas/Tasks/`になる）
-4. `python .claude/skills/vault/scripts/task_save.py --title <item> [--project <project>] --source "[[議事録ノート名]]"`
+4. `PYTHONUTF8=1 python .claude/skills/vault/scripts/task_save.py --title <item> [--project <project>] --source "[[議事録ノート名]]"`
    を実行してタスクノートを作成する（`start_date`は空欄のまま、`status`は
    テンプレートの既定値`1_todo`のまま作成される）。`--project`は省略可能で、
    プロジェクトなしを選んだ場合は省略する。
 5. タスクノート作成後、
-   `python .claude/skills/vault/scripts/meeting_sync.py --link-task <議事録ノートのパス> --item-text <元のアクションアイテム本文> --item-index <出現順インデックス> --task-note <タスクノート名>`
+   `PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --link-task <議事録ノートのパス> --item-text <元のアクションアイテム本文> --item-index <出現順インデックス> --task-note <タスクノート名>`
    を実行する。これにより議事録ノート側の該当チェックボックス行が、
    **チェックせずに元の文言を消して**`- [ ] [[タスクノート名]]`へ完全な
    wikilinkに置き換わる。`--item-index`は、`--item-text`と完全一致する行が
@@ -56,7 +56,7 @@ description: |
    （exit code 1）が返る。
 6. すべてのアクションアイテムの処理が終わったら、議事録ノートの
    `attendance`が`1_scheduled`のままであればユーザーに開催状況を確認し、
-   `python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <2_done|3_skip>`
+   `PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <2_done|3_skip>`
    で更新する。既に`2_done`/`3_skip`であれば何もしない。
 7. 結果をユーザーに要約報告する。
 

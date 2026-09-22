@@ -20,7 +20,7 @@ description: |
 - `10_Projects/<Name>/Tasks/`・`Meetings/`・`Documents/` の3フォルダ
 
 ## 処理
-1. `python .claude/skills/vault/scripts/project_create.py --title <name> [--due-date YYYY-MM-DD]`
+1. `PYTHONUTF8=1 python .claude/skills/vault/scripts/project_create.py --title <name> [--due-date YYYY-MM-DD]`
    を実行する。
 2. 標準出力のJSONを`status`フィールドで判定する。
    - `"ok"`: `note_path`をユーザーに報告する。

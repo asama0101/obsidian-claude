@@ -14,7 +14,7 @@ description: |
 ## 処理
 1. `.claude/skills/vault/scripts/today_start.py` を引数なしで実行する。
    ```
-   python .claude/skills/vault/scripts/today_start.py
+   PYTHONUTF8=1 python .claude/skills/vault/scripts/today_start.py
    ```
 2. スクリプトは標準出力にJSON(1行)を出す。`status`フィールドで結果を判定する。
    - `status: "blocked"`

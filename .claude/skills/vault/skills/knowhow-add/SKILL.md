@@ -36,12 +36,12 @@ description: |
    }
    ```
 
-4. `python .claude/skills/vault/scripts/list_categories.py` を実行し、
+4. `PYTHONUTF8=1 python .claude/skills/vault/scripts/list_categories.py` を実行し、
    既存の `<category>/<topic>` タグ一覧を取得する。これを候補として
    （「新規作成」の選択肢も併記して）ユーザーに提示し、明示的に選択・
    入力するまで待つ（自動決定はしない。`references/category-tagging.md`
    を参照）。
-5. `scripts/knowhow_save.py --content-json <path> --tag <確定したタグ>`
+5. `PYTHONUTF8=1 python .claude/skills/vault/scripts/knowhow_save.py --content-json <path> --tag <確定したタグ>`
    を実行する。スクリプトが `Knowhow_Template.md` を展開し、
    `20_Areas/Knowledge/` にノートを保存して `{"note_path": "..."}` を
    出力する。

@@ -25,13 +25,13 @@ CLI入力（フリーフォーム）。
 
 1. Claude自身がユーザー発言からタイトル・期限を抽出する（決定的処理では
    ないため`task_extract.py`は使わない）。
-2. プロジェクト解決フロー: `python .claude/skills/vault/scripts/list_projects.py`
+2. プロジェクト解決フロー: `PYTHONUTF8=1 python .claude/skills/vault/scripts/list_projects.py`
    を実行し、標準出力のJSON（`{"projects": [...]}`）から`10_Projects/`直下の
    候補一覧を取得する。次の3択をユーザーに確認する（**自動推測はしない**）。
    - 既存プロジェクトから選ぶ
    - 新規プロジェクトを作成する（`project-add`スキルを呼び出す）
    - プロジェクトなしで進める
-3. `python .claude/skills/vault/scripts/task_save.py --title <text> [--project <project>] [--due-date YYYY-MM-DD]`
+3. `PYTHONUTF8=1 python .claude/skills/vault/scripts/task_save.py --title <text> [--project <project>] [--due-date YYYY-MM-DD]`
    を実行する。`--project`は省略可能で、省略時（プロジェクトなしを選んだ場合）
    は`20_Areas/Tasks/`へ保存される。既存プロジェクトを選んだ場合・新規作成した
    場合は`10_Projects/<Name>/Tasks/`へ保存される。議事録経由ではないため

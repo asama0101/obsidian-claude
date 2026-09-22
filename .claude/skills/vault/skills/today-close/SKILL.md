@@ -27,7 +27,7 @@ description: |
    確認する。開催日が当日以前で`attendance`が`1_scheduled`のまま未更新の
    ノートが含まれていれば、該当ノート一覧（`note_path`・`title`）を提示し
    「実施済み/不参加」をユーザーにまとめて確認する。確認結果は
-   `python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <1_scheduled|2_done|3_skip>`
+   `PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <1_scheduled|2_done|3_skip>`
    （実施済みなら`2_done`、不参加なら`3_skip`）で反映する。該当ノートが
    無ければ何もしない。
 
@@ -44,7 +44,7 @@ description: |
 4. `close_day.py` を実行する。
 
    ```
-   python .claude/skills/vault/scripts/close_day.py
+   PYTHONUTF8=1 python .claude/skills/vault/scripts/close_day.py
    ```
 
    Vault ルート以外から実行する場合や動作確認時は `--vault-root <path>`
