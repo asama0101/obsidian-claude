@@ -157,6 +157,47 @@ def test_日時変更が反映されユーザー記入欄は変わらない():
         assert "予算を確定した" in body
 
 
+def test_開催場所のみの変化でもupdatedになり本文が書き換わる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = make_vault(Path(tmp))
+        event1 = make_event(id="evt1", summary="定例1on1", location="会議室A")
+        result1 = meeting_sync.sync_events([event1], vault_root)
+        note_path = Path(result1["created"][0])
+
+        event2 = make_event(id="evt1", summary="定例1on1", location="会議室B")
+        result2 = meeting_sync.sync_events([event2], vault_root)
+
+        assert result2["updated"] == [str(note_path)]
+        updated_text = note_path.read_text(encoding="utf-8")
+        assert "- **開催場所:** 会議室B" in updated_text
+
+
+def test_参加者のみの変化でもupdatedになり本文が書き換わる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = make_vault(Path(tmp))
+        event1 = make_event(id="evt1", summary="定例1on1")
+        result1 = meeting_sync.sync_events([event1], vault_root)
+        note_path = Path(result1["created"][0])
+
+        event2 = make_event(
+            id="evt1",
+            summary="定例1on1",
+            attendees=[
+                {"email": "a@example.com"},
+                {"email": "b@example.com"},
+                {"email": "c@example.com"},
+            ],
+        )
+        result2 = meeting_sync.sync_events([event2], vault_root)
+
+        assert result2["updated"] == [str(note_path)]
+        updated_text = note_path.read_text(encoding="utf-8")
+        assert (
+            "- **参加者:** a@example.com, b@example.com, c@example.com"
+            in updated_text
+        )
+
+
 def test_変化が無ければupdatedに追加されない():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp))
@@ -482,7 +523,7 @@ def test_set_projectで指定ノートのproject欄が書き換わりプロジ�
                 "--set-project",
                 str(note_path),
                 "--project",
-                '"[[VaultMigration]]"',
+                "[[VaultMigration]]",
                 "--vault-root",
                 str(vault_root),
             ]
@@ -542,7 +583,7 @@ def test_set_projectでプロジェクト解除するとAreas配下へ戻る():
                 "--set-project",
                 str(note_path),
                 "--project",
-                '""',
+                "",
                 "--vault-root",
                 str(vault_root),
             ]
@@ -573,7 +614,7 @@ def test_set_projectで既に正しいフォルダにあれば移動しない():
                 "--set-project",
                 str(note_path),
                 "--project",
-                '"[[VaultMigration]]"',
+                "[[VaultMigration]]",
                 "--vault-root",
                 str(vault_root),
             ]
@@ -600,7 +641,7 @@ def test_set_projectで存在しないプロジェクト名を指定するとエ
                     "--set-project",
                     str(note_path),
                     "--project",
-                    '"[[NonExistent]]"',
+                    "[[NonExistent]]",
                     "--vault-root",
                     str(vault_root),
                 ]
@@ -635,7 +676,7 @@ def test_set_projectで移動先に同名ファイルがあれば連番付与さ
                 "--set-project",
                 str(note_path),
                 "--project",
-                '"[[VaultMigration]]"',
+                "[[VaultMigration]]",
                 "--vault-root",
                 str(vault_root),
             ]
@@ -1224,7 +1265,11 @@ def test_定例でoccurrenceコメントのattendanceキーが欠損していれ
         assert result2["needs_task_check"] == []
 
 
-def test_link_taskでチェック済みにすると検出されなくなる():
+def test_link_task後はneeds_task_check対象から除外される():
+    """新仕様のlink-taskはチェック状態を変えず本文を[[task_note]]へ完全置換
+    するだけだが、本文全体が[[...]]形式（タスクノートへのリンクのみ）に
+    なった行は既にタスク化済みとみなし、needs_task_check対象から除外する。
+    """
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp))
         event = make_event(id="evt1", summary="定例1on1")
@@ -1242,13 +1287,32 @@ def test_link_taskでチェック済みにすると検出されなくなる():
                 str(note_path),
                 "--item-text",
                 "資料を送る",
+                "--task-note",
+                "資料を送る",
                 "--vault-root",
                 str(vault_root),
             ]
         )
 
         result_after = meeting_sync.sync_events([], vault_root)
-        assert result_after["needs_task_check"] == []
+        assert len(result_after["needs_task_check"]) == 0
+
+
+def test_link_task後も文言とリンクが両方残る行は引き続き未消化扱いになる():
+    """本文全体が[[...]]のみで完全一致する場合だけ除外対象とする設計のため、
+    元の文言とリンクが両方残るような行（旧仕様の名残や手動編集）は
+    従来通りneeds_task_check対象のままになる。
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = make_vault(Path(tmp))
+        event = make_event(id="evt1", summary="定例1on1")
+        result1 = meeting_sync.sync_events([event], vault_root)
+        note_path = Path(result1["created"][0])
+        _set_attendance(note_path, vault_root, "2_done")
+        _inject_unchecked_item(note_path, "## ⚡ アクションアイテム", "資料を送る [[資料を送る]]")
+
+        result = meeting_sync.sync_events([], vault_root)
+        assert len(result["needs_task_check"]) == 1
 
 
 def test_新規イベント同期と同じ呼び出し内でneeds_task_checkも返る():
@@ -1383,7 +1447,7 @@ def test_不正なattendance値はargparseレベルで拒否される():
             )
 
 
-def test_単発ノートでチェックしリンクを追記する():
+def test_単発ノートでアクションアイテムがタスクノートへ完全置換される():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp))
         event = make_event(id="evt1", summary="定例1on1")
@@ -1411,10 +1475,12 @@ def test_単発ノートでチェックしリンクを追記する():
 
         assert exit_code == 0
         updated = note_path.read_text(encoding="utf-8")
-        assert "- [x] 資料を送る [[資料を送る]]" in updated
+        assert "- [ ] [[資料を送る]]" in updated
+        assert "資料を送る]]" in updated
+        assert "[x]" not in updated
 
 
-def test_task_note省略時はチェックのみでリンクは付かない():
+def test_task_note省略時はエラー終了する():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp))
         event = make_event(id="evt1", summary="定例1on1")
@@ -1426,21 +1492,21 @@ def test_task_note省略時はチェックのみでリンクは付かない():
             "## ⚡ アクションアイテム\n- [ ] 不要な項目",
         )
         note_path.write_text(text, encoding="utf-8")
+        before_text = note_path.read_text(encoding="utf-8")
 
-        meeting_sync.main(
-            [
-                "--link-task",
-                str(note_path),
-                "--item-text",
-                "不要な項目",
-                "--vault-root",
-                str(vault_root),
-            ]
-        )
+        with pytest.raises(SystemExit):
+            meeting_sync.main(
+                [
+                    "--link-task",
+                    str(note_path),
+                    "--item-text",
+                    "不要な項目",
+                    "--vault-root",
+                    str(vault_root),
+                ]
+            )
 
-        updated = note_path.read_text(encoding="utf-8")
-        assert "- [x] 不要な項目\n" in updated
-        assert "[[" not in updated
+        assert note_path.read_text(encoding="utf-8") == before_text
 
 
 def test_該当行が無ければエラーでファイルは変更されない():
@@ -1458,6 +1524,8 @@ def test_該当行が無ければエラーでファイルは変更されない()
                     "--link-task",
                     str(note_path),
                     "--item-text",
+                    "存在しない項目",
+                    "--task-note",
                     "存在しない項目",
                     "--vault-root",
                     str(vault_root),
@@ -1495,14 +1563,16 @@ def test_アクションアイテムセクション外の同一文言は誤爆�
                 str(note_path),
                 "--item-text",
                 "資料を送る",
+                "--task-note",
+                "資料を送る",
                 "--vault-root",
                 str(vault_root),
             ]
         )
 
         updated = note_path.read_text(encoding="utf-8")
-        assert "## ⚡ アクションアイテム\n- [x] 資料を送る" in updated
-        # 決定事項セクション側の同一文言はチェックされない
+        assert "## ⚡ アクションアイテム\n- [ ] [[資料を送る]]" in updated
+        # 決定事項セクション側の同一文言は完全置換されない
         assert "## 📝 決定事項\n- [ ] 資料を送る" in updated
 
 
@@ -1554,9 +1624,42 @@ def test_定例ノートは現在ブロックのみ置換されアーカイブ�
         current_block = final_text[start_idx:end_idx]
         archive_area = final_text[end_idx:]
 
-        assert "- [x] 共通の文言 [[共通タスク]]" in current_block
+        assert "- [ ] [[共通タスク]]" in current_block
         assert "- [ ] 共通の文言" in archive_area
         assert "[[共通タスク]]" not in archive_area
+
+
+def test_item_indexで複数出現時に指定した出現箇所を置換できる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = make_vault(Path(tmp))
+        event = make_event(id="evt1", summary="定例1on1")
+        result1 = meeting_sync.sync_events([event], vault_root)
+        note_path = Path(result1["created"][0])
+        text = note_path.read_text(encoding="utf-8")
+        text = text.replace(
+            "## ⚡ アクションアイテム\n- [ ] ",
+            "## ⚡ アクションアイテム\n- [ ] 共通の文言\n- [ ] 共通の文言",
+        )
+        note_path.write_text(text, encoding="utf-8")
+
+        exit_code = meeting_sync.main(
+            [
+                "--link-task",
+                str(note_path),
+                "--item-text",
+                "共通の文言",
+                "--item-index",
+                "1",
+                "--task-note",
+                "2番目のタスク",
+                "--vault-root",
+                str(vault_root),
+            ]
+        )
+
+        assert exit_code == 0
+        updated = note_path.read_text(encoding="utf-8")
+        assert "- [ ] 共通の文言\n- [ ] [[2番目のタスク]]" in updated
 
 
 def test_eventsキー付きJSONを読み込める():

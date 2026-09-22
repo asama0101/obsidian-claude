@@ -43,9 +43,11 @@ projectが自動推定できなかったものの `{"note_path": ..., "title": .
 - `--set-attendance <note_path> --attendance <value>`: frontmatter
   `attendance`欄（定例は現在有効なoccurrenceブロックのコメントも）を
   書き換える。
-- `--link-task <note_path> --item-text <text> [--task-note <name>]`:
-  アクションアイテムセクション内の該当チェックボックス行を
-  チェック済みにし、`--task-note`指定時は`[[<name>]]`を追記する。
+- `--link-task <note_path> --item-text <text> --task-note <name>
+  [--item-index <n>]`: アクションアイテムセクション内、`--item-text`に
+  一致する行のうち`--item-index`番目（0始まり、省略時0）の出現を
+  `- [ ] [[<name>]]`へ完全置換する（チェックボックスは未チェックのまま）。
+  `--task-note`は必須。
 """
 
 from __future__ import annotations
@@ -85,27 +87,8 @@ _ACTION_ITEM_HEADING_PATTERN = re.compile(
 )
 # `- [ ] 本文` 形式のチェックボックス行(task_extract.pyと同一パターン)
 _CHECKBOX_PATTERN = re.compile(r"^- \[ \] ?(.*)$", re.MULTILINE)
-
-
-# ---------------------------------------------------------------------------
-# frontmatter補助（vault_lib.set_fm_valueは値を自動でダブルクォートするため、
-# fuzzy_project_match が返す '"[[Name]]"' 形式（クォート込み）や、既存の値を
-# そのまま使いたいproject欄にはvault_lib.set_fm_valueを使わず、
-# クォートを付与しないこのローカル版を使う）
-# ---------------------------------------------------------------------------
-def _set_fm_raw(fm_text: str, key: str, raw_value: str) -> str:
-    """frontmatterテキスト内の key: 行を、クォートせず raw_value でそのまま置換する。"""
-    prefix = f"{key}:"
-    new_line = f"{key}: {raw_value}"
-    lines = fm_text.split("\n") if fm_text else []
-
-    for i, line in enumerate(lines):
-        if line.startswith(prefix):
-            lines[i] = new_line
-            return "\n".join(lines)
-
-    lines.append(new_line)
-    return "\n".join(lines)
+# --link-taskによる完全置換後の行（本文が[[タスクノート名]]のみ）を判定する。
+_TASK_LINK_ONLY_PATTERN = re.compile(r"^\[\[.+\]\]$")
 
 
 def _save_note(path: Path, fm_text: str, body_text: str) -> None:
@@ -137,15 +120,9 @@ def _format_attendees(attendees: list) -> str:
     return ", ".join(names)
 
 
-def _extract_project_name(project_match: str) -> str:
-    """fuzzy_project_match の返す '"[[Name]]"' からディレクトリ名 Name を取り出す。"""
-    m = re.match(r'"\[\[(.+)\]\]"', project_match)
-    return m.group(1) if m else project_match
-
-
 def _resolve_dest_dir(vault_root: Path, project_match: str | None) -> Path:
     if project_match:
-        name = _extract_project_name(project_match)
+        name = vault_lib.extract_project_name(project_match)
         return vault_root / "10_Projects" / name / "Meetings"
     return vault_root / "20_Areas" / "Meetings"
 
@@ -191,7 +168,7 @@ def _create_single_note(event: dict, vault_root: Path) -> tuple[Path, str | None
     project_match = vault_lib.fuzzy_project_match(
         summary + description, vault_root / "10_Projects"
     )
-    fm_text = _set_fm_raw(fm_text, "project", project_match if project_match else '""')
+    fm_text = vault_lib.set_fm_value(fm_text, "project", project_match or "")
     fm_text = vault_lib.set_fm_value(fm_text, "calendar_event_id", event["id"])
     fm_text = vault_lib.set_fm_value(fm_text, "date", start_dt.strftime("%Y-%m-%d"))
     fm_text = vault_lib.set_fm_value(fm_text, "url", event.get("hangoutLink", ""))
@@ -235,12 +212,23 @@ def _process_single_event(
     start_dt = _parse_dt(event["start"]["dateTime"])
     new_date = start_dt.strftime("%Y-%m-%d")
     new_url = event.get("hangoutLink", "")
+    new_location = event.get("location", "")
+    new_attendees_text = _format_attendees(event.get("attendees", []))
     old_date = vault_lib.get_fm_value(fm_text, "date")
     old_url = vault_lib.get_fm_value(fm_text, "url") or ""
+    old_location = _get_body_line(body_text, "開催場所")
+    old_attendees_text = _get_body_line(body_text, "参加者")
 
-    if new_date != old_date or new_url != old_url:
+    if (
+        new_date != old_date
+        or new_url != old_url
+        or new_location != old_location
+        or new_attendees_text != old_attendees_text
+    ):
         fm_text = vault_lib.set_fm_value(fm_text, "date", new_date)
         fm_text = vault_lib.set_fm_value(fm_text, "url", new_url)
+        body_text = _replace_body_line(body_text, "開催場所", new_location)
+        body_text = _replace_body_line(body_text, "参加者", new_attendees_text)
         _save_note(path, fm_text, body_text)
         result["updated"].append(str(path))
 
@@ -299,9 +287,23 @@ def _replace_body_line(inner: str, label: str, new_value: str) -> str:
     return pattern.sub(lambda m: m.group(1) + suffix, inner, count=1)
 
 
-def _check_action_item(scope_text: str, item_text: str, task_note: str | None) -> str | None:
-    """アクションアイテムセクション内の該当チェックボックス行をチェック済みにし、
-    task_note指定時は[[リンク]]を追記する。該当行が無ければNoneを返す。
+def _get_body_line(text: str, label: str) -> str:
+    """`- **{label}:** ...` 行の現在値を取得する（_replace_body_lineの読み取り版）。
+
+    該当行が無ければ空文字列を返す。
+    """
+    pattern = re.compile(rf"^- \*\*{re.escape(label)}:\*\* ?(.*)$", re.MULTILINE)
+    m = pattern.search(text)
+    return m.group(1) if m else ""
+
+
+def _check_action_item(
+    scope_text: str, item_text: str, item_index: int, task_note: str
+) -> str | None:
+    """アクションアイテムセクション内、item_text に一致する行のうち item_index
+    番目（0始まり、出現順）を `- [ ] [[task_note]]` へ完全置換する
+    （チェックボックスは未チェックのまま、元の本文は残さない）。
+    該当する出現が無ければNoneを返す。
     """
     span = vault_lib.find_heading_section(scope_text, _ACTION_ITEM_HEADING_PATTERN)
     if span is None:
@@ -309,12 +311,15 @@ def _check_action_item(scope_text: str, item_text: str, task_note: str | None) -
     section_text = scope_text[span[0] : span[1]]
 
     pattern = re.compile(rf"^- \[ \] ?{re.escape(item_text)}$", re.MULTILINE)
-    suffix = f" [[{task_note}]]" if task_note else ""
-    new_section_text, count = pattern.subn(
-        lambda m: f"- [x] {item_text}{suffix}", section_text, count=1
-    )
-    if count == 0:
+    matches = list(pattern.finditer(section_text))
+    if item_index >= len(matches):
         return None
+    target = matches[item_index]
+
+    new_line = f"- [ ] [[{task_note}]]"
+    new_section_text = (
+        section_text[: target.start()] + new_line + section_text[target.end() :]
+    )
 
     return scope_text[: span[0]] + new_section_text + scope_text[span[1] :]
 
@@ -323,13 +328,18 @@ def _has_unchecked_action_items(scope_text: str) -> bool:
     """scope_text内のアクションアイテムセクションに、本文入りの未チェック行が
     1件以上あるか判定する。テンプレートのデフォルト状態である本文なしの
     空プレースホルダー行(`- [ ] `)は、実際のアクションアイテムではないため
+    対象外とする。また、--link-taskで完全置換済みの行（本文が[[タスクノート名]]
+    のみで構成される）は、既にタスク化され追跡されている＝消化済みとみなし
     対象外とする。
     """
     span = vault_lib.find_heading_section(scope_text, _ACTION_ITEM_HEADING_PATTERN)
     if span is None:
         return False
     section_text = scope_text[span[0] : span[1]]
-    return any(m.group(1).strip() for m in _CHECKBOX_PATTERN.finditer(section_text))
+    return any(
+        m.group(1).strip() and not _TASK_LINK_ONLY_PATTERN.match(m.group(1).strip())
+        for m in _CHECKBOX_PATTERN.finditer(section_text)
+    )
 
 
 def _annotate_cancelled(inner: str) -> str:
@@ -404,7 +414,7 @@ def _create_series_note(event: dict, vault_root: Path, today: str) -> tuple[Path
     project_match = vault_lib.fuzzy_project_match(
         summary + description, vault_root / "10_Projects"
     )
-    fm_text = _set_fm_raw(fm_text, "project", project_match if project_match else '""')
+    fm_text = vault_lib.set_fm_value(fm_text, "project", project_match or "")
     fm_text = vault_lib.set_fm_value(
         fm_text, "calendar_series_id", event["recurringEventId"]
     )
@@ -612,9 +622,9 @@ def _cmd_set_project(args: argparse.Namespace, parser: argparse.ArgumentParser) 
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
     note_path = Path(args.set_project)
 
-    project_match = args.project if args.project not in (None, "", '""') else None
+    project_match = args.project if args.project not in (None, "") else None
     if project_match:
-        project_name = _extract_project_name(project_match)
+        project_name = vault_lib.extract_project_name(project_match)
         if not (vault_root / "10_Projects" / project_name).is_dir():
             print(
                 json.dumps(
@@ -625,7 +635,7 @@ def _cmd_set_project(args: argparse.Namespace, parser: argparse.ArgumentParser) 
 
     text = note_path.read_text(encoding="utf-8")
     fm_text, body_text = vault_lib.split_frontmatter(text)
-    fm_text = _set_fm_raw(fm_text, "project", args.project)
+    fm_text = vault_lib.set_fm_value(fm_text, "project", args.project)
 
     dest_dir = _resolve_dest_dir(vault_root, project_match)
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -669,7 +679,9 @@ def _cmd_set_attendance(args: argparse.Namespace, parser: argparse.ArgumentParse
 def _cmd_link_task(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     if args.item_text is None:
         parser.error("--link-task には --item-text の指定が必要です")
-    if args.task_note and ("]]" in args.task_note or "\n" in args.task_note):
+    if not args.task_note:
+        parser.error("--link-task には --task-note の指定が必要です")
+    if "]]" in args.task_note or "\n" in args.task_note:
         parser.error("--task-note に ']]' や改行を含めることはできません")
     note_path = Path(args.link_task)
     if not note_path.is_file():
@@ -687,7 +699,9 @@ def _cmd_link_task(args: argparse.Namespace, parser: argparse.ArgumentParser) ->
     else:
         scope_text = body_text
 
-    new_scope_text = _check_action_item(scope_text, args.item_text, args.task_note)
+    new_scope_text = _check_action_item(
+        scope_text, args.item_text, args.item_index, args.task_note
+    )
     if new_scope_text is None:
         print(json.dumps({"status": "error", "reason": "item_not_found"}, ensure_ascii=False))
         return 1
@@ -728,12 +742,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     mode_group.add_argument(
         "--link-task",
-        help="アクションアイテムをチェック済みにし任意でタスクノートへリンクする対象ノートのパス",
+        help="アクションアイテムの該当行をタスクノートへの[[リンク]]へ置換する対象ノートのパス",
     )
     parser.add_argument(
         "--project",
         default=None,
-        help="--set-project使用時に設定するproject欄の値（例: '\"[[Name]]\"' や '\"\"'）",
+        help="--set-project使用時に設定するproject欄の値（例: '[[Name]]'。解除時は空文字列 ''）",
     )
     parser.add_argument(
         "--attendance",
@@ -749,7 +763,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--task-note",
         default=None,
-        help="--link-task使用時、リンクするタスクノート名（省略時はチェックのみ）",
+        help="--link-task使用時、リンクするタスクノート名（必須。該当行を[[task-note]]へ完全置換する）",
+    )
+    parser.add_argument(
+        "--item-index",
+        type=int,
+        default=0,
+        help=(
+            "--link-task使用時、同一テキストが複数ある場合の出現順インデックス"
+            "（0始まり、省略時は0=最初の一致）"
+        ),
     )
     parser.add_argument(
         "--vault-root", default=None, help="Vaultルート（省略時はvault_lib.VAULT_ROOT）"

@@ -299,7 +299,7 @@ def test_1件一致():
         result = vault_lib.fuzzy_project_match(
             "VaultMigrationの件について相談", projects_dir
         )
-        assert result == '"[[VaultMigration]]"'
+        assert result == "[[VaultMigration]]"
 
 
 def test_0件一致():

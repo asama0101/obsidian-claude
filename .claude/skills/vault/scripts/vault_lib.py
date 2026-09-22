@@ -249,7 +249,7 @@ def extract_project_name(value: str) -> str:
 def fuzzy_project_match(text: str, projects_dir: Path) -> str | None:
     """projects_dir 配下のディレクトリ名から text にあいまい一致するプロジェクトを探す。
 
-    ちょうど1件一致した場合のみ '"[[ディレクトリ名]]"' を返す。
+    ちょうど1件一致した場合のみ '[[ディレクトリ名]]' を返す（クォート無し）。
     """
     matched_names: list[str] = []
     for name in list_project_names(projects_dir):
@@ -258,5 +258,5 @@ def fuzzy_project_match(text: str, projects_dir: Path) -> str | None:
             matched_names.append(name)
 
     if len(matched_names) == 1:
-        return f'"[[{matched_names[0]}]]"'
+        return f"[[{matched_names[0]}]]"
     return None
