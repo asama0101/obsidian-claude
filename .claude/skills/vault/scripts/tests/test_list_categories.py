@@ -1,6 +1,6 @@
 """list_categories.py のユニットテスト。
 
-標準ライブラリの unittest のみを使用する。
+pytest（`.claude/skills/vault/scripts/.venv/`のvenv限定の開発依存）を使用する。
 """
 
 import contextlib
@@ -8,7 +8,6 @@ import io
 import json
 import sys
 import tempfile
-import unittest
 from pathlib import Path
 
 # scripts/ ディレクトリを import パスに追加する
@@ -25,78 +24,75 @@ def _write_note(path: Path, tags: list[str]) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-class TestListCategoryTags(unittest.TestCase):
-    def test_対象ディレクトリが無ければ空リストを返す(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = Path(tmp)
-            result = list_categories.list_category_tags(vault_root)
-            self.assertEqual(result, [])
-
-    def test_単一のKnowhowノートからタグを収集する(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = Path(tmp)
-            _write_note(
-                vault_root / "20_Areas" / "Knowledge" / "note.md",
-                ["python/pandas"],
-            )
-            result = list_categories.list_category_tags(vault_root)
-            self.assertEqual(result, ["python/pandas"])
-
-    def test_両ディレクトリで重複するタグは1件に統合されソートされる(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = Path(tmp)
-            _write_note(
-                vault_root / "20_Areas" / "Knowledge" / "note1.md",
-                ["python/pandas"],
-            )
-            _write_note(
-                vault_root / "20_Areas" / "WebClips" / "note2.md",
-                ["python/pandas"],
-            )
-            _write_note(
-                vault_root / "20_Areas" / "WebClips" / "note3.md",
-                ["git/rebase"],
-            )
-            result = list_categories.list_category_tags(vault_root)
-            self.assertEqual(result, ["git/rebase", "python/pandas"])
-
-    def test_スラッシュ0個と2個以上のタグは除外される(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = Path(tmp)
-            _write_note(
-                vault_root / "20_Areas" / "Knowledge" / "flat.md",
-                ["knowhow"],
-            )
-            _write_note(
-                vault_root / "20_Areas" / "Knowledge" / "deep.md",
-                ["a/b/c"],
-            )
-            _write_note(
-                vault_root / "20_Areas" / "Knowledge" / "valid.md",
-                ["python/pandas"],
-            )
-            result = list_categories.list_category_tags(vault_root)
-            self.assertEqual(result, ["python/pandas"])
+def test_対象ディレクトリが無ければ空リストを返す():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        result = list_categories.list_category_tags(vault_root)
+        assert result == []
 
 
-class TestMain(unittest.TestCase):
-    def test_main実行でJSONがstdoutに出力される(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = Path(tmp)
-            _write_note(
-                vault_root / "20_Areas" / "Knowledge" / "note.md",
-                ["python/pandas"],
-            )
-            argv = ["--vault-root", str(vault_root)]
-
-            buf = io.StringIO()
-            with contextlib.redirect_stdout(buf):
-                result = list_categories.main(argv)
-
-            self.assertEqual(result, 0)
-            output = json.loads(buf.getvalue())
-            self.assertEqual(output, {"tags": ["python/pandas"]})
+def test_単一のKnowhowノートからタグを収集する():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        _write_note(
+            vault_root / "20_Areas" / "Knowledge" / "note.md",
+            ["python/pandas"],
+        )
+        result = list_categories.list_category_tags(vault_root)
+        assert result == ["python/pandas"]
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_両ディレクトリで重複するタグは1件に統合されソートされる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        _write_note(
+            vault_root / "20_Areas" / "Knowledge" / "note1.md",
+            ["python/pandas"],
+        )
+        _write_note(
+            vault_root / "20_Areas" / "WebClips" / "note2.md",
+            ["python/pandas"],
+        )
+        _write_note(
+            vault_root / "20_Areas" / "WebClips" / "note3.md",
+            ["git/rebase"],
+        )
+        result = list_categories.list_category_tags(vault_root)
+        assert result == ["git/rebase", "python/pandas"]
+
+
+def test_スラッシュ0個と2個以上のタグは除外される():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        _write_note(
+            vault_root / "20_Areas" / "Knowledge" / "flat.md",
+            ["knowhow"],
+        )
+        _write_note(
+            vault_root / "20_Areas" / "Knowledge" / "deep.md",
+            ["a/b/c"],
+        )
+        _write_note(
+            vault_root / "20_Areas" / "Knowledge" / "valid.md",
+            ["python/pandas"],
+        )
+        result = list_categories.list_category_tags(vault_root)
+        assert result == ["python/pandas"]
+
+
+def test_main実行でJSONがstdoutに出力される():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        _write_note(
+            vault_root / "20_Areas" / "Knowledge" / "note.md",
+            ["python/pandas"],
+        )
+        argv = ["--vault-root", str(vault_root)]
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            result = list_categories.main(argv)
+
+        assert result == 0
+        output = json.loads(buf.getvalue())
+        assert output == {"tags": ["python/pandas"]}

@@ -1,6 +1,6 @@
 """task_save.py のユニットテスト。
 
-標準ライブラリの unittest のみを使用する。
+pytest（`.claude/skills/vault/scripts/.venv/`のvenv限定の開発依存）を使用する。
 """
 
 import datetime
@@ -8,8 +8,9 @@ import json
 import subprocess
 import sys
 import tempfile
-import unittest
 from pathlib import Path
+
+import pytest
 
 # scripts/ ディレクトリを import パスに追加する
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -39,179 +40,175 @@ _TEMPLATE_TEXT = (
 )
 
 
-class TestExtractProjectName(unittest.TestCase):
-    def test_リンク形式からプロジェクト名を取り出す(self):
-        self.assertEqual(
-            task_save.extract_project_name("[[VaultMigration]]"), "VaultMigration"
+def test_リンク形式からプロジェクト名を取り出す():
+    assert task_save.extract_project_name("[[VaultMigration]]") == "VaultMigration"
+
+
+def test_リンク形式でなければそのまま返す():
+    assert task_save.extract_project_name("PlainName") == "PlainName"
+
+
+@pytest.fixture
+def dt():
+    return datetime.datetime(2026, 9, 21, 14, 30)
+
+
+def _split(note_text: str) -> tuple[str, str]:
+    lines = note_text.split("\n")
+    assert lines[0] == "---"
+    for i in range(1, len(lines)):
+        if lines[i] == "---":
+            return "\n".join(lines[1:i]), "\n".join(lines[i + 1 :])
+    raise AssertionError("frontmatter終端が見つからない")
+
+
+def test_projectとstatusとstart_dateが設定される(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[VaultMigration]]",
+        due_date=None,
+        dt=dt,
+    )
+    fm_text, body_text = _split(note_text)
+    assert 'project: "[[VaultMigration]]"' in fm_text
+    assert "status: 1_todo" in fm_text
+    assert 'start_date: "2026-09-21"' in fm_text
+    assert "# 資料を送る" in body_text
+
+
+def test_due_date未指定なら空欄のまま(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[VaultMigration]]",
+        due_date=None,
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    assert 'due_date: ""' in fm_text
+
+
+def test_due_date指定時はその値が設定される(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[VaultMigration]]",
+        due_date="2026-10-01",
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    assert 'due_date: "2026-10-01"' in fm_text
+
+
+def test_source指定時はsource_meetingが設定される(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[VaultMigration]]",
+        due_date=None,
+        source="[[2026-09-21 定例MTG]]",
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    assert 'source_meeting: "[[2026-09-21 定例MTG]]"' in fm_text
+
+
+def test_source未指定ならsource_meetingは空欄のまま(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[VaultMigration]]",
+        due_date=None,
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    assert 'source_meeting: ""' in fm_text
+
+
+def _make_vault(tmp, project_names=()):
+    vault_root = Path(tmp)
+    template_dir = vault_root / "70_Templates"
+    template_dir.mkdir(parents=True)
+    (template_dir / "Task_Template.md").write_text(_TEMPLATE_TEXT, encoding="utf-8")
+    for name in project_names:
+        (vault_root / "10_Projects" / name).mkdir(parents=True)
+    return vault_root
+
+
+def _run(vault_root, *extra_args):
+    script_path = Path(__file__).resolve().parent.parent / "task_save.py"
+    return subprocess.run(
+        [
+            sys.executable,
+            str(script_path),
+            "--vault-root",
+            str(vault_root),
+            *extra_args,
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_project未指定はエラーになる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = _make_vault(tmp)
+        result = _run(vault_root, "--title", "資料を送る", "--project", "")
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output == {"status": "error", "reason": "project_required"}
+
+
+def test_正常系でノートが作成されJSONが出力される():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = _make_vault(tmp, project_names=["VaultMigration"])
+        result = _run(
+            vault_root,
+            "--title",
+            "資料を送る",
+            "--project",
+            "[[VaultMigration]]",
         )
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        note_path = Path(output["note_path"])
+        assert note_path.exists()
+        assert note_path.parent == vault_root / "10_Projects" / "VaultMigration" / "Tasks"
+        content = note_path.read_text(encoding="utf-8")
+        assert 'project: "[[VaultMigration]]"' in content
+        assert "status: 1_todo" in content
 
-    def test_リンク形式でなければそのまま返す(self):
-        self.assertEqual(task_save.extract_project_name("PlainName"), "PlainName")
 
-
-class TestBuildNoteText(unittest.TestCase):
-    def setUp(self):
-        self.dt = datetime.datetime(2026, 9, 21, 14, 30)
-
-    def test_projectとstatusとstart_dateが設定される(self):
-        note_text = task_save.build_note_text(
-            _TEMPLATE_TEXT,
-            title="資料を送る",
-            project="[[VaultMigration]]",
-            due_date=None,
-            dt=self.dt,
+def test_sourceを指定するとsource_meetingが書き込まれる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = _make_vault(tmp, project_names=["VaultMigration"])
+        result = _run(
+            vault_root,
+            "--title",
+            "資料を送る",
+            "--project",
+            "[[VaultMigration]]",
+            "--source",
+            "[[2026-09-21 定例MTG]]",
         )
-        fm_text, body_text = self._split(note_text)
-        self.assertIn('project: "[[VaultMigration]]"', fm_text)
-        self.assertIn("status: 1_todo", fm_text)
-        self.assertIn('start_date: "2026-09-21"', fm_text)
-        self.assertIn("# 資料を送る", body_text)
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        content = Path(output["note_path"]).read_text(encoding="utf-8")
+        assert 'source_meeting: "[[2026-09-21 定例MTG]]"' in content
 
-    def test_due_date未指定なら空欄のまま(self):
-        note_text = task_save.build_note_text(
-            _TEMPLATE_TEXT,
-            title="資料を送る",
-            project="[[VaultMigration]]",
-            due_date=None,
-            dt=self.dt,
+
+def test_存在しないプロジェクトはエラーになる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = _make_vault(tmp)
+        result = _run(
+            vault_root,
+            "--title",
+            "資料を送る",
+            "--project",
+            "[[NoSuchProject]]",
         )
-        fm_text, _ = self._split(note_text)
-        self.assertIn('due_date: ""', fm_text)
-
-    def test_due_date指定時はその値が設定される(self):
-        note_text = task_save.build_note_text(
-            _TEMPLATE_TEXT,
-            title="資料を送る",
-            project="[[VaultMigration]]",
-            due_date="2026-10-01",
-            dt=self.dt,
-        )
-        fm_text, _ = self._split(note_text)
-        self.assertIn('due_date: "2026-10-01"', fm_text)
-
-    def test_source指定時はsource_meetingが設定される(self):
-        note_text = task_save.build_note_text(
-            _TEMPLATE_TEXT,
-            title="資料を送る",
-            project="[[VaultMigration]]",
-            due_date=None,
-            source="[[2026-09-21 定例MTG]]",
-            dt=self.dt,
-        )
-        fm_text, _ = self._split(note_text)
-        self.assertIn('source_meeting: "[[2026-09-21 定例MTG]]"', fm_text)
-
-    def test_source未指定ならsource_meetingは空欄のまま(self):
-        note_text = task_save.build_note_text(
-            _TEMPLATE_TEXT,
-            title="資料を送る",
-            project="[[VaultMigration]]",
-            due_date=None,
-            dt=self.dt,
-        )
-        fm_text, _ = self._split(note_text)
-        self.assertIn('source_meeting: ""', fm_text)
-
-    @staticmethod
-    def _split(note_text: str) -> tuple[str, str]:
-        lines = note_text.split("\n")
-        assert lines[0] == "---"
-        for i in range(1, len(lines)):
-            if lines[i] == "---":
-                return "\n".join(lines[1:i]), "\n".join(lines[i + 1 :])
-        raise AssertionError("frontmatter終端が見つからない")
-
-
-class TestMain(unittest.TestCase):
-    def _make_vault(self, tmp, project_names=()):
-        vault_root = Path(tmp)
-        template_dir = vault_root / "70_Templates"
-        template_dir.mkdir(parents=True)
-        (template_dir / "Task_Template.md").write_text(_TEMPLATE_TEXT, encoding="utf-8")
-        for name in project_names:
-            (vault_root / "10_Projects" / name).mkdir(parents=True)
-        return vault_root
-
-    def _run(self, vault_root, *extra_args):
-        script_path = Path(__file__).resolve().parent.parent / "task_save.py"
-        return subprocess.run(
-            [
-                sys.executable,
-                str(script_path),
-                "--vault-root",
-                str(vault_root),
-                *extra_args,
-            ],
-            capture_output=True,
-            text=True,
-        )
-
-    def test_project未指定はエラーになる(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = self._make_vault(tmp)
-            result = self._run(
-                vault_root, "--title", "資料を送る", "--project", ""
-            )
-            self.assertEqual(result.returncode, 1)
-            output = json.loads(result.stdout)
-            self.assertEqual(output, {"status": "error", "reason": "project_required"})
-
-    def test_正常系でノートが作成されJSONが出力される(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = self._make_vault(tmp, project_names=["VaultMigration"])
-            result = self._run(
-                vault_root,
-                "--title",
-                "資料を送る",
-                "--project",
-                "[[VaultMigration]]",
-            )
-            self.assertEqual(result.returncode, 0)
-            output = json.loads(result.stdout)
-            note_path = Path(output["note_path"])
-            self.assertTrue(note_path.exists())
-            self.assertEqual(
-                note_path.parent,
-                vault_root / "10_Projects" / "VaultMigration" / "Tasks",
-            )
-            content = note_path.read_text(encoding="utf-8")
-            self.assertIn('project: "[[VaultMigration]]"', content)
-            self.assertIn("status: 1_todo", content)
-
-    def test_sourceを指定するとsource_meetingが書き込まれる(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = self._make_vault(tmp, project_names=["VaultMigration"])
-            result = self._run(
-                vault_root,
-                "--title",
-                "資料を送る",
-                "--project",
-                "[[VaultMigration]]",
-                "--source",
-                "[[2026-09-21 定例MTG]]",
-            )
-            self.assertEqual(result.returncode, 0)
-            output = json.loads(result.stdout)
-            content = Path(output["note_path"]).read_text(encoding="utf-8")
-            self.assertIn('source_meeting: "[[2026-09-21 定例MTG]]"', content)
-
-    def test_存在しないプロジェクトはエラーになる(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            vault_root = self._make_vault(tmp)
-            result = self._run(
-                vault_root,
-                "--title",
-                "資料を送る",
-                "--project",
-                "[[NoSuchProject]]",
-            )
-            self.assertEqual(result.returncode, 1)
-            output = json.loads(result.stdout)
-            self.assertEqual(output, {"status": "error", "reason": "project_not_found"})
-            self.assertFalse(
-                (vault_root / "10_Projects" / "NoSuchProject").exists()
-            )
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output == {"status": "error", "reason": "project_not_found"}
+        assert not (vault_root / "10_Projects" / "NoSuchProject").exists()
