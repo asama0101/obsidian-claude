@@ -181,6 +181,44 @@ def _has_pending_changes(vault_root: Path) -> bool:
     return bool(_git_status_porcelain(vault_root).strip())
 
 
+def _scan_task_review_targets(vault_root: Path, date_str: str) -> list[dict]:
+    """日付・ステータスの見直しが必要なタスクノートを検出する。
+
+    走査対象は `10_Projects/*/Tasks/*.md` と `20_Areas/Tasks/*.md`。
+    typeが"task"のノートのうち、次の3条件のいずれかに該当するものを返す。
+    1. created_date == date_str かつ start_date が空
+    2. start_date == date_str かつ status == "1_todo"
+    3. due_date == date_str かつ status が "4_done"/"5_cancel" 以外
+    """
+    candidate_paths = list(vault_root.glob("10_Projects/*/Tasks/*.md"))
+    candidate_paths.extend((vault_root / "20_Areas" / "Tasks").glob("*.md"))
+
+    targets: list[dict] = []
+    for path in candidate_paths:
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        fm_text, _ = vault_lib.split_frontmatter(text)
+        if vault_lib.get_fm_value(fm_text, "type") != "task":
+            continue
+
+        created_date = vault_lib.get_fm_value(fm_text, "created_date")
+        start_date = vault_lib.get_fm_value(fm_text, "start_date")
+        due_date = vault_lib.get_fm_value(fm_text, "due_date")
+        status = vault_lib.get_fm_value(fm_text, "status")
+
+        matched = (
+            (created_date == date_str and not start_date)
+            or (start_date == date_str and status == "1_todo")
+            or (due_date == date_str and status not in ("4_done", "5_cancel"))
+        )
+        if matched:
+            targets.append({"note_path": str(path), "title": path.stem})
+
+    return sorted(targets, key=lambda entry: entry["title"])
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -204,6 +242,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     date_str = branch
+
+    # 1b. タスクの日付・ステータス見直し対象を確認する(該当あれば後続処理へ進まず中断する)
+    review_targets = _scan_task_review_targets(vault_root, date_str)
+    if review_targets:
+        print(
+            json.dumps(
+                {"status": "needs_task_review", "tasks": review_targets},
+                ensure_ascii=False,
+            )
+        )
+        return 1
 
     # 2-4. 更新ノート一覧を作成する
     updated_paths = _collect_updated_paths(vault_root)

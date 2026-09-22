@@ -410,6 +410,214 @@ def test_単一typeのみ更新時はそのグループのみ表示される():
             assert absent not in merged
 
 
+def _task_frontmatter(*, created_date="", start_date="", due_date="", status="1_todo"):
+    """タスクノートのfrontmatterテキストを組み立てるテスト用ヘルパー。"""
+    return (
+        "---\n"
+        "type: task\n"
+        f"created_date: {created_date}\n"
+        f"start_date: {start_date}\n"
+        f"due_date: {due_date}\n"
+        f"status: {status}\n"
+        "---\n"
+        "body\n"
+    )
+
+
+def test_scan_task_review_targets_条件1_created_dateが本日かつstart_date未設定():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskA.md"
+        _write(task_path, _task_frontmatter(created_date="2026-09-23", start_date=""))
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert targets == [{"note_path": str(task_path), "title": "TaskA"}]
+
+
+def test_scan_task_review_targets_条件2_start_dateが本日かつstatusが1_todo():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskB.md"
+        _write(
+            task_path,
+            _task_frontmatter(
+                created_date="2026-09-20", start_date="2026-09-23", status="1_todo"
+            ),
+        )
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert [t["title"] for t in targets] == ["TaskB"]
+
+
+def test_scan_task_review_targets_条件3_due_dateが本日かつstatusが未完了():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskC.md"
+        _write(
+            task_path,
+            _task_frontmatter(
+                created_date="2026-09-10",
+                start_date="2026-09-15",
+                due_date="2026-09-23",
+                status="2_doing",
+            ),
+        )
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert [t["title"] for t in targets] == ["TaskC"]
+
+
+@pytest.mark.parametrize("status", ["4_done", "5_cancel"])
+def test_scan_task_review_targets_due_dateが本日でも完了済みなら対象外(status):
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskD.md"
+        _write(
+            task_path,
+            _task_frontmatter(
+                created_date="2026-09-10",
+                start_date="2026-09-15",
+                due_date="2026-09-23",
+                status=status,
+            ),
+        )
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert targets == []
+
+
+def test_scan_task_review_targets_いずれの条件にも該当しなければ対象外():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskE.md"
+        _write(
+            task_path,
+            _task_frontmatter(
+                created_date="2026-09-10",
+                start_date="2026-09-15",
+                due_date="2026-09-30",
+                status="2_doing",
+            ),
+        )
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert targets == []
+
+
+def test_scan_task_review_targets_typeがtask以外は対象外():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        _write(
+            vault_root / "10_Projects" / "ProjX" / "Tasks" / "NotATask.md",
+            "---\ntype: project\ncreated_date: 2026-09-23\nstart_date:\n---\nbody\n",
+        )
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert targets == []
+
+
+def test_scan_task_review_targets_20_Areas_Tasks配下も走査対象():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        task_path = vault_root / "20_Areas" / "Tasks" / "TaskF.md"
+        _write(task_path, _task_frontmatter(created_date="2026-09-23", start_date=""))
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert [t["title"] for t in targets] == ["TaskF"]
+
+
+def test_scan_task_review_targets_複数該当はtitle昇順ソート():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        _write(
+            vault_root / "10_Projects" / "ProjX" / "Tasks" / "Zeta.md",
+            _task_frontmatter(created_date="2026-09-23", start_date=""),
+        )
+        _write(
+            vault_root / "10_Projects" / "ProjX" / "Tasks" / "Alpha.md",
+            _task_frontmatter(created_date="2026-09-23", start_date=""),
+        )
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert [t["title"] for t in targets] == ["Alpha", "Zeta"]
+
+
+def test_main_見直し対象タスクが無ければ従来通り後続処理に進む():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _init_repo(root)
+        _write(root / "00_Daily" / ".gitkeep", "")
+        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _commit_all(root, "initial commit")
+
+        branch = "2026-09-30"
+        _run_git(["checkout", "-b", branch], cwd=root)
+        daily_note = root / "00_Daily" / f"{branch}.md"
+        content = _DAILY_NOTE_TEMPLATE.format(date=branch).replace(
+            "（`/close` 実行時に自動更新される）", "- （本日の更新ノートなし）"
+        )
+        _write(daily_note, content)
+        # どの条件にも該当しないタスクノート
+        _write(
+            root / "10_Projects" / "ProjX" / "Tasks" / "Unrelated.md",
+            _task_frontmatter(
+                created_date="2026-09-10",
+                start_date="2026-09-15",
+                due_date="2026-09-29",
+                status="2_doing",
+            ),
+        )
+        _commit_all(root, "add daily note and task")
+
+        result = _run_close_day(root)
+
+        assert result.returncode == 0, result.stdout + result.stderr
+        payload = json.loads(result.stdout)
+        assert payload["status"] == "ok"
+
+
+def test_main_タスク見直し対象があれば中断しコミットしない():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _init_repo(root)
+        _write(root / "00_Daily" / ".gitkeep", "")
+        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _commit_all(root, "initial commit")
+
+        branch = "2026-10-01"
+        _run_git(["checkout", "-b", branch], cwd=root)
+        daily_note = root / "00_Daily" / f"{branch}.md"
+        _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
+        task_path = root / "10_Projects" / "ProjX" / "Tasks" / "NeedsReview.md"
+        _write(task_path, _task_frontmatter(created_date=branch, start_date=""))
+
+        head_before = _run_git(["rev-parse", "HEAD"], cwd=root)
+
+        result = _run_close_day(root)
+
+        assert result.returncode == 1, result.stdout + result.stderr
+        payload = json.loads(result.stdout)
+        assert payload == {
+            "status": "needs_task_review",
+            "tasks": [{"note_path": str(task_path), "title": "NeedsReview"}],
+        }
+
+        # コミット・マージ等の副作用が発生していないことを確認する
+        head_after = _run_git(["rev-parse", "HEAD"], cwd=root)
+        assert head_after == head_before
+        assert _run_git(["status", "--porcelain"], cwd=root) != ""
+        remaining_branches = _run_git(["branch", "--list", branch], cwd=root)
+        assert branch in remaining_branches
+
+
 def test_未知typeと削除済みファイルはotherグループに入る():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
