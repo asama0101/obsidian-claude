@@ -7,6 +7,8 @@ properties:
     displayName: ステータス
   project:
     displayName: プロジェクト
+  created_date:
+    displayName: 作成日
   start_date:
     displayName: 開始日
   due_date:
@@ -83,3 +85,21 @@ views:
       - start_date
       - due_date
       - memo
+  - type: table
+    name: CreatedToday
+    filters:
+      and:
+        - created_date
+        - /^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename)
+        - created_date == date(this.file.basename + " 00:00:00")
+    order:
+      - file.name
+      - project
+      - status
+      - created_date
+      - start_date
+      - due_date
+      - memo
+    sort:
+      - property: status
+        direction: ASC

@@ -9,11 +9,14 @@ type: daily
 ## 📋 本日のタスク
 ![[Tasks.base#Today]]
 
+## 🆕 本日作成したタスク
+![[Tasks.base#CreatedToday]]
+
 ## 📂 アクティブプロジェクト
 ![[Projects.base#Active]]
 
 ## 🔗 本日作成・更新したノート
-*（`/close` 実行時に自動更新される）*
+*（`/today-close` 実行時に自動更新される）*
 <!-- UPDATED_NOTES_START -->
 <!-- UPDATED_NOTES_END -->
 
@@ -22,7 +25,7 @@ type: daily
 ## 📝 メモ
 
 ### 📌 翌日引き継ぎメモ
-*（`/today` 実行時に自動で引継される）*
+*（`/today-open` 実行時に自動で引継される）*
 <!-- CARRYOVER_START -->
 <!-- CARRYOVER_END -->
 
