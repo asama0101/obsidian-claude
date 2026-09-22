@@ -36,3 +36,14 @@ views:
       - date
       - last_updated
       - attendance
+  - type: table
+    name: All
+    filters:
+      and:
+        - '!file.folder.contains("70_Templates")'
+    order:
+      - file.name
+      - type
+      - date
+      - last_updated
+      - attendance

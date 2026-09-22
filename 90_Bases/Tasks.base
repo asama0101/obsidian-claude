@@ -1,4 +1,7 @@
-filters: type == "task"
+filters:
+  and:
+    - type == "task"
+    - '!file.folder.contains("70_Templates")'
 properties:
   status:
     displayName: ステータス
@@ -68,3 +71,15 @@ views:
       - memo
     columnSize:
       file.name: 144
+  - type: table
+    name: All
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - status
+      - project
+      - start_date
+      - due_date
+      - memo

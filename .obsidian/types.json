@@ -1,5 +1,10 @@
 {
   "types": {
-    "status": "text"
+    "status": "text",
+    "aliases": "aliases",
+    "cssclasses": "multitext",
+    "tags": "tags",
+    "due_date": "date",
+    "start_date": "date"
   }
 }

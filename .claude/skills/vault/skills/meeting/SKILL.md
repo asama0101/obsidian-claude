@@ -37,8 +37,13 @@ description: |
    ユーザーに尋ねる。
 5. ユーザーが割り当てを決めたら、ノートごとに
    `python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project <value>`
-   を実行してproject欄へ反映する（`<value>`はプロジェクト選択時は
-   `"[[ディレクトリ名]]"`、「プロジェクトなし」選択時は`""`）。
+   を実行してproject欄へ反映する。`<value>`はシェル上でリテラルの二重引用符を含めて渡す必要がある
+   （`task`スキルの`task_save.py`がクォートなし形式を要求するため異なる規約）。
+   プロジェクト割り当て時は`'"[[ディレクトリ名]]"'`、「プロジェクトなし」時は`'""'`を渡す。例えば：
+   ```
+   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project '"[[九州旅行]]"'
+   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project '""'
+   ```
    このときノートは新しいproject値に応じて`10_Projects/<Name>/Meetings/`
    または`20_Areas/Meetings/`へ自動的に移動される。`--project`が
    `10_Projects/<Name>/`として実在しない値だった場合は

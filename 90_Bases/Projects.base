@@ -1,7 +1,7 @@
 filters:
   and:
     - type == "project"
-    - file.inFolder("10_Projects")
+    - '!file.folder.contains("70_Templates")'
 properties:
   start_date:
     displayName: 開始日
@@ -20,3 +20,9 @@ views:
         direction: ASC
     columnSize:
       file.name: 219
+  - type: table
+    name: All
+    order:
+      - file.name
+      - start_date
+      - due_date
