@@ -1,5 +1,5 @@
 ---
-name: project
+name: project-add
 description: |
   新規プロジェクトを開始する。プロジェクト概要ノートと
   Tasks/・Meetings/・Documents/フォルダを一括作成する。
@@ -7,7 +7,7 @@ description: |
   等のトリガーで起動する。
 ---
 
-# project
+# project-add
 
 ## 目的
 新規プロジェクトの箱（概要ノート＋フォルダ構成）を一括で用意する。

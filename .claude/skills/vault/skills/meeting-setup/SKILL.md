@@ -1,15 +1,19 @@
 ---
-name: meeting
+name: meeting-setup
 description: |
   Google Calendar（将来的にはMicrosoft 365も）の予定から議事録ノートを
-  作成・更新する。「議事録を作って」「今日の会議のノート作って」
-  「/meeting」等のトリガーで起動する。
+  作成・更新し、新規作成したノートのproject割当まで確認する。
+  「議事録を作って」「今日の会議のノート作って」「/meeting-setup」等の
+  トリガーで起動する。
 ---
 
-# meeting
+# meeting-setup
 
 ## 目的
-カレンダー上の予定と議事録ノートを同期する。
+カレンダー上の予定と議事録ノートを同期し、新規作成したノートのproject割当
+まで確認する。開催確認（`attendance`更新）は`today-close`スキル、議事録
+からのタスク化は`meeting-followup`スキルがそれぞれ担うため、本スキルの
+範囲には含まない。
 
 ## 実行フロー
 
@@ -23,61 +27,42 @@ description: |
    | フィールド | 内容 |
    |------------|------|
    | `created` | 新規作成したノートのパス一覧 |
-   | `updated` | 日時・URLなどを更新した既存ノートのパス一覧 |
+   | `updated` | 日時・URL・開催場所・参加者などを更新した既存ノートのパス一覧 |
    | `skipped_single_attendee` | 出席者1人以下かつ既存ノートも無く、無視したイベントID一覧 |
    | `cancelled` | 既存ノート対応の予定が出席者1人以下になり、`attendance`を`3_skip`にしたノートのパス一覧 |
    | `no_project` | 新規作成したがprojectを自動推定できなかったノートの`{"note_path", "title"}`一覧 |
    | `deleted` | カレンダー側でキャンセルされ物理削除された単発ノートのパス一覧 |
-   | `needs_attendance_check` | 開催確認が必要なノートの`{"note_path", "title"}`一覧 |
-   | `needs_task_check` | `attendance`確定済み（`2_done`/`3_skip`）なのに未チェックのアクションアイテムが残っているノートの`{"note_path", "title"}`一覧 |
-4. `no_project`が空でなければ、`python .claude/skills/vault/scripts/list_projects.py`
-   を実行して候補一覧（`{"projects": [...]}`）を取得し、その一覧
-   （＋「プロジェクトなし」の選択肢）を提示して、`no_project`内の各ノート
-   （`title`で識別）についてどれに割り当てるかを1回の確認でまとめて
-   ユーザーに尋ねる。
-5. ユーザーが割り当てを決めたら、ノートごとに
+   | `needs_attendance_check` | 開催確認が必要なノートの`{"note_path", "title"}`一覧。`today-close`スキルが消費する（本スキル自身はここで確認を求めない） |
+   | `needs_task_check` | `attendance`確定済み（`2_done`/`3_skip`）なのに未チェックのアクションアイテムが残っているノートの`{"note_path", "title"}`一覧。`today-close`スキルが消費する（本スキル自身はここで確認を求めない） |
+
+4. `created`一覧の各ノートについて、project割当を改めて確認する。自動推定に
+   失敗した`no_project`のノートだけでなく、`fuzzy_project_match`で自動的に
+   割り当てられたノートも含めて、**新規作成された全ノートを対象**にする。
+   各ノートについてReadツールでfrontmatterの`project`値を確認した上で、
+   - 既存プロジェクトから選ぶ
+   - 新規プロジェクトを作成する（`project-add`スキルを呼び出す）
+   - プロジェクトなしで進める
+
+   の3択を、`created`一覧全体でまとめてユーザーに確認する（自動推定できて
+   いた場合はその値をデフォルト候補として提示してよい）。
+5. 確定した値をノートごとに
    `python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project <value>`
-   を実行してproject欄へ反映する。`<value>`はシェル上でリテラルの二重引用符を含めて渡す必要がある
-   （`task`スキルの`task_save.py`がクォートなし形式を要求するため異なる規約）。
-   プロジェクト割り当て時は`'"[[ディレクトリ名]]"'`、「プロジェクトなし」時は`'""'`を渡す。例えば：
+   で反映する。`<value>`はクォート無し`[[プロジェクト名]]`形式、プロジェクト
+   なしの場合は空文字列`""`を渡す（`task_save.py`の`--project`と同じ記法）。
+   例えば：
    ```
-   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project '"[[九州旅行]]"'
-   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project '""'
+   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project [[九州旅行]]
+   python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project ""
    ```
    このときノートは新しいproject値に応じて`10_Projects/<Name>/Meetings/`
    または`20_Areas/Meetings/`へ自動的に移動される。`--project`が
    `10_Projects/<Name>/`として実在しない値だった場合は
    `{"status": "error", "reason": "project_not_found"}`が返るので、
-   候補一覧を出し直してユーザーに再選択してもらう。
-6. `needs_attendance_check`が空でなければ、各ノート（`note_path`で識別）について「実施済み/不参加」をユーザーにまとめて確認する。
-   カレンダー情報だけでは予定が存在したことは分かっても実際に開催されたかは判定できないため、この手動確認が必要である。
-   確認結果は`python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <1_scheduled|2_done|3_skip>`で反映する。
-   `--attendance`には実施済みなら`2_done`、不参加なら`3_skip`を渡す。
-   「実施済み」と確認されたノートは、続けて下記「task化フロー」へ進む。
-7. `needs_task_check`が空でなければ、対象ノートは直接下記「task化フロー」へ進む。`attendance`（`2_done`/`3_skip`）は既に確定済みのため、「実施済み/不参加」の確認は不要である。
+   候補一覧を出し直してユーザーに再選択してもらう。`updated`（既存ノート
+   更新）はproject欄に一切触れないため、この確認フローの対象外である。
 
 `meeting_sync.py`自体が全ての判定（新規作成/更新/キャンセル反映/
 定例の回判定）を行うため、Claude側でノートを直接編集する必要はない。
-
-## task化フロー
-
-`needs_attendance_check`の確認で「実施済み」と判定されたノート、
-および`needs_task_check`で検出されたノートのいずれについても、
-ノートごとに以下を実行する共通フローである。
-
-1. `python .claude/skills/vault/scripts/task_extract.py --note <note_path>`
-   を実行し、標準出力のJSON（`{"items": [...], "project": ...}`）から
-   未チェックのアクションアイテム一覧（`items`）を取得する。
-2. `items`が空でなければ、各itemについてタスク化するかどうかを
-   ユーザーに確認する。
-3. タスク化する場合は、`task`スキルのパターン(a)フロー通り
-   `python .claude/skills/vault/scripts/task_save.py`を呼ぶ。このとき
-   `--source "[[議事録ノート名]]"`を追加で渡す。
-4. タスク化の有無にかかわらず、
-   `python .claude/skills/vault/scripts/meeting_sync.py --link-task <note_path> --item-text <元のアクションアイテム本文> [--task-note <タスクノート名>]`
-   を実行し、議事録側の該当チェックボックスをチェック済みにする
-   （タスク化した場合は`--task-note`にタスクノート名を渡すと
-   `[[リンク]]`も追記される）。
 
 ## 出力
 
@@ -99,14 +84,14 @@ description: |
    既存ファイルがあれば、occurrence_idで「同じ回の再同期」か
    「次の回への遷移」かを判定して処理する
    （`references/meeting-series-update.md`）。無ければ新規作成する。
-4. カレンダー側で日時・URLが変更されていれば既存ノートに反映する。
-   議事・決定事項などユーザー手書き欄は変更しない。
-5. 既存ノート対応の予定が後から出席者1人以下に変わった場合（実質キャンセル）の扱いは、単発予定と定例予定で異なる。
-   - 単発予定: ノートを削除せず`attendance`を`3_skip`にする（`status`欄は廃止）。
-   - 定例予定: シリーズ全体をキャンセルにせず、対象occurrenceのブロック内に`(キャンセル)`と注記した上で、同ブロックの`attendance`も`3_skip`にする。
-6. 削除対象の判定は単発予定と定例予定で異なる。
-   - 単発予定（`type: meeting`）: 開催日（`date`）が今日であり、かつ今日取得したevents一覧に対応する`calendar_event_id`が無いこと、の2条件を満たすノートが対象である。該当ノートはカレンダー側でキャンセルされたとみなし、中身を確認せず物理削除する（`deleted`）。
-   - 定例予定: 削除対象外。
+4. カレンダー側で日時・URL・開催場所・参加者のいずれかが変更されていれば
+   既存ノートに反映する。議事・決定事項などユーザー手書き欄は変更しない。
+5. 既存ノート対応の予定が後から出席者1人以下に変わった場合（実質キャンセル）の扱い、および削除対象になるかどうかは、単発予定と定例予定で異なる。
+
+   | 予定種別 | キャンセル時の挙動 | 削除対象か |
+   |----------|--------------------|------------|
+   | 単発予定 | ノートを削除せず`attendance`を`3_skip`にする（`status`欄は廃止） | 開催日（`date`）が今日であり、かつ今日取得したevents一覧に対応する`calendar_event_id`が無いノートが対象。該当すればカレンダー側でキャンセルされたとみなし、中身を確認せず物理削除する（`deleted`） |
+   | 定例予定 | シリーズ全体をキャンセルにせず、対象occurrenceのブロック内に`(キャンセル)`と注記した上で、同ブロックの`attendance`も`3_skip`にする | 削除対象外 |
 
 ## Microsoft 365 / Outlook / Teams連携について
 
@@ -115,20 +100,21 @@ description: |
 未接続の場合はこの節の処理は行わず、Microsoft 365 MCPサーバーの
 接続方法をユーザーに案内するに留める。
 
-## today/closeスキルからの呼び出しについて
+## today-open/today-closeスキルからの呼び出しについて
 
-`today`・`close`スキルからもmeetingスキルの実行フロー（カレンダー同期〜
-`needs_attendance_check`/`needs_task_check`の確認・task化フローまで）が
-自動的に呼び出される。呼ばれた場合も、通常`/meeting`実行時と同じ
-対話フロー（project割り当て確認・実施確認・task化確認）をそのまま
-ユーザーに提示してよい。
+`today-open`・`today-close`スキルからもmeeting-setupスキルの実行フロー
+（カレンダー同期〜project割当確認まで）が自動的に呼び出される。呼ばれた
+場合も、通常`/meeting-setup`実行時と同じ対話フロー（project割当確認）を
+そのままユーザーに提示してよい。
 
 Google Calendar MCP未接続やAPI呼び出し失敗時は、本スキルの処理を
-そこで中断し、呼び出し元（`today`/`close`）本来の処理はブロックしない。
+そこで中断し、呼び出し元（`today-open`/`today-close`）本来の処理はブロックしない。
 
-`needs_task_check`は日付を問わず全件スキャン対象のため、対応せず
-残したノートは`today`・`close`を実行するたびに繰り返し提示される
-（仕様通りの動作である）。
+`needs_attendance_check`/`needs_task_check`は日付を問わず`meeting_sync.py`
+実行のたびに全件スキャンして返される検出結果であり、本スキル自身はこれを
+消費しない。`today-close`スキルが該当ノート一覧の提示・確認・案内を担う
+（詳細は`today-close/SKILL.md`を参照）。対応せず残したノートは
+`today-open`・`today-close`を実行するたびに繰り返し検出される。
 
 ## 参照ドキュメント
 
@@ -136,5 +122,6 @@ Google Calendar MCP未接続やAPI呼び出し失敗時は、本スキルの処�
   ロジック詳細
 - `references/meeting-field-mapping.md`: Microsoft 365接続時の
   フィールド対応表
-- `references/project-matching.md`: project自動紐付けルール（meeting専用）
+- `references/project-matching.md`: project自動紐付けルール（meeting-setup専用）
 - `references/conventions.md`: vaultプラグイン全体の共通実装規約
+- [`../../../../../80_SkillFlows/meeting-setup-flow.md`](../../../../../80_SkillFlows/meeting-setup-flow.md): 本フローの設計ドキュメント（Mermaid図付き）

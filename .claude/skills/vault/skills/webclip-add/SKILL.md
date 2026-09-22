@@ -1,12 +1,12 @@
 ---
-name: webclip
+name: webclip-add
 description: |
   指定URLのWebページを要約・画像保存してノート化する。「このページを
   クリップして」「Webクリップ作って」「/webclip <URL>」等のトリガーで
   起動する。
 ---
 
-# webclip
+# webclip-add
 
 ## 目的
 Webページの内容を後から参照できる形でVaultに保存する。
@@ -19,24 +19,27 @@ Webページの内容を後から参照できる形でVaultに保存する。
 - `WebClip_Template.md` ベースのノート（`20_Areas/WebClips/`）
 
 ## 処理の流れ
-1. **Claudeが対象URLをPlaywright（実ブラウザ経由）で取得する。**
+1. **対象URLを受け取ったら、まずPlaywrightのMCPツールが使用可能か確認する。**
+   使用不可であれば、ユーザーにPlaywrightのセットアップ（`claude mcp`での
+   Playwright MCP追加等）を促し、処理を中断する。使用可能であれば、続けて
+   次の手順を順に実行してPlaywright（実ブラウザ経由）でURLを取得する。
    広告ブロック検知や会員限定表示のために本文がほとんど取得できないサイトが
    あるため、常に最初からPlaywrightのブラウザツールを使う
    （他の取得手段へのフォールバックはしない）。
-   - `mcp__plugin_playwright_playwright__browser_navigate`で対象URLへ遷移する。
-   - 遅延読み込み画像を取りこぼさないよう、本文・画像を取得する前に
-     ページ全体を下までスクロールする。
-   - `mcp__plugin_playwright_playwright__browser_evaluate`でページ内JSを実行し、
-     本文テキスト（例: `document.querySelector('article') || document.body`の
-     `innerText`）と本文中の画像URL一覧（`querySelectorAll('img')`の`src`。
-     関連記事サムネイル・SNSアイコン等は除外）を取得する。
-   - ページ内に「次ページ」等の分割ページへのリンクがないか確認する。
-     あれば同様に`browser_navigate`→`browser_evaluate`を繰り返して辿り、
-     各ページの本文・画像を記事内での出現順を保ったまま連結する。
-     巡回には安全弁として上限20ページを設け、超えた場合は打ち切って
-     その旨を最終報告でユーザーに伝える。
-   - 取得が完了したら、開いたページ/タブを閉じる
-     （`mcp__plugin_playwright_playwright__browser_close`等）。
+   1. `mcp__plugin_playwright_playwright__browser_navigate`で対象URLへ遷移する。
+   2. 遅延読み込み画像を取りこぼさないよう、本文・画像を取得する前に
+      ページ全体を下までスクロールする。
+   3. `mcp__plugin_playwright_playwright__browser_evaluate`でページ内JSを実行し、
+      本文テキスト（例: `document.querySelector('article') || document.body`の
+      `innerText`）と本文中の画像URL一覧（`querySelectorAll('img')`の`src`。
+      関連記事サムネイル・SNSアイコン等は除外）を取得する。
+   4. ページ内に「次ページ」等の分割ページへのリンクがないか確認する。
+      あれば同様に手順1〜3（`browser_navigate`→スクロール→`browser_evaluate`）
+      を繰り返して辿り、各ページの本文・画像を記事内での出現順を保ったまま
+      連結する。巡回には安全弁として上限20ページを設け、超えた場合は
+      打ち切ってその旨を最終報告でユーザーに伝える。
+   5. 取得が完了したら、開いたページ/タブを閉じる
+      （`mcp__plugin_playwright_playwright__browser_close`等）。
 2. **Claudeが取得した本文から要約・キーポイント・全文を作る。**
    - 3行程度または箇条書きの要約（`summary`）
    - 要点の箇条書き（`key_points`）

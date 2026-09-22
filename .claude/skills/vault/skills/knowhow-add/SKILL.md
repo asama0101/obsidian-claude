@@ -1,12 +1,12 @@
 ---
-name: knowhow
+name: knowhow-add
 description: |
   雑多なメモ・ログ・コンソール出力等をナレッジノートとして整形保存する。
   「これノウハウとして残して」「ナレッジ化して」「/knowhow」等の
   トリガーで起動する。
 ---
 
-# knowhow
+# knowhow-add
 
 ## 目的
 断片的な情報を再利用可能なナレッジノートとして整形する。
