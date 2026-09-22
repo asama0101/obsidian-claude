@@ -23,8 +23,9 @@ _TEMPLATE_TEXT = (
     "type: task\n"
     'project: ""\n'
     'source_meeting: ""\n'
-    'start_date: "{{date:YYYY-MM-DD}}"\n'
-    'due_date: "{{date:YYYY-MM-DD}}"\n'
+    "created_date:\n"
+    "start_date:\n"
+    "due_date:\n"
     "status: 1_todo\n"
     "tags:\n"
     "  - task\n"
@@ -63,7 +64,7 @@ def _split(note_text: str) -> tuple[str, str]:
     raise AssertionError("frontmatter終端が見つからない")
 
 
-def test_projectとstatusとstart_dateが設定される(dt):
+def test_projectとstatusが設定される(dt):
     note_text = task_save.build_note_text(
         _TEMPLATE_TEXT,
         title="資料を送る",
@@ -74,8 +75,37 @@ def test_projectとstatusとstart_dateが設定される(dt):
     fm_text, body_text = _split(note_text)
     assert 'project: "[[VaultMigration]]"' in fm_text
     assert "status: 1_todo" in fm_text
-    assert 'start_date: "2026-09-21"' in fm_text
     assert "# 資料を送る" in body_text
+
+
+def test_created_dateがクォート無しでセットされる(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[VaultMigration]]",
+        due_date=None,
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    lines = fm_text.split("\n")
+    assert "created_date: 2026-09-21" in lines
+    assert 'created_date: "2026-09-21"' not in fm_text
+
+
+def test_start_dateはセットされない(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[VaultMigration]]",
+        due_date=None,
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    lines = fm_text.split("\n")
+    # テンプレートの空欄のまま(クォート無し・日付未セット)であること
+    assert "start_date:" in lines
+    assert "start_date: 2026-09-21" not in lines
+    assert 'start_date: "2026-09-21"' not in fm_text
 
 
 def test_due_date未指定なら空欄のまま(dt):
@@ -87,10 +117,12 @@ def test_due_date未指定なら空欄のまま(dt):
         dt=dt,
     )
     fm_text, _ = _split(note_text)
-    assert 'due_date: ""' in fm_text
+    lines = fm_text.split("\n")
+    assert "due_date: " in lines
+    assert 'due_date: ""' not in fm_text
 
 
-def test_due_date指定時はその値が設定される(dt):
+def test_due_date指定時はクォート無しでその値が設定される(dt):
     note_text = task_save.build_note_text(
         _TEMPLATE_TEXT,
         title="資料を送る",
@@ -99,7 +131,9 @@ def test_due_date指定時はその値が設定される(dt):
         dt=dt,
     )
     fm_text, _ = _split(note_text)
-    assert 'due_date: "2026-10-01"' in fm_text
+    lines = fm_text.split("\n")
+    assert "due_date: 2026-10-01" in lines
+    assert 'due_date: "2026-10-01"' not in fm_text
 
 
 def test_source指定時はsource_meetingが設定される(dt):
@@ -152,13 +186,17 @@ def _run(vault_root, *extra_args):
     )
 
 
-def test_project未指定はエラーになる():
+def test_project未指定なら20_Areas_Tasks配下に保存される():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = _make_vault(tmp)
-        result = _run(vault_root, "--title", "資料を送る", "--project", "")
-        assert result.returncode == 1
+        result = _run(vault_root, "--title", "資料を送る")
+        assert result.returncode == 0
         output = json.loads(result.stdout)
-        assert output == {"status": "error", "reason": "project_required"}
+        note_path = Path(output["note_path"])
+        assert note_path.exists()
+        assert note_path.parent == vault_root / "20_Areas" / "Tasks"
+        content = note_path.read_text(encoding="utf-8")
+        assert 'project: ""' in content
 
 
 def test_正常系でノートが作成されJSONが出力される():

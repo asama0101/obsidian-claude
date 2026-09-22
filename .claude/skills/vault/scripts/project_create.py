@@ -45,7 +45,7 @@ def create_project(
     fm_text, body_text = vault_lib.split_frontmatter(filled)
 
     if due_date:
-        fm_text = vault_lib.set_fm_value(fm_text, "due_date", due_date)
+        fm_text = vault_lib.set_fm_raw_value(fm_text, "due_date", due_date)
 
     note_text = f"---\n{fm_text}\n---\n{body_text}"
 

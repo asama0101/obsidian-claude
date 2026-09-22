@@ -67,7 +67,7 @@ def test_正常系で3つのサブフォルダとノートが作成される(dt)
         assert result["folders"] == ["Tasks", "Meetings", "Documents"]
 
 
-def test_due_date指定時はfrontmatterに反映される(dt):
+def test_due_date指定時はfrontmatterにクォート無しで反映される(dt):
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = _make_vault(tmp)
         result = project_create.create_project(
@@ -76,7 +76,8 @@ def test_due_date指定時はfrontmatterに反映される(dt):
 
         note_path = Path(result["note_path"])
         content = note_path.read_text(encoding="utf-8")
-        assert 'due_date: "2026-10-01"' in content
+        assert "due_date: 2026-10-01" in content
+        assert 'due_date: "2026-10-01"' not in content
 
 
 def test_due_date未指定ならfrontmatterは空欄のまま(dt):
