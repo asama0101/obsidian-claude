@@ -2,7 +2,8 @@
 type: task
 project: ""
 source_meeting: ""
-start_date: "{{date:YYYY-MM-DD}}"
+created_date:
+start_date:
 due_date:
 status: 1_todo
 memo: ""
