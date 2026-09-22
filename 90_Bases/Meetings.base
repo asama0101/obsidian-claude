@@ -18,10 +18,10 @@ views:
       or:
         - and:
             - type == "meeting"
-            - date == today()
+            - date == if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today())
         - and:
             - type == "meeting_series"
-            - last_updated == today()
+            - last_updated == if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today())
     order:
       - file.name
       - project

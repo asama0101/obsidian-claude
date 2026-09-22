@@ -16,7 +16,7 @@ views:
     filters:
       and:
         - start_date
-        - start_date <= today()
+        - start_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today())
         - status != "4_done"
         - status != "5_cancel"
     groupBy:

@@ -13,8 +13,8 @@ type: daily
 ![[Projects.base#Active]]
 
 ## 🔗 本日作成・更新したノート
+*（`/close` 実行時に自動更新される）*
 <!-- UPDATED_NOTES_START -->
-（`/close` 実行時に自動更新される）
 <!-- UPDATED_NOTES_END -->
 
 ---
@@ -22,9 +22,9 @@ type: daily
 ## 📝 メモ
 
 ### 📌 翌日引き継ぎメモ
+*（`/today` 実行時に自動で引継される）*
 <!-- CARRYOVER_START -->
-- [ ] 
 <!-- CARRYOVER_END -->
 
 ### 💭 本日限りのメモ
--
+
