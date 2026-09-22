@@ -97,10 +97,9 @@ def get_fm_value(fm_text: str, key: str) -> str | None:
     return None
 
 
-def set_fm_value(fm_text: str, key: str, value: str) -> str:
-    """frontmatterテキスト内の key: 行を置換、無ければ末尾に追加する。"""
+def _set_fm_line(fm_text: str, key: str, new_line: str) -> str:
+    """frontmatterテキスト内の key: 行を new_line に置換、無ければ末尾に追加する。"""
     prefix = f"{key}:"
-    new_line = f'{key}: "{value}"'
     lines = fm_text.split("\n") if fm_text else []
 
     for i, line in enumerate(lines):
@@ -110,6 +109,16 @@ def set_fm_value(fm_text: str, key: str, value: str) -> str:
 
     lines.append(new_line)
     return "\n".join(lines)
+
+
+def set_fm_value(fm_text: str, key: str, value: str) -> str:
+    """frontmatterテキスト内の key: 行を置換、無ければ末尾に追加する。値はダブルクォートで囲む。"""
+    return _set_fm_line(fm_text, key, f'{key}: "{value}"')
+
+
+def set_fm_raw_value(fm_text: str, key: str, value: str) -> str:
+    """frontmatterテキスト内の key: 行を置換、無ければ末尾に追加する。値はクォートせずそのまま書き込む。"""
+    return _set_fm_line(fm_text, key, f"{key}: {value}")
 
 
 def add_tag(fm_text: str, tag: str) -> str:
@@ -223,6 +232,18 @@ def _tokenize(name: str) -> list[str]:
     """ディレクトリ名を空白/ハイフン/アンダースコアで分割し、3文字以上のトークンを返す。"""
     tokens = re.split(r"[\s\-_]+", name)
     return [t for t in tokens if len(t) >= 3]
+
+
+_PROJECT_LINK_PATTERN = re.compile(r"^\[\[(.+)\]\]$")
+
+
+def extract_project_name(value: str) -> str:
+    """"[[Name]]" 形式のプロジェクトリンクからプロジェクト名を取り出す。
+
+    リンク形式でなければ、そのままの文字列をプロジェクト名として扱う。
+    """
+    match = _PROJECT_LINK_PATTERN.match(value)
+    return match.group(1) if match else value
 
 
 def fuzzy_project_match(text: str, projects_dir: Path) -> str | None:

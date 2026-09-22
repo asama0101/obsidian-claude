@@ -16,6 +16,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import task_save  # noqa: E402
+import vault_lib  # noqa: E402
 
 _TEMPLATE_TEXT = (
     "---\n"
@@ -41,11 +42,11 @@ _TEMPLATE_TEXT = (
 
 
 def test_リンク形式からプロジェクト名を取り出す():
-    assert task_save.extract_project_name("[[VaultMigration]]") == "VaultMigration"
+    assert vault_lib.extract_project_name("[[VaultMigration]]") == "VaultMigration"
 
 
 def test_リンク形式でなければそのまま返す():
-    assert task_save.extract_project_name("PlainName") == "PlainName"
+    assert vault_lib.extract_project_name("PlainName") == "PlainName"
 
 
 @pytest.fixture

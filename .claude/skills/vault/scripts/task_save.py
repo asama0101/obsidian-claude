@@ -5,23 +5,12 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
-import re
 import sys
 from pathlib import Path
 
 import vault_lib
 
 _TEMPLATE_RELATIVE_PATH = "70_Templates/Task_Template.md"
-_PROJECT_LINK_PATTERN = re.compile(r"^\[\[(.+)\]\]$")
-
-
-def extract_project_name(project: str) -> str:
-    """"[[Name]]" 形式のプロジェクトリンクからプロジェクト名を取り出す。
-
-    リンク形式でなければ、そのままの文字列をプロジェクト名として扱う。
-    """
-    match = _PROJECT_LINK_PATTERN.match(project)
-    return match.group(1) if match else project
 
 
 def build_note_text(
@@ -71,7 +60,7 @@ def main() -> None:
 
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
 
-    project_name = extract_project_name(args.project)
+    project_name = vault_lib.extract_project_name(args.project)
     project_dir = vault_root / "10_Projects" / project_name
     if not project_dir.is_dir():
         print(json.dumps({"status": "error", "reason": "project_not_found"}, ensure_ascii=False))

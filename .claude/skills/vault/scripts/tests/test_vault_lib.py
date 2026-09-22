@@ -111,6 +111,24 @@ def test_存在しないキーは末尾に追加する():
     assert result == 'title: "foo"\nstatus: "done"'
 
 
+def test_raw値で既存キーをクォートせず置換し他行は変化しない():
+    fm = 'project: "[[Old]]"\ntags: []'
+    result = vault_lib.set_fm_raw_value(fm, "project", "[[New]]")
+    assert result == "project: [[New]]\ntags: []"
+
+
+def test_raw値で存在しないキーはクォートせず末尾に追加する():
+    fm = 'title: "foo"'
+    result = vault_lib.set_fm_raw_value(fm, "project", '""')
+    assert result == 'title: "foo"\nproject: ""'
+
+
+def test_raw値に特殊文字を含んでもクォートを付与しない():
+    fm = 'project: ""'
+    result = vault_lib.set_fm_raw_value(fm, "project", '"[[My Project]]"')
+    assert result == 'project: "[[My Project]]"'
+
+
 def test_既存タグリストの末尾に追加する():
     fm = 'title: "foo"\ntags:\n  - existing'
     result = vault_lib.add_tag(fm, "new-tag")
@@ -327,3 +345,11 @@ def test_check_trueで異常終了時に例外を送出する():
     with tempfile.TemporaryDirectory() as tmp:
         with pytest.raises(Exception):
             vault_lib.run_git("not-a-real-git-command", cwd=tmp)
+
+
+def test_extract_project_nameでリンク形式からプロジェクト名を取り出す():
+    assert vault_lib.extract_project_name("[[VaultMigration]]") == "VaultMigration"
+
+
+def test_extract_project_nameでリンク形式でなければそのまま返す():
+    assert vault_lib.extract_project_name("PlainName") == "PlainName"
