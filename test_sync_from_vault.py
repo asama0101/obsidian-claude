@@ -353,17 +353,17 @@ def test_読み取り不可なファイルがあっても他のファイルの�
         (src / "broken.md").write_text("broken", encoding="utf-8")
         (src / "ok.md").write_text("ok content", encoding="utf-8")
 
-        original_copy2 = sync_from_vault.shutil.copy2
+        original_read_bytes = Path.read_bytes
 
-        def fake_copy2(src_path, dst_path, *args, **kwargs):
+        def fake_read_bytes(self, *args, **kwargs):
             # Windows上ではファイル所有者に対するchmodだけでは読み取り不能を再現できないため、
-            # shutil.copy2をモンキーパッチしてOSError（権限エラー・OneDriveオンデマンド
-            # ファイル未ダウンロード等）を模擬する
-            if Path(src_path).name == "broken.md":
+            # copy_file()が読み取り可否確認に使うPath.read_bytesをモンキーパッチして
+            # OSError（権限エラー・OneDriveオンデマンドファイル未ダウンロード等）を模擬する
+            if self.name == "broken.md":
                 raise OSError("simulated permission denied")
-            return original_copy2(src_path, dst_path, *args, **kwargs)
+            return original_read_bytes(self, *args, **kwargs)
 
-        monkeypatch.setattr(sync_from_vault.shutil, "copy2", fake_copy2)
+        monkeypatch.setattr(Path, "read_bytes", fake_read_bytes)
 
         logs = sync_from_vault.mirror_dir(src, dst)
 

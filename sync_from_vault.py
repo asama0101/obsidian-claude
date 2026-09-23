@@ -164,23 +164,33 @@ def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[st
         （新規なら"ADD <relpath>"、更新なら"UPDATE <relpath>"、変更が無ければ空リスト、
         読み取り時にOSError（権限エラー・OneDriveオンデマンドファイル未ダウンロード等）が
         発生すれば"SKIP（読み取り不可） <relpath>: <エラー内容>"）。
+
+    Raises:
+        OSError: 書き込み側（コピー先ディスク満杯・コピー先ファイルロック中等）で
+            発生した場合。読み取り側のOSErrorとは異なりSKIPせず、ロールバックもせず
+            そのまま伝播させる。
     """
     rel_path = dst.relative_to(base_dir).as_posix()
 
     try:
         if not dst.exists():
             action = "ADD"
+            # ADDの場合はfilecmp.cmpによる読み取り確認が行われないため、実際にコピー
+            # 可能かどうかをここで明示的に読み取って確認する（結果は使わず破棄する）
+            src.read_bytes()
         elif not filecmp.cmp(src, dst, shallow=False):
             action = "UPDATE"
         else:
             return []
-
-        if not dry_run:
-            shutil.copy2(src, dst)
     except OSError as exc:
-        # 読み取り時のOSErrorはこのファイルだけスキップし処理を続行する（書き込み・
-        # 削除・ディレクトリ作成中のOSErrorはここでは捕捉せず、呼び出し元へ伝播させる）
+        # 読み取り時のOSErrorはこのファイルだけスキップし処理を続行する
         return [f"SKIP（読み取り不可） {rel_path}: {exc}"]
+
+    # 読み取り確認後の書き込み（メタデータもコピーするためshutil.copy2を使う）は
+    # tryの外に置き、書き込み・削除・ディレクトリ作成中のOSErrorはここでは捕捉せず、
+    # 呼び出し元へそのまま伝播させる（ロールバックしない）
+    if not dry_run:
+        shutil.copy2(src, dst)
 
     return [f"{action} {rel_path}"]
 
