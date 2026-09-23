@@ -5,12 +5,13 @@ Vaultの内容に合わせて同期する。git操作（add/commit/push）は一
 ファイルのコピー・削除のみを行う。
 
 このモジュールは複数タスクに分割して段階的に実装される。このファイル時点では
-以下の2カテゴリのみを扱う。
+以下の4カテゴリを扱う。
 - フルミラー・ディレクトリ（.claude/, 80_Templates/, 82_Bases/, 90_SkillFlows/）
 - 単一ファイルコピー（CLAUDE.md, README.md）
+- `.obsidian/`許可リスト方式ミラー
+- 個人ノート系フォルダ（00_Inbox等）の構造のみミラー
 
-`.obsidian/`許可リストミラー・個人ノート構造ミラー・エラー処理・CLIエントリポイントは
-後続タスクで追加する。
+エラー処理・CLIエントリポイントは後続タスクで追加する。
 """
 
 import filecmp
@@ -81,7 +82,13 @@ def _mirror_dir_recursive(
     dry_run: bool,
     logs: list[str],
 ) -> None:
-    """mirror_dirの再帰本体。1階層分の追加・更新・削除を判定し、サブディレクトリへ再帰する。"""
+    """mirror_dirの再帰本体。1階層分の追加・更新・削除を判定し、サブディレクトリへ再帰する。
+
+    structure_only=Trueの場合はファイルを一切コピーせず、ディレクトリ構造のみを再現する。
+    末端ディレクトリ（サブディレクトリを持たないディレクトリ。src側の構造で判定）には
+    `.gitkeep`を置き、末端でなくなったディレクトリからは`.gitkeep`を取り除く。この判定は
+    毎回src側の現状から再計算する（前回の状態は記憶しない）。
+    """
     if not dry_run:
         dst_dir.mkdir(parents=True, exist_ok=True)
 
@@ -90,10 +97,12 @@ def _mirror_dir_recursive(
     dst_names = {entry.name for entry in dst_dir.iterdir()} if dst_dir.exists() else set()
     dst_names -= skip_names
 
+    has_subdirs = False
     for name in sorted(src_names):
         src_path = src_dir / name
         dst_path = dst_dir / name
         if src_path.is_dir():
+            has_subdirs = True
             _mirror_dir_recursive(
                 src_path, dst_path, src_root, dst_root, skip_names, structure_only, dry_run, logs
             )
@@ -115,10 +124,27 @@ def _mirror_dir_recursive(
             logs.append(f"DELETE {rel_path}")
             if not dry_run:
                 shutil.rmtree(dst_path)
-        elif not structure_only:
+        elif structure_only and name == ".gitkeep":
+            # .gitkeepの追加・削除はこの後の末端判定でまとめて扱うためここではスキップする
+            continue
+        else:
             logs.append(f"DELETE {rel_path}")
             if not dry_run:
                 dst_path.unlink()
+
+    if structure_only:
+        gitkeep_path = dst_dir / ".gitkeep"
+        gitkeep_rel = gitkeep_path.relative_to(dst_root).as_posix()
+        gitkeep_exists = gitkeep_path.exists()
+        if has_subdirs:
+            if gitkeep_exists:
+                logs.append(f"DELETE {gitkeep_rel}")
+                if not dry_run:
+                    gitkeep_path.unlink()
+        elif not gitkeep_exists:
+            logs.append(f"ADD {gitkeep_rel}")
+            if not dry_run:
+                gitkeep_path.touch()
 
 
 def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[str]:
@@ -151,19 +177,71 @@ def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[st
     return [f"{action} {rel_path}"]
 
 
+# .obsidian/配下で許可リスト方式でミラーするファイル（この7項目 + themes/ディレクトリのみ）
+OBSIDIAN_ALLOWLIST_FILES = frozenset(
+    {
+        "app.json",
+        "appearance.json",
+        "core-plugins.json",
+        "daily-notes.json",
+        "hotkeys.json",
+        "switcher.json",
+        "types.json",
+    }
+)
+
+
 def mirror_obsidian_allowlist(
     vault_obsidian: Path, repo_obsidian: Path, *, dry_run: bool
 ) -> list[str]:
-    """.obsidian/配下を許可リスト方式でミラーする（スタブ、Task 2で本実装予定）。"""
-    return []
+    """.obsidian/配下を許可リスト方式でミラーする。
+
+    許可リスト（OBSIDIAN_ALLOWLIST_FILESの各ファイル + themes/ディレクトリ）だけを対象にする。
+    許可リスト以外の.obsidian/配下のファイル・ディレクトリ（workspace.json等）には
+    一切触れない（読み取らない・削除しない）。
+
+    Args:
+        vault_obsidian: Vault側の.obsidian/ディレクトリ。
+        repo_obsidian: リポジトリ側の.obsidian/ディレクトリ（無ければ新規作成する）。
+        dry_run: Trueの場合はファイルシステムに一切書き込まず、操作ログだけを返す。
+
+    Returns:
+        実行した（またはdry_run=Trueでは実行予定の）操作ログの文字列リスト。
+    """
+    logs: list[str] = []
+
+    if not dry_run:
+        repo_obsidian.mkdir(parents=True, exist_ok=True)
+
+    for name in sorted(OBSIDIAN_ALLOWLIST_FILES):
+        src_path = vault_obsidian / name
+        dst_path = repo_obsidian / name
+        if src_path.exists():
+            logs += copy_file(src_path, dst_path, base_dir=repo_obsidian, dry_run=dry_run)
+        elif dst_path.exists():
+            logs.append(f"DELETE {name}")
+            if not dry_run:
+                dst_path.unlink()
+
+    logs += mirror_dir(vault_obsidian / "themes", repo_obsidian / "themes", dry_run=dry_run)
+
+    return logs
+
+
+# mirror_dir(structure_only=True)でディレクトリ構造のみミラーする個人ノート系フォルダ
+PERSONAL_NOTE_FOLDERS = (
+    "00_Inbox",
+    "10_Daily",
+    "20_Projects",
+    "30_Areas",
+    "40_Resources",
+    "50_Archives",
+    "81_Attachments",
+)
 
 
 def run(dry_run: bool) -> list[str]:
-    """フルミラー・ディレクトリと単一ファイルコピーの同期を実行し、操作ログを集約する。
-
-    このタスク（Task 1）ではフルミラー・ディレクトリ（.claude/, 80_Templates/,
-    82_Bases/, 90_SkillFlows/）と単一ファイルコピー（CLAUDE.md, README.md）のみを扱う。
-    `.obsidian/`許可リストミラー・個人ノート構造ミラーは後続タスクが追加する。
+    """全カテゴリの同期を実行し、操作ログを集約する。
 
     Args:
         dry_run: Trueの場合はファイルシステムに一切書き込まず、操作ログだけを返す。
@@ -191,5 +269,14 @@ def run(dry_run: bool) -> list[str]:
     logs += copy_file(
         VAULT_ROOT / "README.md", REPO_ROOT / "README.md", base_dir=REPO_ROOT, dry_run=dry_run
     )
+
+    logs += mirror_obsidian_allowlist(
+        VAULT_ROOT / ".obsidian", REPO_ROOT / ".obsidian", dry_run=dry_run
+    )
+
+    for folder in PERSONAL_NOTE_FOLDERS:
+        logs += mirror_dir(
+            VAULT_ROOT / folder, REPO_ROOT / folder, structure_only=True, dry_run=dry_run
+        )
 
     return logs
