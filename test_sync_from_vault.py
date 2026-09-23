@@ -406,6 +406,26 @@ def test_読み取り以外のOSErrorはロールバックせずそのまま伝�
         assert (dst / "obsolete_dir").exists()
 
 
+def test_書き込み時のOSErrorは読み取り不可としてスキップされずそのまま伝播する(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src = root / "src"
+        dst = root / "dst"
+        src.mkdir()
+        (src / "new.md").write_text("new content", encoding="utf-8")
+
+        def fake_copy2(src_path, dst_path, *args, **kwargs):
+            # ディスク満杯・コピー先ファイルがロック中等、書き込み側で発生するOSErrorを
+            # 模擬する。読み取り側（filecmp.cmp・読み取り確認）ではなく書き込み
+            # （shutil.copy2の実コピー呼び出し）で発生した場合はSKIPせず伝播すべきことを検証する
+            raise OSError("simulated write failure")
+
+        monkeypatch.setattr(sync_from_vault.shutil, "copy2", fake_copy2)
+
+        with pytest.raises(OSError):
+            sync_from_vault.mirror_dir(src, dst)
+
+
 def test_VAULT_ROOTが存在しない場合エラー終了する(monkeypatch):
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
