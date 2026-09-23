@@ -696,3 +696,26 @@ def test_フルミラー対象で読み取り専用属性が付いた削除対�
 
         assert logs == ["DELETE CLAUDE.md"]
         assert not dst_file.exists()
+
+
+# --- ここから fix round 1: _rmtree_onexcの例外種別判定 ---
+
+
+def test_rmtreeのonexcコールバックはPermissionError以外の例外に対して属性解除せずそのまま再送出する(
+    monkeypatch,
+):
+    # _rmtree_onexcはshutil.rmtreeのonexcコールバック契約（func, path, exc）に従う単体として
+    # 直接検証する。PermissionError以外（真のファイルロック等）に対しては、無関係な
+    # os.chmod副作用を発生させてはならない。
+    chmod_calls = []
+    monkeypatch.setattr(
+        sync_from_vault.os, "chmod", lambda *args, **kwargs: chmod_calls.append(args)
+    )
+
+    def failing_func(path):
+        raise OSError("simulated non-permission deletion failure")
+
+    with pytest.raises(OSError):
+        sync_from_vault._rmtree_onexc(failing_func, "some/path", OSError("boom"))
+
+    assert chmod_calls == []
