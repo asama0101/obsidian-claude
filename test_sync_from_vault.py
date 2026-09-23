@@ -242,6 +242,7 @@ def test_obsidian許可リストで許可リスト外のファイルは無視さ
         repo_obsidian.mkdir(parents=True)
         (vault_obsidian / "app.json").write_text("app content", encoding="utf-8")
         (vault_obsidian / "workspace.json").write_text("vault workspace", encoding="utf-8")
+        (vault_obsidian / "themes").mkdir()
         (repo_obsidian / "app.json").write_text("old app content", encoding="utf-8")
         (repo_obsidian / "workspace.json").write_text("local workspace", encoding="utf-8")
 
@@ -286,6 +287,7 @@ def test_obsidian許可リストでvault側から削除された対象ファイ�
         repo_obsidian = root / "repo" / ".obsidian"
         vault_obsidian.mkdir(parents=True)
         repo_obsidian.mkdir(parents=True)
+        (vault_obsidian / "themes").mkdir()
         (repo_obsidian / "hotkeys.json").write_text("stale hotkeys", encoding="utf-8")
 
         logs = sync_from_vault.mirror_obsidian_allowlist(
@@ -303,6 +305,7 @@ def test_obsidian許可リストでdry_run指定時はファイルシステム�
         repo_obsidian = root / "repo" / ".obsidian"
         vault_obsidian.mkdir(parents=True)
         (vault_obsidian / "app.json").write_text("app content", encoding="utf-8")
+        (vault_obsidian / "themes").mkdir()
 
         logs = sync_from_vault.mirror_obsidian_allowlist(
             vault_obsidian, repo_obsidian, dry_run=True

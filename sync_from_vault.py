@@ -60,19 +60,36 @@ def mirror_dir(
     dst側にあってsrc側に無いファイル・ディレクトリ（skip_names該当を除く）は削除する。
     dstが存在しない場合はエラーにせず新規作成する。
 
+    srcディレクトリ自体（このトップレベル呼び出しの引数）が存在しない場合は、
+    OneDrive同期遅延等による一時的な不在の可能性があるため「src側が空」として
+    扱わず、dst側に一切触れずSKIPする（サブディレクトリが再帰の途中で消える
+    場合は、vault側で意図的に削除されたケースと区別できないため対象外。
+    そちらは従来通り削除する）。
+
     Args:
         src: ミラー元ディレクトリ。
         dst: ミラー先ディレクトリ。
         skip_names: コピー・削除判定の両方から除外する名前の集合
             （再帰的にどの深さでも一致すれば除外）。
         structure_only: Trueならディレクトリのみ再現しファイルは無視する。
+            この場合、dst側の.gitkeep以外のファイルはsrc側に同名ファイルが
+            存在するかどうかに関わらず無条件で削除対象になる。
         dry_run: Trueの場合はファイルシステムに一切書き込まず、操作ログだけを返す。
 
     Returns:
         実行した（またはdry_run=Trueでは実行予定の）操作ログの文字列リスト
-        （例: "ADD <relpath>", "UPDATE <relpath>", "DELETE <relpath>"）。
+        （例: "ADD <relpath>", "UPDATE <relpath>", "DELETE <relpath>",
+        srcディレクトリ自体が不在なら"SKIP（ミラー元ディレクトリ不在） <src>"）。
     """
     logs: list[str] = []
+    if not src.exists():
+        # OneDrive同期遅延等でミラー元ディレクトリ自体が一時的に見えなくなる場合がある。
+        # ここで「src側が空」として扱うとdst側の既存内容が丸ごと削除対象になってしまうため、
+        # トップレベル呼び出しに限りsrc不在を検知したら何もせずSKIPし、既存内容を保持する
+        # （サブディレクトリが再帰の途中で消える場合は、vault側で意図的に削除されたケースと
+        # 区別できないため、こちらは_mirror_dir_recursive内の従来通りの削除セマンティクスに従う）
+        logs.append(f"SKIP（ミラー元ディレクトリ不在） {src}")
+        return logs
     _mirror_dir_recursive(src, dst, src, dst, skip_names, structure_only, dry_run, logs)
     return logs
 
@@ -120,14 +137,26 @@ def _mirror_dir_recursive(
         elif not structure_only:
             logs.extend(copy_file(src_path, dst_path, base_dir=dst_root, dry_run=dry_run))
 
-    for name in sorted(dst_names - src_names):
+    if structure_only:
+        # structure_onlyでは「名前がsrc側と一致するか」でなく「dst側にファイルが
+        # 存在するかどうか」だけで削除判定する。src側に同名ファイルが存在するという
+        # 理由でdst側の残留ファイル（個人ノート等）を削除対象から除外してはならない
+        # （個人情報系フォルダには本来ファイルが一切存在してはいけないため）
+        delete_candidates = dst_names
+    else:
+        delete_candidates = dst_names - src_names
+
+    for name in sorted(delete_candidates):
         dst_path = dst_dir / name
         rel_path = dst_path.relative_to(dst_root).as_posix()
         if dst_path.is_dir():
+            if structure_only and name in src_names and (src_dir / name).is_dir():
+                # src側にも対応するディレクトリがあり既に再帰処理済みのため、ここでは何もしない
+                continue
             logs.append(f"DELETE {rel_path}")
             if not dry_run:
                 shutil.rmtree(dst_path)
-        elif structure_only and name == ".gitkeep":
+        elif name == ".gitkeep" and structure_only:
             # .gitkeepの追加・削除はこの後の末端判定でまとめて扱うためここではスキップする
             continue
         else:
@@ -165,6 +194,7 @@ def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[st
     Returns:
         実行した（またはdry_run=Trueでは実行予定の）操作ログの文字列リスト
         （新規なら"ADD <relpath>"、更新なら"UPDATE <relpath>"、変更が無ければ空リスト、
+        srcが存在せずdstが存在すれば"DELETE <relpath>"（両方存在しなければ空リスト）、
         読み取り時にOSError（権限エラー・OneDriveオンデマンドファイル未ダウンロード等）が
         発生すれば"SKIP（読み取り不可） <relpath>: <エラー内容>"）。
 
@@ -174,6 +204,16 @@ def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[st
             そのまま伝播させる。
     """
     rel_path = dst.relative_to(base_dir).as_posix()
+
+    if not src.exists():
+        # vault側に無いのは「読み取り不可」ではなく単に存在しない状態。ディレクトリ
+        # ミラーの削除セマンティクスと一貫させるため、dst側に残っていれば削除する
+        if dst.exists():
+            logs = [f"DELETE {rel_path}"]
+            if not dry_run:
+                dst.unlink()
+            return logs
+        return []
 
     try:
         if not dst.exists():
@@ -237,6 +277,10 @@ def mirror_obsidian_allowlist(
     for name in sorted(OBSIDIAN_ALLOWLIST_FILES):
         src_path = vault_obsidian / name
         dst_path = repo_obsidian / name
+        if os.path.islink(src_path):
+            # 他の経路（_mirror_dir_recursive）と同様、symlink・ジャンクションはたどらずスキップする
+            logs.append(f"SKIP（symlink） {name}")
+            continue
         if src_path.exists():
             logs += copy_file(src_path, dst_path, base_dir=repo_obsidian, dry_run=dry_run)
         elif dst_path.exists():
