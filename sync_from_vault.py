@@ -304,3 +304,11 @@ def run(dry_run: bool) -> list[str]:
         )
 
     return logs
+
+
+def main() -> None:
+    pass
+
+
+if __name__ == "__main__":
+    main()
