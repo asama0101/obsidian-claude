@@ -15,6 +15,7 @@ Vaultの内容に合わせて同期する。git操作（add/commit/push）は一
 """
 
 import filecmp
+import os
 import shutil
 from pathlib import Path
 
@@ -108,14 +109,20 @@ def _mirror_dir_recursive(
             )
         elif not structure_only:
             rel_path = src_path.relative_to(src_root).as_posix()
-            if not dst_path.exists():
-                logs.append(f"ADD {rel_path}")
-                if not dry_run:
-                    shutil.copy2(src_path, dst_path)
-            elif not filecmp.cmp(src_path, dst_path, shallow=False):
-                logs.append(f"UPDATE {rel_path}")
-                if not dry_run:
-                    shutil.copy2(src_path, dst_path)
+            try:
+                if not dst_path.exists():
+                    logs.append(f"ADD {rel_path}")
+                    if not dry_run:
+                        shutil.copy2(src_path, dst_path)
+                elif not filecmp.cmp(src_path, dst_path, shallow=False):
+                    logs.append(f"UPDATE {rel_path}")
+                    if not dry_run:
+                        shutil.copy2(src_path, dst_path)
+            except OSError:
+                # TODO(Task 3 GREEN): 読み取り不可ファイルのSKIPログを実装する
+                # （このスタブは二段階REDのための暫定措置であり、ここではまだログを
+                # 正しい形式で残さない）
+                pass
 
     for name in sorted(dst_names - src_names):
         dst_path = dst_dir / name
