@@ -115,13 +115,13 @@ def main(argv: list[str] | None = None) -> int:
     vault_root = Path(args.vault_root) if args.vault_root else vault_lib.VAULT_ROOT
     content = json.loads(Path(args.content_json).read_text(encoding="utf-8"))
 
-    template_path = vault_root / "70_Templates" / "Knowhow_Template.md"
+    template_path = vault_root / "80_Templates" / "Knowhow_Template.md"
     template_text = template_path.read_text(encoding="utf-8")
 
     dt = datetime.datetime.now()
     note_text = build_note(content, template_text, dt, tag=args.tag)
 
-    out_dir = vault_root / "20_Areas" / "Knowledge"
+    out_dir = vault_root / "30_Areas" / "Knowledge"
     out_dir.mkdir(parents=True, exist_ok=True)
     filename = vault_lib.sanitize_filename(content["title"]) + ".md"
     note_path = vault_lib.unique_path(out_dir, filename)

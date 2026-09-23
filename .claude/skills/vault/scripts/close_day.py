@@ -20,7 +20,7 @@ import vault_lib
 _DAILY_BRANCH_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 # 更新ノート一覧から除外するパス接頭辞
-_EXCLUDED_PREFIXES = ("70_Templates/", ".claude/")
+_EXCLUDED_PREFIXES = ("80_Templates/", ".claude/")
 
 # frontmatterのtype値のうちグループとして認識する既知の値
 _KNOWN_TYPES = ("project", "meeting", "task", "knowhow", "webclip")
@@ -137,7 +137,7 @@ def _filter_updated_notes(
     """close対象外(当日ノート自身/テンプレート/.claude配下/非.md)を除外し、
     (ファイル名(拡張子除く), フルパス) のstemソート済みリストを返す。
     """
-    daily_note_path = f"00_Daily/{date_str}.md"
+    daily_note_path = f"10_Daily/{date_str}.md"
     entries: list[tuple[str, Path]] = []
     for path in paths:
         normalized = path.replace("\\", "/")
@@ -184,14 +184,14 @@ def _has_pending_changes(vault_root: Path) -> bool:
 def _scan_task_review_targets(vault_root: Path, date_str: str) -> list[dict]:
     """日付・ステータスの見直しが必要なタスクノートを検出する。
 
-    走査対象は `10_Projects/*/Tasks/*.md` と `20_Areas/Tasks/*.md`。
+    走査対象は `20_Projects/*/Tasks/*.md` と `30_Areas/Tasks/*.md`。
     typeが"task"のノートのうち、次の3条件のいずれかに該当するものを返す。
     1. created_date == date_str かつ start_date が空
     2. start_date == date_str かつ status == "1_todo"
     3. due_date == date_str かつ status が "4_done"/"5_cancel" 以外
     """
-    candidate_paths = list(vault_root.glob("10_Projects/*/Tasks/*.md"))
-    candidate_paths.extend((vault_root / "20_Areas" / "Tasks").glob("*.md"))
+    candidate_paths = list(vault_root.glob("20_Projects/*/Tasks/*.md"))
+    candidate_paths.extend((vault_root / "30_Areas" / "Tasks").glob("*.md"))
 
     targets: list[dict] = []
     for path in candidate_paths:
@@ -261,7 +261,7 @@ def main(argv: list[str] | None = None) -> int:
     block_text = _build_updated_notes_block(entries)
 
     # 5. 当日デイリーノートのマーカーブロックを置換して書き戻す
-    daily_note_path = vault_root / "00_Daily" / f"{date_str}.md"
+    daily_note_path = vault_root / "10_Daily" / f"{date_str}.md"
     daily_note_text = daily_note_path.read_text(encoding="utf-8")
     new_daily_note_text = vault_lib.set_marker_block(
         daily_note_text, "UPDATED_NOTES_START", "UPDATED_NOTES_END", block_text

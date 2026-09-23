@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import knowhow_save  # noqa: E402
 import vault_lib  # noqa: E402
 
-TEMPLATE_PATH = vault_lib.VAULT_ROOT / "70_Templates" / "Knowhow_Template.md"
+TEMPLATE_PATH = vault_lib.VAULT_ROOT / "80_Templates" / "Knowhow_Template.md"
 
 
 def _sample_content(**overrides):
@@ -110,11 +110,11 @@ def test_タイトルが本文見出しに反映される(template_text, dt):
 
 def _make_vault(tmp):
     vault_root = Path(tmp)
-    (vault_root / "70_Templates").mkdir(parents=True)
-    (vault_root / "70_Templates" / "Knowhow_Template.md").write_text(
+    (vault_root / "80_Templates").mkdir(parents=True)
+    (vault_root / "80_Templates" / "Knowhow_Template.md").write_text(
         TEMPLATE_PATH.read_text(encoding="utf-8"), encoding="utf-8"
     )
-    (vault_root / "20_Areas" / "Knowledge").mkdir(parents=True)
+    (vault_root / "30_Areas" / "Knowledge").mkdir(parents=True)
     return vault_root
 
 
@@ -146,7 +146,7 @@ def test_note_pathが出力され保存される():
         output = json.loads(buf.getvalue())
         note_path = Path(output["note_path"])
         assert note_path.exists()
-        assert note_path.parent == vault_root / "20_Areas" / "Knowledge"
+        assert note_path.parent == vault_root / "30_Areas" / "Knowledge"
         saved_text = note_path.read_text(encoding="utf-8")
         assert "category:" not in saved_text
         assert "  - python/pandas" in saved_text
@@ -155,7 +155,7 @@ def test_note_pathが出力され保存される():
 def test_ファイル名衝突時はunique_pathで回避する():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = _make_vault(tmp)
-        knowledge_dir = vault_root / "20_Areas" / "Knowledge"
+        knowledge_dir = vault_root / "30_Areas" / "Knowledge"
         existing = knowledge_dir / "衝突テスト.md"
         existing.write_text("既存ノート", encoding="utf-8")
 

@@ -30,7 +30,7 @@ def _list_branch_names(vault_root: Path) -> list[str]:
 
 
 def _find_carryover_source(daily_dir: Path, today: str) -> Path | None:
-    """00_Daily配下から当日より前の日付で最新のノートを探す。
+    """10_Daily配下から当日より前の日付で最新のノートを探す。
 
     ファイル名(日付文字列)の降順で走査し、最初に見つかったものを返す。
     連続した日付である必要はない。見つからなければ None。
@@ -85,7 +85,7 @@ def run(vault_root: Path, dt: datetime.datetime | None = None) -> dict:
         branch_status = "created"
 
     # 3. デイリーノートが既に存在する場合はCarryover転記をスキップする。
-    daily_dir = vault_root / "00_Daily"
+    daily_dir = vault_root / "10_Daily"
     daily_note_path = daily_dir / f"{today}.md"
     if daily_note_path.exists():
         return {"status": "ok", "branch": branch_status, "daily_note": "skipped"}
@@ -102,7 +102,7 @@ def run(vault_root: Path, dt: datetime.datetime | None = None) -> dict:
 
     # 6. テンプレートを展開し、Carryoverブロックのみ差し替える。
     #    UPDATED_NOTESブロックはプレースホルダのまま(closeスキルが後で上書きする)。
-    template_path = vault_root / "70_Templates" / "Daily_Template.md"
+    template_path = vault_root / "80_Templates" / "Daily_Template.md"
     template_text = template_path.read_text(encoding="utf-8")
     filled_text = vault_lib.fill_template(template_text, title=today, dt=dt)
     if carryover_inner:

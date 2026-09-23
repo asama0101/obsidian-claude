@@ -40,7 +40,7 @@ views:
     name: All
     filters:
       and:
-        - '!file.folder.contains("70_Templates")'
+        - '!file.folder.contains("80_Templates")'
     order:
       - file.name
       - type

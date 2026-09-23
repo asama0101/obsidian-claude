@@ -60,13 +60,13 @@
 | `meeting-series-update.md` | 定例予定ノートの更新ロジック（`occurrence_id`による同一回/次回判定） |
 | `project-matching.md` | `meeting`/`webclip`共通のプロジェクト自動紐付けルール（`vault_lib.fuzzy_project_match`） |
 
-## 90_Bases/ Baseファイル一覧
+## 82_Bases/ Baseファイル一覧
 
 | ファイル | フィルタ条件 | 役割 |
 |----------|--------------|------|
-| `Knowhow.base` | `type == "knowhow"` | ナレッジノート一覧（全件ビュー・カテゴリ別グループビュー） |
+| `Knowledge.base` | `type in ["knowhow", "webclip"]` | Knowhow/WebClip一括のナレッジノート一覧（全件ビュー・カテゴリ別グループビュー） |
 | `Meetings.base` | `type == "meeting"` または `"meeting_series"` | 議事録一覧（単発・定例を横断表示） |
-| `Projects.base` | `type == "project"` かつ `10_Projects/`配下 | プロジェクト一覧（Activeビューは`40_Archives/`を除外） |
+| `Projects.base` | `type == "project"` かつ `20_Projects/`配下 | プロジェクト一覧（Activeビューは`50_Archives/`を除外） |
 | `Tasks.base` | `type == "task"` | タスク一覧（ステータス・プロジェクト・期限等を列表示） |
 
 Base定義を追加・変更する場合、対象ノートのfrontmatter（`type`プロパティ等）との整合を確認する。

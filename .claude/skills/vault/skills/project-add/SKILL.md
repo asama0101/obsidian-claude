@@ -16,8 +16,8 @@ description: |
 プロジェクト名（必須）、期限（任意）。
 
 ## 出力
-- `Project_Template.md` ベースの概要ノート（`10_Projects/<Name>/<Name>.md`）
-- `10_Projects/<Name>/Tasks/`・`Meetings/`・`Documents/` の3フォルダ
+- `Project_Template.md` ベースの概要ノート（`20_Projects/<Name>/<Name>.md`）
+- `20_Projects/<Name>/Tasks/`・`Meetings/`・`Documents/` の3フォルダ
 
 ## 処理
 1. `PYTHONUTF8=1 python .claude/skills/vault/scripts/project_create.py --title <name> [--due-date YYYY-MM-DD]`
@@ -25,7 +25,7 @@ description: |
 2. 標準出力のJSONを`status`フィールドで判定する。
    - `"ok"`: `note_path`をユーザーに報告する。
    - `"error"`（`reason: "project_already_exists"`）: 同名の
-     `10_Projects/<name>/`が既に存在する。既存ノートを使うか別名にするか
+     `20_Projects/<name>/`が既に存在する。既存ノートを使うか別名にするか
      ユーザーに確認する（自動的に別名採番はしない）。
 
 ## 補足

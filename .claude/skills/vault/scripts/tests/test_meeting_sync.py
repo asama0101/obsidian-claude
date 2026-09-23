@@ -1,7 +1,7 @@
 """meeting_sync.py のユニットテスト。
 
 pytest（`.claude/skills/vault/scripts/.venv/`のvenv限定の開発依存）を使用する。
-テンプレートファイルは実際の70_Templates配下のものをテスト用一時Vaultへコピーして使う
+テンプレートファイルは実際の80_Templates配下のものをテスト用一時Vaultへコピーして使う
 （内容を重複転記せず、実物とのズレを防ぐため）。
 """
 
@@ -22,12 +22,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import meeting_sync  # noqa: E402
 import vault_lib  # noqa: E402
 
-REAL_TEMPLATES_DIR = vault_lib.VAULT_ROOT / "70_Templates"
+REAL_TEMPLATES_DIR = vault_lib.VAULT_ROOT / "80_Templates"
 
 
 def make_vault(root: Path, project_names: list[str] | None = None) -> Path:
     """テスト用の一時Vaultディレクトリを組み立てる（実テンプレートをコピー）。"""
-    templates_dir = root / "70_Templates"
+    templates_dir = root / "80_Templates"
     templates_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy(
         REAL_TEMPLATES_DIR / "Meeting_Template.md", templates_dir / "Meeting_Template.md"
@@ -37,12 +37,12 @@ def make_vault(root: Path, project_names: list[str] | None = None) -> Path:
         templates_dir / "Meeting_Series_Template.md",
     )
 
-    projects_dir = root / "10_Projects"
+    projects_dir = root / "20_Projects"
     projects_dir.mkdir(parents=True, exist_ok=True)
     for name in project_names or []:
         (projects_dir / name).mkdir(parents=True, exist_ok=True)
 
-    (root / "20_Areas" / "Meetings").mkdir(parents=True, exist_ok=True)
+    (root / "30_Areas" / "Meetings").mkdir(parents=True, exist_ok=True)
     return root
 
 
@@ -103,7 +103,7 @@ def test_新規作成でproject推定される():
         note_path = Path(result["created"][0])
         assert note_path.exists()
         assert (
-            note_path.parent == vault_root / "10_Projects" / "VaultMigration" / "Meetings"
+            note_path.parent == vault_root / "20_Projects" / "VaultMigration" / "Meetings"
         )
 
         text = note_path.read_text(encoding="utf-8")
@@ -124,7 +124,7 @@ def test_project推定できない場合はAreas配下に空欄で作成():
         result = meeting_sync.sync_events([event], vault_root)
 
         note_path = Path(result["created"][0])
-        assert note_path.parent == vault_root / "20_Areas" / "Meetings"
+        assert note_path.parent == vault_root / "30_Areas" / "Meetings"
         text = note_path.read_text(encoding="utf-8")
         fm, _body = vault_lib.split_frontmatter(text)
         assert vault_lib.get_fm_value(fm, "project") == ""
@@ -532,7 +532,7 @@ def test_set_projectで指定ノートのproject欄が書き換わりプロジ�
         assert exit_code == 0
         assert not note_path.exists()
         dest_path = (
-            vault_root / "10_Projects" / "VaultMigration" / "Meetings" / note_path.name
+            vault_root / "20_Projects" / "VaultMigration" / "Meetings" / note_path.name
         )
         assert dest_path.exists()
         after_text = dest_path.read_text(encoding="utf-8")
@@ -571,7 +571,7 @@ def test_set_projectのみでprojectが無ければエラー終了する():
 def test_set_projectでプロジェクト解除するとAreas配下へ戻る():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
-        dest_dir = vault_root / "10_Projects" / "VaultMigration" / "Meetings"
+        dest_dir = vault_root / "20_Projects" / "VaultMigration" / "Meetings"
         dest_dir.mkdir(parents=True, exist_ok=True)
         note_path = dest_dir / "会議.md"
         note_path.write_text(
@@ -591,7 +591,7 @@ def test_set_projectでプロジェクト解除するとAreas配下へ戻る():
 
         assert exit_code == 0
         assert not note_path.exists()
-        new_path = vault_root / "20_Areas" / "Meetings" / "会議.md"
+        new_path = vault_root / "30_Areas" / "Meetings" / "会議.md"
         assert new_path.exists()
         new_fm, _ = vault_lib.split_frontmatter(
             new_path.read_text(encoding="utf-8")
@@ -602,7 +602,7 @@ def test_set_projectでプロジェクト解除するとAreas配下へ戻る():
 def test_set_projectで既に正しいフォルダにあれば移動しない():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
-        dest_dir = vault_root / "10_Projects" / "VaultMigration" / "Meetings"
+        dest_dir = vault_root / "20_Projects" / "VaultMigration" / "Meetings"
         dest_dir.mkdir(parents=True, exist_ok=True)
         note_path = dest_dir / "会議.md"
         note_path.write_text(
@@ -629,7 +629,7 @@ def test_set_projectで既に正しいフォルダにあれば移動しない():
 def test_set_projectで存在しないプロジェクト名を指定するとエラーになりノートは変更されない():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
-        src_dir = vault_root / "20_Areas" / "Meetings"
+        src_dir = vault_root / "30_Areas" / "Meetings"
         note_path = src_dir / "会議.md"
         before_text = '---\nproject: ""\n---\nbody'
         note_path.write_text(before_text, encoding="utf-8")
@@ -654,17 +654,17 @@ def test_set_projectで存在しないプロジェクト名を指定するとエ
         }
         assert note_path.exists()
         assert note_path.read_text(encoding="utf-8") == before_text
-        assert not (vault_root / "10_Projects" / "NonExistent").exists()
+        assert not (vault_root / "20_Projects" / "NonExistent").exists()
 
 
 def test_set_projectで移動先に同名ファイルがあれば連番付与される():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp), project_names=["VaultMigration"])
-        src_dir = vault_root / "20_Areas" / "Meetings"
+        src_dir = vault_root / "30_Areas" / "Meetings"
         note_path = src_dir / "会議.md"
         note_path.write_text('---\nproject: ""\n---\nbody-A', encoding="utf-8")
 
-        dest_dir = vault_root / "10_Projects" / "VaultMigration" / "Meetings"
+        dest_dir = vault_root / "20_Projects" / "VaultMigration" / "Meetings"
         dest_dir.mkdir(parents=True, exist_ok=True)
         existing_path = dest_dir / "会議.md"
         existing_path.write_text(
@@ -1113,7 +1113,7 @@ def test_単発でアクションアイテム未記入の空プレースホル�
 def test_単発でアクションアイテムセクション自体が無ければ検出されない():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp))
-        dest_dir = vault_root / "20_Areas" / "Meetings"
+        dest_dir = vault_root / "30_Areas" / "Meetings"
         dest_dir.mkdir(parents=True, exist_ok=True)
         note_path = dest_dir / "会議.md"
         note_path.write_text(
@@ -1406,7 +1406,7 @@ def test_定例ノートはfrontmatterと現在ブロック両方が書き換わ
 def test_存在しないノートを指定するとエラーになる():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = make_vault(Path(tmp))
-        missing_path = vault_root / "20_Areas" / "Meetings" / "no-such.md"
+        missing_path = vault_root / "30_Areas" / "Meetings" / "no-such.md"
 
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):

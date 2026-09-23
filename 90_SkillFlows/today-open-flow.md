@@ -28,7 +28,7 @@ flowchart TD
     CheckNote -->|存在する| SkipNote[デイリーノートの作成をスキップする]
     class SkipNote python
 
-    CheckNote -->|存在しない| FindPrev[00_Daily内で当日より前の日付のうち<br/>最も新しいノートを探す]
+    CheckNote -->|存在しない| FindPrev[10_Daily内で当日より前の日付のうち<br/>最も新しいノートを探す]
     class FindPrev python
 
     FindPrev --> ExtractCarryover[見つかった場合、そのノートのCARRYOVERブロックの<br/>中身だけを読み取る（元ノートは変更しない）]

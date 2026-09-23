@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import today_start  # noqa: E402
 import vault_lib  # noqa: E402
 
-# 実際の 70_Templates/Daily_Template.md と同内容(テスト用に埋め込む)
+# 実際の 80_Templates/Daily_Template.md と同内容(テスト用に埋め込む)
 TEMPLATE_TEXT = (
     "---\n"
     "tags:\n"
@@ -57,11 +57,11 @@ def _init_vault(vault_root: Path) -> None:
     vault_lib.run_git("config", "user.email", "test@example.com", cwd=vault_root)
     vault_lib.run_git("config", "user.name", "Test", cwd=vault_root)
 
-    (vault_root / "70_Templates").mkdir(parents=True, exist_ok=True)
-    (vault_root / "70_Templates" / "Daily_Template.md").write_text(
+    (vault_root / "80_Templates").mkdir(parents=True, exist_ok=True)
+    (vault_root / "80_Templates" / "Daily_Template.md").write_text(
         TEMPLATE_TEXT, encoding="utf-8"
     )
-    (vault_root / "00_Daily").mkdir(parents=True, exist_ok=True)
+    (vault_root / "10_Daily").mkdir(parents=True, exist_ok=True)
 
     (vault_root / "README.md").write_text("init", encoding="utf-8")
     vault_lib.run_git("add", "-A", cwd=vault_root)
@@ -119,7 +119,7 @@ def test_デイリーノートが既存ならスキップしCarryover転記も�
         today = "2026-01-15"
 
         existing_content = "# 手動で作成済みのノート\n既存の内容"
-        (vault_root / "00_Daily" / f"{today}.md").write_text(
+        (vault_root / "10_Daily" / f"{today}.md").write_text(
             existing_content, encoding="utf-8"
         )
 
@@ -128,7 +128,7 @@ def test_デイリーノートが既存ならスキップしCarryover転記も�
         assert result["status"] == "ok"
         assert result["daily_note"] == "skipped"
         assert (
-            vault_root / "00_Daily" / f"{today}.md"
+            vault_root / "10_Daily" / f"{today}.md"
         ).read_text(encoding="utf-8") == existing_content
 
 
@@ -144,7 +144,7 @@ def test_前日ノートのCarryoverが転記され元ノートは変更され�
         prev_content = vault_lib.set_marker_block(
             prev_content, "CARRYOVER_START", "CARRYOVER_END", "- [ ] task A"
         )
-        prev_path = vault_root / "00_Daily" / "2026-01-10.md"
+        prev_path = vault_root / "10_Daily" / "2026-01-10.md"
         prev_path.write_text(prev_content, encoding="utf-8")
 
         result = today_start.run(vault_root, dt=dt)
@@ -153,7 +153,7 @@ def test_前日ノートのCarryoverが転記され元ノートは変更され�
         assert result["daily_note"] == "created"
         assert result["carryover_source"] == "2026-01-10"
 
-        new_content = (vault_root / "00_Daily" / f"{today}.md").read_text(encoding="utf-8")
+        new_content = (vault_root / "10_Daily" / f"{today}.md").read_text(encoding="utf-8")
         assert (
             vault_lib.get_marker_block(new_content, "CARRYOVER_START", "CARRYOVER_END")
             == "- [ ] task A"
@@ -177,7 +177,7 @@ def test_前日ノートが無い場合はCarryoverが空のまま作成され�
         assert result["daily_note"] == "created"
         assert result["carryover_source"] is None
 
-        new_content = (vault_root / "00_Daily" / f"{today}.md").read_text(encoding="utf-8")
+        new_content = (vault_root / "10_Daily" / f"{today}.md").read_text(encoding="utf-8")
         expected_placeholder = vault_lib.get_marker_block(
             TEMPLATE_TEXT, "CARRYOVER_START", "CARRYOVER_END"
         )

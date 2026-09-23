@@ -1,7 +1,7 @@
 filters:
   and:
     - type == "project"
-    - '!file.folder.contains("70_Templates")'
+    - '!file.folder.contains("80_Templates")'
 properties:
   start_date:
     displayName: 開始日
@@ -10,7 +10,7 @@ properties:
 views:
   - type: table
     name: Active
-    filters: '!file.inFolder("40_Archives")'
+    filters: '!file.inFolder("50_Archives")'
     order:
       - file.name
       - start_date

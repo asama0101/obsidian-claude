@@ -1,7 +1,7 @@
 filters:
   and:
     - type == "task"
-    - '!file.folder.contains("70_Templates")'
+    - '!file.folder.contains("80_Templates")'
 properties:
   status:
     displayName: ステータス
@@ -35,9 +35,41 @@ views:
       - due_date
       - memo
     sort:
-      - property: status
-        direction: ASC
       - property: project
+        direction: ASC
+      - property: start_date
+        direction: ASC
+      - property: due_date
+        direction: ASC
+  - type: table
+    name: ScheduleCheck
+    filters:
+      and:
+        - status != "4_done"
+        - status != "5_cancel"
+        - or:
+            - "!start_date"
+            - "!due_date"
+            - and:
+                - start_date
+                - start_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today()) + "14d"
+            - and:
+                - due_date
+                - due_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today()) + "14d"
+    groupBy:
+      property: start_date
+      direction: ASC
+    order:
+      - file.name
+      - project
+      - status
+      - start_date
+      - due_date
+      - memo
+    sort:
+      - property: project
+        direction: ASC
+      - property: due_date
         direction: ASC
   - type: table
     name: ProjectTasks
@@ -56,6 +88,8 @@ views:
       - due_date
       - memo
     sort:
+      - property: start_date
+        direction: ASC
       - property: due_date
         direction: ASC
     columnSize:
@@ -85,21 +119,10 @@ views:
       - start_date
       - due_date
       - memo
-  - type: table
-    name: CreatedToday
-    filters:
-      and:
-        - created_date
-        - /^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename)
-        - created_date == date(this.file.basename + " 00:00:00")
-    order:
-      - file.name
-      - project
-      - status
-      - created_date
-      - start_date
-      - due_date
-      - memo
     sort:
-      - property: status
+      - property: project
+        direction: ASC
+      - property: start_date
+        direction: ASC
+      - property: due_date
         direction: ASC

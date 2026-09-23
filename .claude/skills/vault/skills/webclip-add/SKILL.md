@@ -15,8 +15,8 @@ Webページの内容を後から参照できる形でVaultに保存する。
 対象URL。
 
 ## 出力
-- `80_Attachments/` にダウンロード保存した主要画像
-- `WebClip_Template.md` ベースのノート（`20_Areas/WebClips/`）
+- `81_Attachments/` にダウンロード保存した主要画像
+- `WebClip_Template.md` ベースのノート（`30_Areas/WebClips/`）
 
 ## 処理の流れ
 1. **対象URLを受け取ったら、まずPlaywrightのMCPツールが使用可能か確認する。**
@@ -89,12 +89,12 @@ Webページの内容を後から参照できる形でVaultに保存する。
      --url <URL> --content-json <JSONファイルパス> --tag <確定したタグ>
    ```
    - `summary`/`key_points`の`image_url`と`full_text`中の`![alt](URL)`を
-     まとめて重複排除した上で、画像を`80_Attachments/`にダウンロード保存する
+     まとめて重複排除した上で、画像を`81_Attachments/`にダウンロード保存する
      （個々の失敗はスキップし、ノート作成自体は継続する）。
    - `full_text`中の`![alt](URL)`は、ダウンロードできた画像はローカル埋め込み
-     `![[80_Attachments/...]]`に置換され、ダウンロードに失敗した箇所は
+     `![[81_Attachments/...]]`に置換され、ダウンロードに失敗した箇所は
      取り除かれた上で「📄 クリップ本文」セクションにblockquote形式で入る。
-   - `WebClip_Template.md`ベースのノートを`20_Areas/WebClips/`に作成し、
+   - `WebClip_Template.md`ベースのノートを`30_Areas/WebClips/`に作成し、
      結果（`note_path`・`images_saved`・`images_failed`）をJSONで出力する。
 6. **Claudeが結果を要約報告する。**
    - 作成したノートのパス、保存できた画像数、失敗した画像があればその旨を

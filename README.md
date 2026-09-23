@@ -16,16 +16,19 @@ Vault本体（Markdownノート・テンプレート・Bases定義）と、そ�
 
 | パス | 役割 |
 |------|------|
-| `00_Daily/` | デイリーノート（`today-open`スキルが作成） |
-| `10_Projects/` | プロジェクト単位のフォルダ。各配下に `Tasks/`・`Meetings/`・`Documents/` |
-| `20_Areas/Knowledge/` | ナレッジノート（`knowhow-add`スキルが整形） |
-| `20_Areas/Meetings/` | プロジェクトに紐付かない議事録 |
-| `20_Areas/WebClips/` | Webクリップ（`webclip-add`スキルが保存） |
-| `30_Resources/` | プロジェクトに紐付かないドキュメントの格納先 |
-| `40_Archives/` | 完了・非アクティブになったノートの置き場 |
-| `70_Templates/` | 各ノート種別のテンプレート（後述） |
-| `80_Attachments/` | 画像等の添付ファイル |
-| `90_Bases/` | Obsidian Bases定義（`*.base`ファイル、後述） |
+| `00_Inbox/` | 人が手動で書く未整理メモの置き場。frontmatter規約なし、Base集計対象外 |
+| `10_Daily/` | デイリーノート（`today-open`スキルが作成） |
+| `20_Projects/` | プロジェクト単位のフォルダ。各配下に `Tasks/`・`Meetings/`・`Documents/` |
+| `30_Areas/Knowledge/` | ナレッジノート（`knowhow-add`スキルが整形） |
+| `30_Areas/Meetings/` | プロジェクトに紐付かない議事録 |
+| `30_Areas/WebClips/` | Webクリップ（`webclip-add`スキルが保存） |
+| `30_Areas/Tasks/` | プロジェクトに紐付かないタスク |
+| `40_Resources/` | プロジェクトに紐付かないドキュメントの格納先 |
+| `50_Archives/` | 完了・非アクティブになったノートの置き場 |
+| `80_Templates/` | 各ノート種別のテンプレート（後述） |
+| `81_Attachments/` | 画像等の添付ファイル |
+| `82_Bases/` | Obsidian Bases定義（`*.base`ファイル、後述） |
+| `90_SkillFlows/` | 各スキルの動作フロー説明（使い方ドキュメント） |
 | `.claude/skills/vault/` | Claude Codeプラグイン本体（後述） |
 
 ## プラグイン本体の構成
@@ -56,15 +59,15 @@ Vault本体（Markdownノート・テンプレート・Bases定義）と、そ�
 | `project-add` | プロジェクト概要ノートとTasks/Meetings/Documentsフォルダを一括作成する | [SKILL.md](.claude/skills/vault/skills/project-add/SKILL.md) |
 | `today-close` | タスク・議事録の締め忘れを確認し、当日ブランチの変更をコミットしmainへマージする（1日の作業終了） | [SKILL.md](.claude/skills/vault/skills/today-close/SKILL.md) |
 
-## 90_Bases/ のBases定義
+## 82_Bases/ のBases定義
 
 Obsidian Basesプラグインのビュー定義。対応するノート種別を一覧・フィルタ表示する。
 
 | ファイル | 対象 |
 |----------|------|
-| `Knowhow.base` | `type == "knowhow"` のノート（全件・カテゴリ別の2ビュー） |
+| `Knowledge.base` | `type in ["knowhow", "webclip"]` のノート（Knowhow・WebClipを一括管理。全件・カテゴリ別の2ビュー） |
 | `Meetings.base` | `type == "meeting"` / `"meeting_series"` のノート |
-| `Projects.base` | `10_Projects/` 配下の `type == "project"` のノート |
+| `Projects.base` | `20_Projects/` 配下の `type == "project"` のノート |
 | `Tasks.base` | `type == "task"` のノート |
 
 ## セットアップ要件

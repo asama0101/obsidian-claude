@@ -1,7 +1,7 @@
 """プロジェクトタイトルのみからプロジェクト一式を作成するスクリプト。
 
 Project_Template.md からプロジェクト概要ノートを作成し、Tasks/Meetings/Documents
-の3つの空サブフォルダを 10_Projects/<title>/ 配下に作る。LLMの判断を介さない、
+の3つの空サブフォルダを 20_Projects/<title>/ 配下に作る。LLMの判断を介さない、
 決定論的な処理のみで完結する。
 """
 
@@ -15,7 +15,7 @@ from pathlib import Path
 
 import vault_lib
 
-_TEMPLATE_RELATIVE_PATH = "70_Templates/Project_Template.md"
+_TEMPLATE_RELATIVE_PATH = "80_Templates/Project_Template.md"
 _SUBFOLDERS = ["Tasks", "Meetings", "Documents"]
 
 
@@ -28,11 +28,11 @@ def create_project(
 ) -> dict:
     """プロジェクト一式(概要ノート+3サブフォルダ)を作成する。
 
-    10_Projects/<title>/ が既に存在する場合は何も作成・変更せず、
+    20_Projects/<title>/ が既に存在する場合は何も作成・変更せず、
     {"status": "error", "reason": "project_already_exists"} を返す。
     """
     safe_title = vault_lib.sanitize_filename(title)
-    project_dir = vault_root / "10_Projects" / safe_title
+    project_dir = vault_root / "20_Projects" / safe_title
 
     if project_dir.exists():
         return {"status": "error", "reason": "project_already_exists"}

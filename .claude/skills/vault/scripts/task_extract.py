@@ -41,7 +41,7 @@ def extract_action_items(text: str) -> list[str]:
 def extract_project(text: str, vault_root: Path) -> str | None:
     """frontmatterから project の値を取得する。
 
-    未設定、または対応するプロジェクトが `10_Projects/` 配下に
+    未設定、または対応するプロジェクトが `20_Projects/` 配下に
     実在しない(アーカイブ済み等)場合は None を返す。
     """
     fm_text, _ = vault_lib.split_frontmatter(text)
@@ -53,7 +53,7 @@ def extract_project(text: str, vault_root: Path) -> str | None:
     if name.startswith("[[") and name.endswith("]]"):
         name = name[2:-2]
 
-    if not (vault_root / "10_Projects" / name).is_dir():
+    if not (vault_root / "20_Projects" / name).is_dir():
         return None
 
     return project

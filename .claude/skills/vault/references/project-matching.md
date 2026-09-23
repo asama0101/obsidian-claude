@@ -2,7 +2,7 @@
 
 `vault_lib.fuzzy_project_match(text, projects_dir)`が担う。
 
-1. `10_Projects/`直下のディレクトリ名一覧を取得する
+1. `20_Projects/`直下のディレクトリ名一覧を取得する
    （`vault_lib.list_project_names`）。
 2. 対象テキスト（イベントの`summary`+`description`）に対し、
    各プロジェクト名（3文字以上のトークン）が部分一致するか確認する。

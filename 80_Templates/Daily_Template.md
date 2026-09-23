@@ -9,8 +9,8 @@ type: daily
 ## 📋 本日のタスク
 ![[Tasks.base#Today]]
 
-## 🆕 本日作成したタスク
-![[Tasks.base#CreatedToday]]
+## 📅 要スケジュール確認タスク
+![[Tasks.base#ScheduleCheck]]
 
 ## 📂 アクティブプロジェクト
 ![[Projects.base#Active]]

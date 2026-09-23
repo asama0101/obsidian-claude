@@ -10,7 +10,7 @@ flowchart TD
     B --> C{期限の指定はあるか}
     C -->|あり| D[期限付きでproject_create.pyを実行する]
     C -->|なし| E[期限なしでproject_create.pyを実行する]
-    D --> F[10_Projects/名前/ が既に存在するか確認する]
+    D --> F[20_Projects/名前/ が既に存在するか確認する]
     E --> F
     F --> G{project_already_existsか}
     G -->|存在する| H[同名フォルダが既にあるとエラーを返す]
@@ -40,7 +40,7 @@ flowchart TD
 ## 補足
 
 - **期限の指定はあるか**: ユーザーが期限を伝えていれば`--due-date`付きで`project_create.py`を実行する。伝えていなければ期限なしで実行する。
-- **`project_already_exists`か**: `10_Projects/<名前>/`ディレクトリが実行時点で既に存在するかどうかで判定する。スクリプトは自動採番せず、存在する場合は何も作成・変更しない。
+- **`project_already_exists`か**: `20_Projects/<名前>/`ディレクトリが実行時点で既に存在するかどうかで判定する。スクリプトは自動採番せず、存在する場合は何も作成・変更しない。
 - **既存ノートを使うか別名にするか**: `project_already_exists`エラー時にClaudeがユーザーへ確認する。スクリプト側は判断しない。
 - 今回の刷新後、`task-add`/`meeting-followup`スキルからも呼び出されるようになるが、呼び出し元が増えるだけで、project-add自身のフロー（本図の内容）は変わらない。
 

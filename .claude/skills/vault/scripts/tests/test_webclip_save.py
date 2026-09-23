@@ -48,13 +48,13 @@ TEMPLATE_TEXT = (
 
 def _make_vault(tmp):
     vault_root = Path(tmp)
-    (vault_root / "70_Templates").mkdir(parents=True)
-    (vault_root / "70_Templates" / "WebClip_Template.md").write_text(
+    (vault_root / "80_Templates").mkdir(parents=True)
+    (vault_root / "80_Templates" / "WebClip_Template.md").write_text(
         TEMPLATE_TEXT, encoding="utf-8"
     )
-    (vault_root / "80_Attachments").mkdir()
-    (vault_root / "20_Areas" / "WebClips").mkdir(parents=True)
-    (vault_root / "10_Projects").mkdir()
+    (vault_root / "81_Attachments").mkdir()
+    (vault_root / "30_Areas" / "WebClips").mkdir(parents=True)
+    (vault_root / "20_Projects").mkdir()
     return vault_root
 
 
@@ -138,8 +138,8 @@ def test_summaryとkey_pointsの項目に紐づく画像がその直下に埋め
         s1_filename = next(f for f in result["images_saved"] if f.endswith(".png"))
         k1_filename = next(f for f in result["images_saved"] if f.endswith(".jpg"))
 
-        assert f"- 要約1\n  ![[80_Attachments/{s1_filename}]]\n- 要約2" in note_text
-        assert f"- ポイント1\n  ![[80_Attachments/{k1_filename}]]" in note_text
+        assert f"- 要約1\n  ![[81_Attachments/{s1_filename}]]\n- 要約2" in note_text
+        assert f"- ポイント1\n  ![[81_Attachments/{k1_filename}]]" in note_text
         assert "> 本文全文です" in note_text
 
 
@@ -211,7 +211,7 @@ def test_image_urlを持たない項目には画像が埋め込まれない():
         assert result["images_failed"] == []
 
         note_text = Path(result["note_path"]).read_text(encoding="utf-8")
-        assert "![[80_Attachments/" not in note_text
+        assert "![[81_Attachments/" not in note_text
 
 
 def test_同じimage_urlが複数項目で参照される場合はダウンロードが1回だけになる():
@@ -252,8 +252,8 @@ def test_同じimage_urlが複数項目で参照される場合はダウンロ�
         shared_filename = result["images_saved"][0]
 
         note_text = Path(result["note_path"]).read_text(encoding="utf-8")
-        assert f"- 要約A\n  ![[80_Attachments/{shared_filename}]]" in note_text
-        assert f"- ポイントB\n  ![[80_Attachments/{shared_filename}]]" in note_text
+        assert f"- 要約A\n  ![[81_Attachments/{shared_filename}]]" in note_text
+        assert f"- ポイントB\n  ![[81_Attachments/{shared_filename}]]" in note_text
 
 
 def test_full_textが加工されず全文そのまま引用形式で本文に入る():
@@ -320,11 +320,11 @@ def test_画像ダウンロード失敗時はスキップされノート作成�
 
         note_path = Path(result["note_path"])
         assert note_path.exists()
-        assert len(list((vault_root / "80_Attachments").iterdir())) == 0
+        assert len(list((vault_root / "81_Attachments").iterdir())) == 0
 
         note_text = note_path.read_text(encoding="utf-8")
         assert "- 要約" in note_text
-        assert "![[80_Attachments/" not in note_text
+        assert "![[81_Attachments/" not in note_text
 
 
 def test_frontmatterのurlとdateが正しく設定される():
@@ -398,7 +398,7 @@ def test_full_text内の画像記法が抽出されダウンロードされblock
 
         note_text = Path(result["note_path"]).read_text(encoding="utf-8")
         assert "> 冒頭のテキスト" in note_text
-        assert f"> ![[80_Attachments/{body_filename}]]" in note_text
+        assert f"> ![[81_Attachments/{body_filename}]]" in note_text
         assert "> 続きのテキスト" in note_text
         assert "https://example.com/body1.png" not in note_text
 
@@ -439,8 +439,8 @@ def test_full_textとsummaryで同一URLが参照される場合ダウンロー�
         shared_filename = result["images_saved"][0]
 
         note_text = Path(result["note_path"]).read_text(encoding="utf-8")
-        assert f"- 要約A\n  ![[80_Attachments/{shared_filename}]]" in note_text
-        assert f"> ![[80_Attachments/{shared_filename}]]" in note_text
+        assert f"- 要約A\n  ![[81_Attachments/{shared_filename}]]" in note_text
+        assert f"> ![[81_Attachments/{shared_filename}]]" in note_text
 
 
 def test_full_text内の画像ダウンロード失敗時は該当箇所が取り除かれimages_failedに記録される():
@@ -484,7 +484,7 @@ def test_full_text内の画像ダウンロード失敗時は該当箇所が取�
         assert "> 冒頭のテキスト" in note_text
         assert "> 続きのテキスト" in note_text
         assert "https://example.com/broken-body.jpg" not in note_text
-        assert "![[80_Attachments/" not in note_text
+        assert "![[81_Attachments/" not in note_text
 
 
 def test_full_textに画像が無い場合は従来通りテキストのみのblockquoteになる():
@@ -570,10 +570,10 @@ def test_full_text内で画像行とテキスト行が混在してもblockquote�
         assert "> 1行目のテキスト" in body_lines
         assert "> 2行目のテキスト" in body_lines
         assert "> 3行目のテキスト" in body_lines
-        image_lines = [line for line in body_lines if "![[80_Attachments/" in line]
+        image_lines = [line for line in body_lines if "![[81_Attachments/" in line]
         assert len(image_lines) == 2
         for image_line in image_lines:
-            assert image_line.startswith("> ![[80_Attachments/")
+            assert image_line.startswith("> ![[81_Attachments/")
 
 
 def test_tagがfrontmatterのtagsリストに追加される():

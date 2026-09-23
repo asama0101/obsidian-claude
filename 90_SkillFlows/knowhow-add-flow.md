@@ -21,7 +21,7 @@ flowchart TD
     J --> K[Knowhow_Template.md を展開しfrontmatterと本文に分割する]
     K --> L[frontmatterにタグを追加する]
     L --> M[本文の各セクション概要・手順・注意点・参照・原文を差し込む]
-    M --> N[20_Areas/Knowledge/ にノートファイルを保存する]
+    M --> N[30_Areas/Knowledge/ にノートファイルを保存する]
     N --> O{保存は成功したか}
     O -->|成功| P[note_pathを標準出力にJSONで返す]
     O -->|失敗 テンプレート読込エラー等| Q[エラーを報告し処理を中断する]
@@ -54,7 +54,7 @@ flowchart TD
 ## 補足
 
 - カテゴリタグは`<category>/<topic>`形式の階層タグ1本のみで分類する（旧`category`frontmatterプロパティは廃止済み）。
-- `list_categories.py`は`20_Areas/Knowledge/`と`20_Areas/WebClips/`配下のノートを走査し、`/`をちょうど1つ含むタグだけを重複排除・ソートして返す機械的な集計処理であり、判断は行わない。
+- `list_categories.py`は`30_Areas/Knowledge/`と`30_Areas/WebClips/`配下のノートを走査し、`/`をちょうど1つ含むタグだけを重複排除・ソートして返す機械的な集計処理であり、判断は行わない。
 - カテゴリタグの確定はClaudeが単独で自動決定してはならない。既存候補が0件の場合でも自由入力だけに丸投げしない。Claudeが候補を提案した上で、ユーザーの明示的な選択・入力を待つ（詳細は`.claude/skills/vault/references/category-tagging.md`）。
 - ノート保存時、`title`から`vault_lib.sanitize_filename`でファイル名を生成し、同名ファイルが既に存在する場合は`vault_lib.unique_path`で衝突を回避する。
 - 保存失敗時（テンプレートファイルが見つからない等）の具体的なリカバリ手順はソースコード上未規定であり、本図では「エラー報告・中断」までを示すにとどめる。

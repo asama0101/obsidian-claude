@@ -44,7 +44,7 @@ description: |
   `git pull --ff-only`で最新化する（失敗しても処理は続行する）。
 - Carryover転記は前日ノートの`<!-- CARRYOVER_START -->`〜`<!-- CARRYOVER_END -->`
   ブロックの中身のみを読み取り、元ノートは一切変更しない。
-- 前日ノートは`00_Daily/`内を日付降順に走査し、当日より前で最初に見つかったもの
+- 前日ノートは`10_Daily/`内を日付降順に走査し、当日より前で最初に見つかったもの
   （連続していなくてもよい）を使う。見つからなければCarryoverは空のまま作成する。
 - meeting-setupスキルの自動実行の詳細は`meeting-setup/SKILL.md`の
   「today-open/today-closeスキルからの呼び出しについて」を参照。

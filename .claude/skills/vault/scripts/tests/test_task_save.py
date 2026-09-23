@@ -163,11 +163,11 @@ def test_source未指定ならsource_meetingは空欄のまま(dt):
 
 def _make_vault(tmp, project_names=()):
     vault_root = Path(tmp)
-    template_dir = vault_root / "70_Templates"
+    template_dir = vault_root / "80_Templates"
     template_dir.mkdir(parents=True)
     (template_dir / "Task_Template.md").write_text(_TEMPLATE_TEXT, encoding="utf-8")
     for name in project_names:
-        (vault_root / "10_Projects" / name).mkdir(parents=True)
+        (vault_root / "20_Projects" / name).mkdir(parents=True)
     return vault_root
 
 
@@ -186,7 +186,7 @@ def _run(vault_root, *extra_args):
     )
 
 
-def test_project未指定なら20_Areas_Tasks配下に保存される():
+def test_project未指定なら30_Areas_Tasks配下に保存される():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = _make_vault(tmp)
         result = _run(vault_root, "--title", "資料を送る")
@@ -194,7 +194,7 @@ def test_project未指定なら20_Areas_Tasks配下に保存される():
         output = json.loads(result.stdout)
         note_path = Path(output["note_path"])
         assert note_path.exists()
-        assert note_path.parent == vault_root / "20_Areas" / "Tasks"
+        assert note_path.parent == vault_root / "30_Areas" / "Tasks"
         content = note_path.read_text(encoding="utf-8")
         assert 'project: ""' in content
 
@@ -213,7 +213,7 @@ def test_正常系でノートが作成されJSONが出力される():
         output = json.loads(result.stdout)
         note_path = Path(output["note_path"])
         assert note_path.exists()
-        assert note_path.parent == vault_root / "10_Projects" / "VaultMigration" / "Tasks"
+        assert note_path.parent == vault_root / "20_Projects" / "VaultMigration" / "Tasks"
         content = note_path.read_text(encoding="utf-8")
         assert 'project: "[[VaultMigration]]"' in content
         assert "status: 1_todo" in content
@@ -250,4 +250,4 @@ def test_存在しないプロジェクトはエラーになる():
         assert result.returncode == 1
         output = json.loads(result.stdout)
         assert output == {"status": "error", "reason": "project_not_found"}
-        assert not (vault_root / "10_Projects" / "NoSuchProject").exists()
+        assert not (vault_root / "20_Projects" / "NoSuchProject").exists()

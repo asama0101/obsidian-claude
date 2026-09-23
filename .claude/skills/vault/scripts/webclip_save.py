@@ -3,8 +3,8 @@
 Claude側でWebFetch+要約して作成したJSON(title/summary/key_points/full_text)を
 受け取り、summary/key_pointsの各項目に紐づく画像および、full_text中に
 ![alt](URL)形式でインライン埋め込まれた画像をまとめてダウンロードして
-80_Attachments/に保存し、WebClip_Template.mdベースのノートを
-20_Areas/WebClips/に作成する。標準ライブラリのみに依存する。
+81_Attachments/に保存し、WebClip_Template.mdベースのノートを
+30_Areas/WebClips/に作成する。標準ライブラリのみに依存する。
 """
 
 from __future__ import annotations
@@ -135,7 +135,7 @@ def _replace_full_text_images(full_text: str, url_to_filename: dict[str, str]) -
         url = match.group(1)
         filename = url_to_filename.get(url)
         if filename:
-            return f"![[80_Attachments/{filename}]]"
+            return f"![[81_Attachments/{filename}]]"
         return ""
 
     return _MARKDOWN_IMAGE_RE.sub(_replace, full_text)
@@ -168,7 +168,7 @@ def _bullet_list_with_images(items: list[dict]) -> str:
         lines.append(f"- {item['text']}")
         filename = item.get("filename")
         if filename:
-            lines.append(f"  ![[80_Attachments/{filename}]]")
+            lines.append(f"  ![[81_Attachments/{filename}]]")
     return "\n".join(lines)
 
 
@@ -192,7 +192,7 @@ def build_note_text(
     """テンプレートに内容を差し込み、完成したノート全文を返す。
 
     summary_items/key_points_itemsは{"text": str, "filename": str | None}のリスト。
-    full_textは画像記法(![alt](URL))が既にローカル埋め込み(![[80_Attachments/...]])
+    full_textは画像記法(![alt](URL))が既にローカル埋め込み(![[81_Attachments/...]])
     へ置換済みの状態で渡される想定(呼び出し側で_replace_full_text_images済み)。
     tagは"<category>/<topic>"形式のカテゴリタグで、frontmatterのtags:リストに追加する。
     """
@@ -242,7 +242,7 @@ def main(argv: list[str] | None = None) -> int:
         normalized_summary, normalized_key_points, full_text_urls=full_text_image_urls
     )
 
-    attachments_dir = vault_root / "80_Attachments"
+    attachments_dir = vault_root / "81_Attachments"
     url_to_filename, images_failed = download_images(unique_urls, title, attachments_dir)
     images_saved = list(url_to_filename.values())
 
@@ -250,7 +250,7 @@ def main(argv: list[str] | None = None) -> int:
     key_points_items = _resolve_item_filenames(normalized_key_points, url_to_filename)
     full_text = _replace_full_text_images(full_text, url_to_filename)
 
-    template_path = vault_root / "70_Templates" / "WebClip_Template.md"
+    template_path = vault_root / "80_Templates" / "WebClip_Template.md"
     template_text = template_path.read_text(encoding="utf-8")
 
     note_text = build_note_text(
@@ -264,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
         tag=args.tag,
     )
 
-    dest_dir = vault_root / "20_Areas" / "WebClips"
+    dest_dir = vault_root / "30_Areas" / "WebClips"
     dest_dir.mkdir(parents=True, exist_ok=True)
     filename = f"{vault_lib.sanitize_filename(title) or 'webclip'}.md"
     note_path = vault_lib.unique_path(dest_dir, filename)

@@ -72,7 +72,7 @@ def test_projectが設定されており対応ディレクトリが実在する�
 
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        (vault_root / "10_Projects" / "VaultMigration").mkdir(parents=True)
+        (vault_root / "20_Projects" / "VaultMigration").mkdir(parents=True)
         text = '---\nproject: "[[VaultMigration]]"\n---\n# body'
         assert (
             task_extract.extract_project(text, vault_root) == "[[VaultMigration]]"
@@ -113,7 +113,7 @@ def test_main実行でJSONが標準出力される():
 
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        (vault_root / "10_Projects" / "VaultMigration").mkdir(parents=True)
+        (vault_root / "20_Projects" / "VaultMigration").mkdir(parents=True)
         note_path = vault_root / "note.md"
         note_path.write_text(
             '---\nproject: "[[VaultMigration]]"\n---\n'

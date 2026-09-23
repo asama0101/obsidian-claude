@@ -30,7 +30,7 @@ _TEMPLATE_TEXT = (
 
 def _make_vault(tmp) -> Path:
     vault_root = Path(tmp)
-    template_dir = vault_root / "70_Templates"
+    template_dir = vault_root / "80_Templates"
     template_dir.mkdir(parents=True)
     (template_dir / "Project_Template.md").write_text(_TEMPLATE_TEXT, encoding="utf-8")
     return vault_root
@@ -50,7 +50,7 @@ def test_正常系で3つのサブフォルダとノートが作成される(dt)
 
         assert result["status"] == "ok"
 
-        project_dir = vault_root / "10_Projects" / "新規プロジェクト"
+        project_dir = vault_root / "20_Projects" / "新規プロジェクト"
         assert (project_dir / "Tasks").is_dir()
         assert (project_dir / "Meetings").is_dir()
         assert (project_dir / "Documents").is_dir()
@@ -96,7 +96,7 @@ def test_due_date未指定ならfrontmatterは空欄のまま(dt):
 def test_既存プロジェクトがあれば何も作成せずエラーを返す(dt):
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = _make_vault(tmp)
-        existing_dir = vault_root / "10_Projects" / "既存プロジェクト"
+        existing_dir = vault_root / "20_Projects" / "既存プロジェクト"
         existing_dir.mkdir(parents=True)
 
         result = project_create.create_project(
@@ -126,7 +126,7 @@ def test_main経由の正常系でJSONが出力される():
 
         assert exit_code == 0
         note_path = (
-            vault_root / "10_Projects" / "CLIプロジェクト" / "CLIプロジェクト.md"
+            vault_root / "20_Projects" / "CLIプロジェクト" / "CLIプロジェクト.md"
         )
         assert note_path.is_file()
 
@@ -134,7 +134,7 @@ def test_main経由の正常系でJSONが出力される():
 def test_main経由の既存プロジェクトはエラー終了する():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = _make_vault(tmp)
-        (vault_root / "10_Projects" / "重複プロジェクト").mkdir(parents=True)
+        (vault_root / "20_Projects" / "重複プロジェクト").mkdir(parents=True)
 
         argv = [
             "--title",

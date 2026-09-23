@@ -27,13 +27,13 @@ flowchart TD
     N --> O[候補一覧と新規作成の選択肢をユーザーに提示し確定を待つ]
     O --> P[webclip_save.pyを実行する]
     P --> Q[summary/key_points/full_text中の画像URLを重複排除して収集する]
-    Q --> R[画像を80_Attachments/へ1件ずつダウンロードする]
+    Q --> R[画像を81_Attachments/へ1件ずつダウンロードする]
     R --> S{個々の画像ダウンロードは成功したか}
     S -- 成功 --> T[ローカル埋め込み記法に置換する]
     S -- 失敗 --> U[そのURLをスキップし失敗リストに記録する]
     T --> V
     U --> V[WebClip_Template.mdを基にノート本文を組み立てる]
-    V --> W[20_Areas/WebClips/にノートを保存する]
+    V --> W[30_Areas/WebClips/にノートを保存する]
     W --> X[note_path・images_saved・images_failedをJSONで出力する]
     X --> Y[Claudeが作成結果と失敗画像の有無をユーザーに報告する]
 

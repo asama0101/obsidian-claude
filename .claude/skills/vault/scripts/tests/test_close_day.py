@@ -71,7 +71,7 @@ def test_日付形式でないブランチではerrorを返す():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
+        _write(root / "10_Daily" / ".gitkeep", "")
         _commit_all(root, "initial commit")
         # main ブランチのまま(日付形式ではない)実行する
 
@@ -86,13 +86,13 @@ def test_変更が無い場合はコミットをスキップする():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-21"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         # 既に「更新ノートなし」の最終状態で作成しておき、差分が出ないようにする
         content = _DAILY_NOTE_TEMPLATE.format(date=branch).replace(
             "（`/close` 実行時に自動更新される）", "- （本日の更新ノートなし）"
@@ -115,14 +115,14 @@ def test_更新ノート一覧の反映と除外対象の除外():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template original")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template original")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-22"
         _run_git(["checkout", "-b", branch], cwd=root)
 
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
         # コミット済みの更新ノート
         _write(root / "20_Notes" / "Alpha.md", "alpha content")
@@ -131,7 +131,7 @@ def test_更新ノート一覧の反映と除外対象の除外():
         # 未コミットの更新ノート(新規/untracked)
         _write(root / "20_Notes" / "Beta.md", "beta content")
         # 除外対象: テンプレート配下の変更
-        _write(root / "70_Templates" / "Daily_Template.md", "template modified")
+        _write(root / "80_Templates" / "Daily_Template.md", "template modified")
         # 除外対象: .claude 配下
         _write(root / ".claude" / "scratch.md", "scratch")
         # 除外対象: .md 以外
@@ -148,7 +148,7 @@ def test_更新ノート一覧の反映と除外対象の除外():
 
         # main にマージ後の内容を確認する
         _run_git(["checkout", "main"], cwd=root)
-        merged_note_text = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+        merged_note_text = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
         assert "**other**" in merged_note_text
         assert "- [[Alpha]]" in merged_note_text
         assert "- [[Beta]]" in merged_note_text
@@ -166,15 +166,15 @@ def test_gitがクォートするファイル名も一覧に含まれる():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-25"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-        _write(root / "20_Areas" / "Knowledge" / "status --check(x).md", "content")
+        _write(root / "30_Areas" / "Knowledge" / "status --check(x).md", "content")
 
         result = _run_close_day(root)
 
@@ -185,7 +185,7 @@ def test_gitがクォートするファイル名も一覧に含まれる():
 
 
 def test_全く新規のディレクトリ内のファイルも個別に一覧化される():
-    # 10_Projects/<新規プロジェクト>/Tasks/ のように、追跡済み
+    # 20_Projects/<新規プロジェクト>/Tasks/ のように、追跡済み
     # ファイルが1つも無い全く新規のディレクトリにノートを作成した
     # 場合、gitのデフォルト(untracked-files=normal)だと
     # ディレクトリ名1行に集約され、ファイルが一覧から漏れる
@@ -193,16 +193,16 @@ def test_全く新規のディレクトリ内のファイルも個別に一覧�
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-26"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
         _write(
-            root / "10_Projects" / "NewProject" / "Tasks" / "FirstTask.md",
+            root / "20_Projects" / "NewProject" / "Tasks" / "FirstTask.md",
             "task content",
         )
 
@@ -218,13 +218,13 @@ def test_mainとHEADが一致していれば_already_closed():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-23"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         content = _DAILY_NOTE_TEMPLATE.format(date=branch).replace(
             "（`/close` 実行時に自動更新される）", "- （本日の更新ノートなし）"
         )
@@ -247,13 +247,13 @@ def test_mainが分岐している場合はff_onlyマージに失敗する():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-24"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         content = _DAILY_NOTE_TEMPLATE.format(date=branch).replace(
             "（`/close` 実行時に自動更新される）", "- （本日の更新ノートなし）"
         )
@@ -325,9 +325,9 @@ def test_stemとフルパスのtupleリストをソート済みで返す():
         paths = {
             "20_Notes/Beta.md",
             "20_Notes/Alpha.md",
-            "70_Templates/x.md",
+            "80_Templates/x.md",
             "images/a.png",
-            "00_Daily/2026-09-22.md",
+            "10_Daily/2026-09-22.md",
         }
         entries = close_day._filter_updated_notes(paths, "2026-09-22", vault_root)
         assert entries == [
@@ -340,22 +340,22 @@ def test_type別に固定順でグルーピングされmeeting_seriesはmeeting�
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-28"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
 
-        _write(root / "10_Projects" / "Zeta.md", "---\ntype: project\n---\nbody")
+        _write(root / "20_Projects" / "Zeta.md", "---\ntype: project\n---\nbody")
         _write(
-            root / "10_Projects" / "Meetings" / "Alpha.md",
+            root / "20_Projects" / "Meetings" / "Alpha.md",
             "---\ntype: meeting\n---\nbody",
         )
         _write(
-            root / "10_Projects" / "Meetings" / "Weekly.md",
+            root / "20_Projects" / "Meetings" / "Weekly.md",
             "---\ntype: meeting_series\n---\nbody",
         )
         _write(root / "40_Tasks" / "DoThing.md", "---\ntype: task\n---\nbody")
@@ -367,7 +367,7 @@ def test_type別に固定順でグルーピングされmeeting_seriesはmeeting�
         assert sorted(payload["updated_notes"]) == ["Alpha", "DoThing", "Weekly", "Zeta"]
 
         _run_git(["checkout", "main"], cwd=root)
-        merged = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+        merged = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
 
         project_idx = merged.index("**project**")
         meeting_idx = merged.index("**meeting**")
@@ -389,13 +389,13 @@ def test_単一typeのみ更新時はそのグループのみ表示される():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-29"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
         _write(root / "30_Knowhow" / "Tip.md", "---\ntype: knowhow\n---\nbody")
 
@@ -403,7 +403,7 @@ def test_単一typeのみ更新時はそのグループのみ表示される():
 
         assert result.returncode == 0, result.stdout + result.stderr
         _run_git(["checkout", "main"], cwd=root)
-        merged = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+        merged = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
         assert "**knowhow**" in merged
         assert "- [[Tip]]" in merged
         for absent in ("**project**", "**meeting**", "**task**", "**webclip**", "**other**"):
@@ -427,7 +427,7 @@ def _task_frontmatter(*, created_date="", start_date="", due_date="", status="1_
 def test_scan_task_review_targets_条件1_created_dateが本日かつstart_date未設定():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskA.md"
+        task_path = vault_root / "20_Projects" / "ProjX" / "Tasks" / "TaskA.md"
         _write(task_path, _task_frontmatter(created_date="2026-09-23", start_date=""))
 
         targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
@@ -438,7 +438,7 @@ def test_scan_task_review_targets_条件1_created_dateが本日かつstart_date�
 def test_scan_task_review_targets_条件2_start_dateが本日かつstatusが1_todo():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskB.md"
+        task_path = vault_root / "20_Projects" / "ProjX" / "Tasks" / "TaskB.md"
         _write(
             task_path,
             _task_frontmatter(
@@ -454,7 +454,7 @@ def test_scan_task_review_targets_条件2_start_dateが本日かつstatusが1_to
 def test_scan_task_review_targets_条件3_due_dateが本日かつstatusが未完了():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskC.md"
+        task_path = vault_root / "20_Projects" / "ProjX" / "Tasks" / "TaskC.md"
         _write(
             task_path,
             _task_frontmatter(
@@ -474,7 +474,7 @@ def test_scan_task_review_targets_条件3_due_dateが本日かつstatusが未完
 def test_scan_task_review_targets_due_dateが本日でも完了済みなら対象外(status):
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskD.md"
+        task_path = vault_root / "20_Projects" / "ProjX" / "Tasks" / "TaskD.md"
         _write(
             task_path,
             _task_frontmatter(
@@ -493,7 +493,7 @@ def test_scan_task_review_targets_due_dateが本日でも完了済みなら対�
 def test_scan_task_review_targets_いずれの条件にも該当しなければ対象外():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        task_path = vault_root / "10_Projects" / "ProjX" / "Tasks" / "TaskE.md"
+        task_path = vault_root / "20_Projects" / "ProjX" / "Tasks" / "TaskE.md"
         _write(
             task_path,
             _task_frontmatter(
@@ -513,7 +513,7 @@ def test_scan_task_review_targets_typeがtask以外は対象外():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
         _write(
-            vault_root / "10_Projects" / "ProjX" / "Tasks" / "NotATask.md",
+            vault_root / "20_Projects" / "ProjX" / "Tasks" / "NotATask.md",
             "---\ntype: project\ncreated_date: 2026-09-23\nstart_date:\n---\nbody\n",
         )
 
@@ -522,10 +522,10 @@ def test_scan_task_review_targets_typeがtask以外は対象外():
         assert targets == []
 
 
-def test_scan_task_review_targets_20_Areas_Tasks配下も走査対象():
+def test_scan_task_review_targets_30_Areas_Tasks配下も走査対象():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
-        task_path = vault_root / "20_Areas" / "Tasks" / "TaskF.md"
+        task_path = vault_root / "30_Areas" / "Tasks" / "TaskF.md"
         _write(task_path, _task_frontmatter(created_date="2026-09-23", start_date=""))
 
         targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
@@ -537,11 +537,11 @@ def test_scan_task_review_targets_複数該当はtitle昇順ソート():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
         _write(
-            vault_root / "10_Projects" / "ProjX" / "Tasks" / "Zeta.md",
+            vault_root / "20_Projects" / "ProjX" / "Tasks" / "Zeta.md",
             _task_frontmatter(created_date="2026-09-23", start_date=""),
         )
         _write(
-            vault_root / "10_Projects" / "ProjX" / "Tasks" / "Alpha.md",
+            vault_root / "20_Projects" / "ProjX" / "Tasks" / "Alpha.md",
             _task_frontmatter(created_date="2026-09-23", start_date=""),
         )
 
@@ -554,20 +554,20 @@ def test_main_見直し対象タスクが無ければ従来通り後続処理に
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-30"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         content = _DAILY_NOTE_TEMPLATE.format(date=branch).replace(
             "（`/close` 実行時に自動更新される）", "- （本日の更新ノートなし）"
         )
         _write(daily_note, content)
         # どの条件にも該当しないタスクノート
         _write(
-            root / "10_Projects" / "ProjX" / "Tasks" / "Unrelated.md",
+            root / "20_Projects" / "ProjX" / "Tasks" / "Unrelated.md",
             _task_frontmatter(
                 created_date="2026-09-10",
                 start_date="2026-09-15",
@@ -588,15 +588,15 @@ def test_main_タスク見直し対象があれば中断しコミットしない
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-10-01"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-        task_path = root / "10_Projects" / "ProjX" / "Tasks" / "NeedsReview.md"
+        task_path = root / "20_Projects" / "ProjX" / "Tasks" / "NeedsReview.md"
         _write(task_path, _task_frontmatter(created_date=branch, start_date=""))
 
         head_before = _run_git(["rev-parse", "HEAD"], cwd=root)
@@ -622,13 +622,13 @@ def test_未知typeと削除済みファイルはotherグループに入る():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
-        _write(root / "00_Daily" / ".gitkeep", "")
-        _write(root / "70_Templates" / "Daily_Template.md", "template")
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
         branch = "2026-09-27"
         _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "00_Daily" / f"{branch}.md"
+        daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
 
         # 未知のtype値を持つノート
@@ -649,7 +649,7 @@ def test_未知typeと削除済みファイルはotherグループに入る():
         assert sorted(payload["updated_notes"]) == ["Ghost", "Mystery"]
 
         _run_git(["checkout", "main"], cwd=root)
-        merged = (root / "00_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+        merged = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
         assert "**other**" in merged
         assert "- [[Mystery]]" in merged
         assert "- [[Ghost]]" in merged

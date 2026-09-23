@@ -10,7 +10,7 @@ from pathlib import Path
 
 import vault_lib
 
-_TEMPLATE_RELATIVE_PATH = "70_Templates/Task_Template.md"
+_TEMPLATE_RELATIVE_PATH = "80_Templates/Task_Template.md"
 
 
 def build_note_text(
@@ -59,7 +59,7 @@ def main() -> None:
 
     if args.project:
         project_name = vault_lib.extract_project_name(args.project)
-        project_dir = vault_root / "10_Projects" / project_name
+        project_dir = vault_root / "20_Projects" / project_name
         if not project_dir.is_dir():
             print(
                 json.dumps({"status": "error", "reason": "project_not_found"}, ensure_ascii=False)
@@ -67,7 +67,7 @@ def main() -> None:
             sys.exit(1)
         tasks_dir = project_dir / "Tasks"
     else:
-        tasks_dir = vault_root / "20_Areas" / "Tasks"
+        tasks_dir = vault_root / "30_Areas" / "Tasks"
 
     template_text = (vault_root / _TEMPLATE_RELATIVE_PATH).read_text(encoding="utf-8")
 

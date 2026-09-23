@@ -38,8 +38,8 @@ projectが自動推定できなかったものの `{"note_path": ..., "title": .
 
 以下は`--events-json`と排他の別モードとして動作する:
 - `--set-project <note_path> --project <value>`: frontmatter `project`
-  欄を書き換え、新しいproject値が指す`10_Projects/<Name>/Meetings/`
-  または`20_Areas/Meetings/`へノートを移動する。
+  欄を書き換え、新しいproject値が指す`20_Projects/<Name>/Meetings/`
+  または`30_Areas/Meetings/`へノートを移動する。
 - `--set-attendance <note_path> --attendance <value>`: frontmatter
   `attendance`欄（定例は現在有効なoccurrenceブロックのコメントも）を
   書き換える。
@@ -123,13 +123,13 @@ def _format_attendees(attendees: list) -> str:
 def _resolve_dest_dir(vault_root: Path, project_match: str | None) -> Path:
     if project_match:
         name = vault_lib.extract_project_name(project_match)
-        return vault_root / "10_Projects" / name / "Meetings"
-    return vault_root / "20_Areas" / "Meetings"
+        return vault_root / "20_Projects" / name / "Meetings"
+    return vault_root / "30_Areas" / "Meetings"
 
 
 def _iter_meeting_notes(vault_root: Path):
-    """10_Projects配下、および20_Areas/Meetings配下の.mdファイルを走査する。"""
-    bases = [vault_root / "10_Projects", vault_root / "20_Areas" / "Meetings"]
+    """20_Projects配下、および30_Areas/Meetings配下の.mdファイルを走査する。"""
+    bases = [vault_root / "20_Projects", vault_root / "30_Areas" / "Meetings"]
     for base in bases:
         if base.exists():
             yield from base.rglob("*.md")
@@ -156,7 +156,7 @@ def _create_single_note(event: dict, vault_root: Path) -> tuple[Path, str | None
     summary = event.get("summary", "")
     description = event.get("description", "")
 
-    template_path = vault_root / "70_Templates" / "Meeting_Template.md"
+    template_path = vault_root / "80_Templates" / "Meeting_Template.md"
     template_text = template_path.read_text(encoding="utf-8")
     filled = vault_lib.fill_template(template_text, title=summary, dt=start_dt)
     fm_text, body_text = vault_lib.split_frontmatter(filled)
@@ -166,7 +166,7 @@ def _create_single_note(event: dict, vault_root: Path) -> tuple[Path, str | None
     )
 
     project_match = vault_lib.fuzzy_project_match(
-        summary + description, vault_root / "10_Projects"
+        summary + description, vault_root / "20_Projects"
     )
     fm_text = vault_lib.set_fm_value(fm_text, "project", project_match or "")
     fm_text = vault_lib.set_fm_value(fm_text, "calendar_event_id", event["id"])
@@ -370,7 +370,7 @@ def _fresh_occurrence_block(
     vault_root: Path, event: dict, start_dt: datetime.datetime
 ) -> str:
     """新しい回への遷移用に、テンプレートから空の状態のブロックを組み立てる。"""
-    template_path = vault_root / "70_Templates" / "Meeting_Series_Template.md"
+    template_path = vault_root / "80_Templates" / "Meeting_Series_Template.md"
     template_text = template_path.read_text(encoding="utf-8")
     inner = vault_lib.get_marker_block(
         template_text, "NEW_MEETING_START", "NEW_MEETING_END"
@@ -400,7 +400,7 @@ def _create_series_note(event: dict, vault_root: Path, today: str) -> tuple[Path
     summary = event.get("summary", "")
     description = event.get("description", "")
 
-    template_path = vault_root / "70_Templates" / "Meeting_Series_Template.md"
+    template_path = vault_root / "80_Templates" / "Meeting_Series_Template.md"
     template_text = template_path.read_text(encoding="utf-8")
     filled = vault_lib.fill_template(template_text, title=summary, dt=start_dt)
     filled = filled.replace('occurrence_id: ""', f'occurrence_id: "{event["id"]}"')
@@ -412,7 +412,7 @@ def _create_series_note(event: dict, vault_root: Path, today: str) -> tuple[Path
     body_text = _set_occurrence_meta(body_text, date=start_dt.strftime("%Y-%m-%d"))
 
     project_match = vault_lib.fuzzy_project_match(
-        summary + description, vault_root / "10_Projects"
+        summary + description, vault_root / "20_Projects"
     )
     fm_text = vault_lib.set_fm_value(fm_text, "project", project_match or "")
     fm_text = vault_lib.set_fm_value(
@@ -625,7 +625,7 @@ def _cmd_set_project(args: argparse.Namespace, parser: argparse.ArgumentParser) 
     project_match = args.project if args.project not in (None, "") else None
     if project_match:
         project_name = vault_lib.extract_project_name(project_match)
-        if not (vault_root / "10_Projects" / project_name).is_dir():
+        if not (vault_root / "20_Projects" / project_name).is_dir():
             print(
                 json.dumps(
                     {"status": "error", "reason": "project_not_found"}, ensure_ascii=False

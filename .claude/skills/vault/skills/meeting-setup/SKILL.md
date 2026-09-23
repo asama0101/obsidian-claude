@@ -54,9 +54,9 @@ description: |
    PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project [[九州旅行]]
    PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-project <note_path> --project ""
    ```
-   このときノートは新しいproject値に応じて`10_Projects/<Name>/Meetings/`
-   または`20_Areas/Meetings/`へ自動的に移動される。`--project`が
-   `10_Projects/<Name>/`として実在しない値だった場合は
+   このときノートは新しいproject値に応じて`20_Projects/<Name>/Meetings/`
+   または`30_Areas/Meetings/`へ自動的に移動される。`--project`が
+   `20_Projects/<Name>/`として実在しない値だった場合は
    `{"status": "error", "reason": "project_not_found"}`が返るので、
    候補一覧を出し直してユーザーに再選択してもらう。`updated`（既存ノート
    更新）はproject欄に一切触れないため、この確認フローの対象外である。
@@ -67,8 +67,8 @@ description: |
 ## 出力
 
 - 単発予定: `Meeting_Template.md` ベースのノート
-  （`20_Areas/Meetings/` またはプロジェクト判明時は
-  `10_Projects/<Name>/Meetings/`）
+  （`30_Areas/Meetings/` またはプロジェクト判明時は
+  `20_Projects/<Name>/Meetings/`）
 - 定例予定: `Meeting_Series_Template.md` の
   `NEW_MEETING_START`/`END`差し替えロジックで追記、または新規作成
   （詳細は`references/meeting-series-update.md`）
@@ -124,4 +124,4 @@ Google Calendar MCP未接続やAPI呼び出し失敗時は、本スキルの処�
   フィールド対応表
 - `references/project-matching.md`: project自動紐付けルール（meeting-setup専用）
 - `references/conventions.md`: vaultプラグイン全体の共通実装規約
-- [`../../../../../80_SkillFlows/meeting-setup-flow.md`](../../../../../80_SkillFlows/meeting-setup-flow.md): 本フローの設計ドキュメント（Mermaid図付き）
+- [`../../../../../90_SkillFlows/meeting-setup-flow.md`](../../../../../90_SkillFlows/meeting-setup-flow.md): 本フローの設計ドキュメント（Mermaid図付き）

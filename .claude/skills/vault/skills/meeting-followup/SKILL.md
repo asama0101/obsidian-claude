@@ -22,7 +22,7 @@ description: |
 
 ## 出力
 - タスクノート（`Task_Template.md`ベース。保存先はプロジェクト解決フロー
-  の結果次第で`10_Projects/<Name>/Tasks/`または`20_Areas/Tasks/`）
+  の結果次第で`20_Projects/<Name>/Tasks/`または`30_Areas/Tasks/`）
 - 議事録ノート側の該当チェックボックス行の書き換え（`[[タスクノート名]]`
   への完全置換）
 
@@ -35,11 +35,11 @@ description: |
 3. タスク化する各アクションアイテムについて、プロジェクト解決フロー
    （`task-add`スキルと共通の設計）を実行する。
    `PYTHONUTF8=1 python .claude/skills/vault/scripts/list_projects.py`を実行し、標準出力の
-   JSON（`{"projects": [...]}`）から`10_Projects/`直下の候補一覧を取得した
+   JSON（`{"projects": [...]}`）から`20_Projects/`直下の候補一覧を取得した
    上で、次の3択をユーザーに確認する（**自動推測はしない**）。
    - 既存プロジェクトから選ぶ
    - 新規プロジェクトを作成する（`project-add`スキルを呼び出す）
-   - プロジェクトなしで進める（保存先は`20_Areas/Tasks/`になる）
+   - プロジェクトなしで進める（保存先は`30_Areas/Tasks/`になる）
 4. `PYTHONUTF8=1 python .claude/skills/vault/scripts/task_save.py --title <item> [--project <project>] --source "[[議事録ノート名]]"`
    を実行してタスクノートを作成する（`start_date`は空欄のまま、`status`は
    テンプレートの既定値`1_todo`のまま作成される）。`--project`は省略可能で、

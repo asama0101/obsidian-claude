@@ -39,7 +39,7 @@
 
 ## ファイル検索
 
-既存ノートは`10_Projects/`配下と`20_Areas/Meetings/`配下を
+既存ノートは`20_Projects/`配下と`30_Areas/Meetings/`配下を
 `Path.rglob("*.md")`で走査し、frontmatterの`calendar_series_id`が
 イベントの`recurringEventId`と一致するものを探す
 （`vault_lib.get_fm_value`を使用）。見つからなければ新規作成する。
@@ -58,5 +58,5 @@
 による推定）、`last_updated`（今日の日付）、`url`
 （`hangoutLink`があれば設定）をfrontmatterに設定し、テンプレートの
 `<!-- occurrence_id: "" -->`を実際のイベントIDに置換して保存する。
-保存先はprojectが確定していれば`10_Projects/<Name>/Meetings/`、
-それ以外は`20_Areas/Meetings/`。
+保存先はprojectが確定していれば`20_Projects/<Name>/Meetings/`、
+それ以外は`30_Areas/Meetings/`。

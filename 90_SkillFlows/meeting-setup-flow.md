@@ -27,7 +27,7 @@ flowchart TD
     subgraph PJ["project割当確認"]
         proj_ask{"新規作成された各ノートについて<br/>project割当を確認する<br/>(既存から選ぶ/新規作成する/プロジェクトなし)"}
         proj_new["project-addスキルを呼び出して<br/>プロジェクトを新規作成する"]
-        proj_none["保存先を20_Areas/Meetings/に決定する<br/>(フォルダが無ければ作成する)"]
+        proj_none["保存先を30_Areas/Meetings/に決定する<br/>(フォルダが無ければ作成する)"]
         proj_set["project欄の更新を試みる<br/>(meeting_sync.py --set-project相当)"]
         proj_not_found{"指定したプロジェクトが<br/>存在しないエラーになったか"}
         proj_retry["候補一覧を出し直して<br/>再選択を依頼する"]
@@ -94,8 +94,8 @@ flowchart TD
 - 開催日が今日で、かつ今日取得したevents一覧に対応する`calendar_event_id`が無いノートは、カレンダー側でキャンセルされたとみなし物理削除する(`deleted`)。この判定は出席者数とは無関係の独立ロジックである。
 - 単発予定は日時・URL・開催場所・参加者の4項目すべてを差分チェックし、いずれかが変わっていれば`updated`として更新する（`_process_single_event`に実装済み）。定例予定は同じoccurrenceの再同期時、開催場所を差分チェック無しで毎回上書きし（`_resync_occurrence_block`）、参加者は新しい回への遷移時（新規occurrenceブロック作成時）のみ設定される。本図の`cal_changed`/`cal_update`ノードは主に単発予定の挙動を表す。
 - **project割当確認**: カレンダー同期の結果`created`となった各ノート（新規作成のみ、`updated`は対象外）について、その場で「既存プロジェクトから選ぶ」「新規プロジェクトを作成する(project-addスキル呼び出し)」「プロジェクトなし」の3択を提示する。以前は同期処理と切り離した別ステップだったが、今回の刷新で1つの流れに統合した。既存ノートの更新（`updated`）はproject欄に一切触れないため、この確認フローには進まない。
-- 「プロジェクトなし」を選んだ場合、ノートの保存先は`20_Areas/Meetings/`にする(フォルダが無ければ作成する)。
-- 指定したプロジェクトが`10_Projects/<名前>/`として実在しない場合は`project_not_found`エラーになるため、候補一覧を出し直して再選択を依頼する。
+- 「プロジェクトなし」を選んだ場合、ノートの保存先は`30_Areas/Meetings/`にする(フォルダが無ければ作成する)。
+- 指定したプロジェクトが`20_Projects/<名前>/`として実在しない場合は`project_not_found`エラーになるため、候補一覧を出し直して再選択を依頼する。
 - カレンダー同期〜project割当確認はいずれも`today-open`/`today-close`スキルから自動的に呼び出される。呼ばれた場合も`/meeting-setup`単独実行時と同じ対話フローをそのままユーザーに提示してよい。
 - Google Calendar MCP未接続やAPI呼び出し失敗時は本スキルの処理をそこで打ち切り、呼び出し元（`today-open`/`today-close`）本来の処理はブロックしない。
 - **開催確認は`today-close`スキルの新規ロジックが担う**（本図には含まない。詳細は[`today-close-flow.md`](today-close-flow.md)）。`attendance`（`1_scheduled`/`2_done`/`3_skip`）の更新は基本的にユーザーが手動でノートを編集する運用に変わり、meeting-setupスキル自身は確認を促さない。

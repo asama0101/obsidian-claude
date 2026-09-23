@@ -12,7 +12,7 @@ Knowhowの旧`category`frontmatterプロパティは廃止済み。WebClipには
 
 `python .claude/skills/vault/scripts/list_categories.py [--vault-root <path>]`
 
-- `20_Areas/Knowledge/`と`20_Areas/WebClips/`配下の全ノートの
+- `30_Areas/Knowledge/`と`30_Areas/WebClips/`配下の全ノートの
   `tags`を走査し、`/`をちょうど1つ含むタグ（＝カテゴリタグ）だけを
   収集する。
 - 重複を除去・ソートして`{"tags": ["git/xxx", "python/pandas", ...]}`

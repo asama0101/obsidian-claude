@@ -12,10 +12,10 @@ flowchart TD
     A --> B[Claudeが入力からタイトルと期限を抽出する]
 
     subgraph PR["プロジェクト解決フロー"]
-        C[list_projects.pyで10_Projects直下の一覧を取得する]
+        C[list_projects.pyで20_Projects直下の一覧を取得する]
         D{既存から選ぶ・新規作成・プロジェクトなしをユーザーに確認する}
         F[project-addスキルを呼び出して新規プロジェクトを作成する]
-        H[保存先を20_Areas/Tasksに決定する]
+        H[保存先を30_Areas/Tasksに決定する]
 
         C --> D
     end
@@ -47,8 +47,8 @@ flowchart TD
 - タイトル・期限の抽出はClaude自身が発話から行う。決定的処理ではないため`task_extract.py`は使わない（分割元の`task`スキルの(b)パターンを踏襲）。
 - 議事録経由ではないため、`task_save.py`実行時に`--source`は付与しない（付与する場合は議事録ノートへのwikilinkが必要だが、`task-add`では対象外）。
 - プロジェクト解決フローは`meeting-followup`・`meeting-setup`のタスク化パターンとも共通の設計であり、同一の描き方をする。
-- 「プロジェクトなしで進める」を選んだ場合、保存先フォルダは`20_Areas/Tasks/`に決定される。既存プロジェクトを選んだ場合・新規作成した場合は`10_Projects/<名前>/Tasks/`になる。
-- `task_save.py`の`--project`は任意（省略時`None`）であり、省略時は保存先が`20_Areas/Tasks/`になる（`task-add`が「プロジェクトなしで進める」を選べるのはこの実装による）。既存プロジェクトを指定した場合・新規作成した場合は`10_Projects/<名前>/Tasks/`になる。
+- 「プロジェクトなしで進める」を選んだ場合、保存先フォルダは`30_Areas/Tasks/`に決定される。既存プロジェクトを選んだ場合・新規作成した場合は`20_Projects/<名前>/Tasks/`になる。
+- `task_save.py`の`--project`は任意（省略時`None`）であり、省略時は保存先が`30_Areas/Tasks/`になる（`task-add`が「プロジェクトなしで進める」を選べるのはこの実装による）。既存プロジェクトを指定した場合・新規作成した場合は`20_Projects/<名前>/Tasks/`になる。
 - `task_save.py`は作成時に`created_date`のみを自動セットし、`start_date`は空欄のまま作成する（`status`はテンプレートの既定値`1_todo`のまま）。`start_date`は、ユーザーが後からデイリーノートに埋め込まれたBaseビューから指定する想定であり（`today-close`スキルによる自動入力は行わない）、作成日当日中に指定しなかった場合は[`today-close-flow.md`](today-close-flow.md)のタスク日付見直しチェックにより検出され、処理が中断されてユーザーへの見直しが促される。
 
 ## 関連ドキュメント
