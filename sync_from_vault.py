@@ -165,18 +165,34 @@ def _mirror_dir_recursive(
                 dst_path.unlink()
 
     if structure_only:
-        gitkeep_path = dst_dir / ".gitkeep"
-        gitkeep_rel = gitkeep_path.relative_to(dst_root).as_posix()
-        gitkeep_exists = gitkeep_path.exists()
-        if has_subdirs:
-            if gitkeep_exists:
-                logs.append(f"DELETE {gitkeep_rel}")
-                if not dry_run:
-                    gitkeep_path.unlink()
-        elif not gitkeep_exists:
-            logs.append(f"ADD {gitkeep_rel}")
+        _sync_gitkeep_marker(dst_dir, dst_root, has_subdirs, dry_run, logs)
+
+
+def _sync_gitkeep_marker(
+    dst_dir: Path,
+    dst_root: Path,
+    has_subdirs: bool,
+    dry_run: bool,
+    logs: list[str],
+) -> None:
+    """structure_only用の`.gitkeep`増減簿記。
+
+    末端ディレクトリ（has_subdirs=False）には`.gitkeep`を置き、末端でなくなった
+    ディレクトリ（has_subdirs=True）からは`.gitkeep`を取り除く。この判定は
+    毎回src側の現状（has_subdirs）から再計算する（前回の状態は記憶しない）。
+    """
+    gitkeep_path = dst_dir / ".gitkeep"
+    gitkeep_rel = gitkeep_path.relative_to(dst_root).as_posix()
+    gitkeep_exists = gitkeep_path.exists()
+    if has_subdirs:
+        if gitkeep_exists:
+            logs.append(f"DELETE {gitkeep_rel}")
             if not dry_run:
-                gitkeep_path.touch()
+                gitkeep_path.unlink()
+    elif not gitkeep_exists:
+        logs.append(f"ADD {gitkeep_rel}")
+        if not dry_run:
+            gitkeep_path.touch()
 
 
 def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[str]:
