@@ -8,6 +8,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import sync_from_vault  # noqa: E402
@@ -308,3 +310,112 @@ def test_obsidian許可リストでdry_run指定時はファイルシステム�
 
         assert logs == ["ADD app.json"]
         assert not repo_obsidian.exists()
+
+
+# --- ここから Task 3: エラー処理・耐性 ---
+
+
+def test_symlinkはたどられずスキップされ操作ログに記録される(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src = root / "src"
+        dst = root / "dst"
+        src.mkdir()
+        (src / "linked").mkdir()
+        (src / "linked" / "inside.md").write_text("inside", encoding="utf-8")
+        (src / "keep.md").write_text("kept", encoding="utf-8")
+
+        original_islink = sync_from_vault.os.path.islink
+
+        def fake_islink(path):
+            # このWindows環境ではシンボリックリンク作成に管理者権限/開発者モードが必要で
+            # テスト環境で再現できない（実測でos.symlinkがWinError 1314を送出することを確認済み）
+            # ため、os.path.islinkをモンキーパッチしてシンボリックリンクの存在を模擬する
+            if Path(path).name == "linked":
+                return True
+            return original_islink(path)
+
+        monkeypatch.setattr(sync_from_vault.os.path, "islink", fake_islink)
+
+        logs = sync_from_vault.mirror_dir(src, dst)
+
+        assert "SKIP（symlink） linked" in logs
+        assert not (dst / "linked").exists()
+        assert (dst / "keep.md").read_text(encoding="utf-8") == "kept"
+
+
+def test_読み取り不可なファイルがあっても他のファイルの処理は続行される(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src = root / "src"
+        dst = root / "dst"
+        src.mkdir()
+        (src / "broken.md").write_text("broken", encoding="utf-8")
+        (src / "ok.md").write_text("ok content", encoding="utf-8")
+
+        original_copy2 = sync_from_vault.shutil.copy2
+
+        def fake_copy2(src_path, dst_path, *args, **kwargs):
+            # Windows上ではファイル所有者に対するchmodだけでは読み取り不能を再現できないため、
+            # shutil.copy2をモンキーパッチしてOSError（権限エラー・OneDriveオンデマンド
+            # ファイル未ダウンロード等）を模擬する
+            if Path(src_path).name == "broken.md":
+                raise OSError("simulated permission denied")
+            return original_copy2(src_path, dst_path, *args, **kwargs)
+
+        monkeypatch.setattr(sync_from_vault.shutil, "copy2", fake_copy2)
+
+        logs = sync_from_vault.mirror_dir(src, dst)
+
+        assert any(log.startswith("SKIP（読み取り不可） broken.md") for log in logs)
+        assert "ADD ok.md" in logs
+        assert (dst / "ok.md").read_text(encoding="utf-8") == "ok content"
+        assert not (dst / "broken.md").exists()
+
+
+def test_読み取り以外のOSErrorはロールバックせずそのまま伝播する(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src = root / "src"
+        dst = root / "dst"
+        src.mkdir()
+        dst.mkdir()
+        (src / "new.md").write_text("new content", encoding="utf-8")
+        (dst / "obsolete_dir").mkdir()
+        (dst / "obsolete_dir" / "old.md").write_text("old", encoding="utf-8")
+
+        original_rmtree = sync_from_vault.shutil.rmtree
+
+        def fake_rmtree(path, *args, **kwargs):
+            # ディレクトリ削除中に想定外のOSError（読み取り以外）が発生するケースを
+            # 再現するため、shutil.rmtreeをモンキーパッチする。sync_from_vault.shutilは
+            # 実体が標準ライブラリshutilと同一モジュールのため、対象パス以外は元の実装に
+            # 委譲し、tempfile.TemporaryDirectoryの後片付け処理まで巻き込まないようにする
+            if Path(path).name == "obsolete_dir":
+                raise OSError("simulated deletion failure")
+            return original_rmtree(path, *args, **kwargs)
+
+        monkeypatch.setattr(sync_from_vault.shutil, "rmtree", fake_rmtree)
+
+        with pytest.raises(OSError):
+            sync_from_vault.mirror_dir(src, dst)
+
+        # 先行して完了済みのADDはロールバックされずそのまま残る
+        assert (dst / "new.md").read_text(encoding="utf-8") == "new content"
+        # 削除に失敗したディレクトリもロールバックされずそのまま残る
+        assert (dst / "obsolete_dir").exists()
+
+
+def test_VAULT_ROOTが存在しない場合エラー終了する(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        fake_vault_root = root / "nonexistent_vault"
+        fake_repo_root = root / "repo"
+        fake_repo_root.mkdir()
+        monkeypatch.setattr(sync_from_vault, "VAULT_ROOT", fake_vault_root)
+        monkeypatch.setattr(sync_from_vault, "REPO_ROOT", fake_repo_root)
+
+        with pytest.raises(SystemExit) as exc_info:
+            sync_from_vault.run(dry_run=True)
+
+        assert str(fake_vault_root) in str(exc_info.value)
