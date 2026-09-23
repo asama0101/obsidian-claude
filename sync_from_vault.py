@@ -22,6 +22,7 @@ import filecmp
 import os
 import shutil
 import stat
+import subprocess
 from pathlib import Path
 
 # 変更時はここを直接書き換える
@@ -412,6 +413,21 @@ def run(dry_run: bool) -> list[str]:
         )
 
     return logs
+
+
+def _get_current_branch(repo_root: Path) -> str:
+    # RED検証用スタブ（意図的に不正な戻り値。GREENで実装する）
+    return ""
+
+
+def _extract_changed_paths(logs: list[str]) -> list[str]:
+    # RED検証用スタブ（意図的に不正な戻り値。GREENで実装する）
+    return []
+
+
+def _commit_and_push(logs: list[str], repo_root: Path) -> None:
+    # RED検証用スタブ（意図的に何もしない。GREENで実装する）
+    pass
 
 
 def main() -> None:
