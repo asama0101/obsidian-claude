@@ -416,18 +416,65 @@ def run(dry_run: bool) -> list[str]:
 
 
 def _get_current_branch(repo_root: Path) -> str:
-    # RED検証用スタブ（意図的に不正な戻り値。GREENで実装する）
-    return ""
+    """repo_rootの現在のgitブランチ名を返す。"""
+    result = subprocess.run(
+        ["git", "branch", "--show-current"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return result.stdout.strip()
 
 
 def _extract_changed_paths(logs: list[str]) -> list[str]:
-    # RED検証用スタブ（意図的に不正な戻り値。GREENで実装する）
-    return []
+    """操作ログからADD/UPDATE/DELETE行だけを抜き出し、対象パスの一覧を返す。
+
+    SKIPで始まる行（symlinkスキップ・読み取り不可スキップ等）は無視する。
+    """
+    paths: list[str] = []
+    for line in logs:
+        for prefix in ("ADD ", "UPDATE ", "DELETE "):
+            if line.startswith(prefix):
+                paths.append(line[len(prefix):])
+                break
+    return paths
 
 
 def _commit_and_push(logs: list[str], repo_root: Path) -> None:
-    # RED検証用スタブ（意図的に何もしない。GREENで実装する）
-    pass
+    """操作ログを元にgit add/commit/pushを一気通貫で行う。
+
+    操作ログが空、または実際に変更されたパスが無ければ何もせず終了する。
+    現在のブランチがmainでなければ、コミット・pushを行わずSystemExitで中断する
+    （個人運用ツールのためロールバックは実装せず、subprocessの例外はそのまま伝播させる）。
+
+    Args:
+        logs: run()が返した操作ログの文字列リスト。
+        repo_root: git操作の対象リポジトリのルートディレクトリ。
+    """
+    if not logs:
+        print("変更なし。コミット・pushをスキップします。")
+        return
+
+    branch = _get_current_branch(repo_root)
+    if branch != "main":
+        raise SystemExit(
+            f"現在のブランチは'{branch}'です。mainブランチでのみコミット・pushを行います。中断します。"
+        )
+
+    changed_paths = _extract_changed_paths(logs)
+    if not changed_paths:
+        # 全行がSKIPだった場合の念のためのガード（通常はlogsが空のケースで既に処理済み）
+        print("変更なし。コミット・pushをスキップします。")
+        return
+
+    subprocess.run(["git", "add", "--", *changed_paths], cwd=repo_root, check=True)
+
+    count = sum(1 for line in logs if not line.startswith("SKIP"))
+    message = f"Sync from vault ({count} changes)\n\n" + "\n".join(changed_paths)
+    subprocess.run(["git", "commit", "-m", message], cwd=repo_root, check=True)
+
+    subprocess.run(["git", "push", "origin", "main"], cwd=repo_root, check=True)
 
 
 def main() -> None:
@@ -445,6 +492,9 @@ def main() -> None:
     for line in logs:
         print(line)
     print(f"\n{'[dry-run] ' if args.dry_run else ''}{len(logs)} 件の操作")
+
+    if not args.dry_run:
+        _commit_and_push(logs, REPO_ROOT)
 
 
 if __name__ == "__main__":
