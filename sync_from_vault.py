@@ -64,11 +64,16 @@ def _clear_readonly(path: str) -> None:
 def _rmtree_onexc(func, path, exc: BaseException) -> None:
     """shutil.rmtreeの失敗時コールバック（Python 3.12以降のonexc引数）。
 
-    読み取り専用属性を解除したうえで、渡された削除関数（os.rmdir/os.remove）を
-    1回だけ再試行する。再試行でも失敗した場合はその例外をそのまま呼び出し元へ
-    伝播させる（onexcは自ら再送出しない限りrmtree側で握りつぶされてしまうため。
-    既存の「削除中のOSErrorはロールバックせず伝播する」方針は変えない）。
+    PermissionErrorの場合のみ、読み取り専用属性を解除したうえで渡された削除関数
+    （os.rmdir/os.remove）を1回だけ再試行する（`_unlink_with_retry`と同じ判定方針）。
+    再試行でも失敗した場合はその例外をそのまま呼び出し元へ伝播させる（onexcは自ら
+    再送出しない限りrmtree側で握りつぶされてしまうため）。PermissionError以外
+    （真のファイルロック等）はチェック無しでそのまま再送出し、無関係なos.chmod
+    副作用を発生させない（既存の「削除中のOSErrorはロールバックせず伝播する」
+    方針は変えない）。
     """
+    if not isinstance(exc, PermissionError):
+        raise exc
     _clear_readonly(path)
     func(path)
 
