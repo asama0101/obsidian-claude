@@ -478,3 +478,165 @@ def test_dry_runフラグ省略時はrun関数にdry_run_Falseが渡される(mo
     sync_from_vault.main()
 
     assert captured["dry_run"] is False
+
+
+# --- ここから 最終ブランチレビュー(CP-D)修正 ---
+
+
+def test_Critical1_src側ディレクトリが一時的に存在しない場合dst側は全削除されずSKIPされる():
+    # OneDrive同期遅延等でカテゴリ直下ディレクトリ自体が一時的に見えなくなっても、
+    # リポジトリ側の既存内容が丸ごと削除されてはならない
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src = root / "src_temporarily_missing"
+        dst = root / "dst"
+        dst.mkdir()
+        (dst / "existing.md").write_text("existing content", encoding="utf-8")
+        (dst / "existing_dir").mkdir()
+        (dst / "existing_dir" / "inner.md").write_text("inner", encoding="utf-8")
+
+        logs = sync_from_vault.mirror_dir(src, dst)
+
+        assert (dst / "existing.md").exists()
+        assert (dst / "existing_dir" / "inner.md").exists()
+        assert any("SKIP" in log for log in logs)
+        assert not any(log.startswith("DELETE") for log in logs)
+
+
+def test_Critical1_structure_onlyでもsrc側親フォルダが存在しない場合dst側は全削除されずSKIPされる():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src = root / "00_Inbox_missing"
+        dst = root / "dst"
+        dst.mkdir()
+        (dst / "sub").mkdir()
+        (dst / "sub" / ".gitkeep").touch()
+
+        logs = sync_from_vault.mirror_dir(src, dst, structure_only=True)
+
+        assert (dst / "sub" / ".gitkeep").exists()
+        assert any("SKIP" in log for log in logs)
+        assert not any(log.startswith("DELETE") for log in logs)
+
+
+def test_Critical2_構造のみミラーでvault側と同名の残留ファイルも無条件で削除される():
+    # structure_only=Trueの個人ノート系フォルダでは、vault側に同名ファイルが
+    # 存在するかどうかに関わらず、dst側の.gitkeep以外の実ファイルは必ず削除されるべき
+    # （個人情報を含むファイルが公開リポジトリに残留し続けることを防ぐ）
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src = root / "src"
+        dst = root / "dst"
+        src.mkdir()
+        dst.mkdir()
+        (src / "note.md").write_text("vault側の内容", encoding="utf-8")
+        (dst / "note.md").write_text("残留した個人情報", encoding="utf-8")
+
+        logs = sync_from_vault.mirror_dir(src, dst, structure_only=True)
+
+        assert not (dst / "note.md").exists()
+        assert "DELETE note.md" in logs
+
+
+def test_Important1_run関数で4カテゴリすべてが結線されて同期される(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        vault_root = root / "vault"
+        repo_root = root / "repo"
+        vault_root.mkdir()
+        repo_root.mkdir()
+
+        # フルミラー・ディレクトリ
+        (vault_root / ".claude").mkdir()
+        (vault_root / ".claude" / "settings.json").write_text("{}", encoding="utf-8")
+        (vault_root / "80_Templates").mkdir()
+        (vault_root / "80_Templates" / "template.md").write_text("template", encoding="utf-8")
+        (vault_root / "82_Bases").mkdir()
+        (vault_root / "82_Bases" / "base.base").write_text("base", encoding="utf-8")
+        (vault_root / "90_SkillFlows").mkdir()
+        (vault_root / "90_SkillFlows" / "flow.md").write_text("flow", encoding="utf-8")
+
+        # 単一ファイルコピー
+        (vault_root / "CLAUDE.md").write_text("claude md", encoding="utf-8")
+        (vault_root / "README.md").write_text("readme", encoding="utf-8")
+
+        # .obsidian許可リスト方式ミラー
+        (vault_root / ".obsidian").mkdir()
+        (vault_root / ".obsidian" / "app.json").write_text("app", encoding="utf-8")
+
+        # 個人ノート系フォルダ（構造のみミラー）
+        for folder in sync_from_vault.PERSONAL_NOTE_FOLDERS:
+            (vault_root / folder / "sub").mkdir(parents=True)
+            (vault_root / folder / "sub" / "note.md").write_text("note", encoding="utf-8")
+
+        monkeypatch.setattr(sync_from_vault, "VAULT_ROOT", vault_root)
+        monkeypatch.setattr(sync_from_vault, "REPO_ROOT", repo_root)
+
+        sync_from_vault.run(dry_run=False)
+
+        assert (repo_root / ".claude" / "settings.json").read_text(encoding="utf-8") == "{}"
+        assert (
+            repo_root / "80_Templates" / "template.md"
+        ).read_text(encoding="utf-8") == "template"
+        assert (repo_root / "82_Bases" / "base.base").read_text(encoding="utf-8") == "base"
+        assert (repo_root / "90_SkillFlows" / "flow.md").read_text(encoding="utf-8") == "flow"
+        assert (repo_root / "CLAUDE.md").read_text(encoding="utf-8") == "claude md"
+        assert (repo_root / "README.md").read_text(encoding="utf-8") == "readme"
+        assert (repo_root / ".obsidian" / "app.json").read_text(encoding="utf-8") == "app"
+        for folder in sync_from_vault.PERSONAL_NOTE_FOLDERS:
+            assert (repo_root / folder / "sub" / ".gitkeep").exists()
+            assert not (repo_root / folder / "sub" / "note.md").exists()
+
+
+def test_Important3_obsidian許可リストでsymlinkの許可ファイルはスキップされる(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        vault_obsidian = root / "vault" / ".obsidian"
+        repo_obsidian = root / "repo" / ".obsidian"
+        vault_obsidian.mkdir(parents=True)
+        (vault_obsidian / "app.json").write_text("app content", encoding="utf-8")
+
+        original_islink = sync_from_vault.os.path.islink
+
+        def fake_islink(path):
+            if Path(path).name == "app.json":
+                return True
+            return original_islink(path)
+
+        monkeypatch.setattr(sync_from_vault.os.path, "islink", fake_islink)
+
+        logs = sync_from_vault.mirror_obsidian_allowlist(
+            vault_obsidian, repo_obsidian, dry_run=False
+        )
+
+        assert "SKIP（symlink） app.json" in logs
+        assert not (repo_obsidian / "app.json").exists()
+
+
+def test_Important4_単一ファイルコピーでsrcが存在せずdstが存在する場合はdstが削除される():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src_file = root / "CLAUDE.md"  # 意図的に作成しない（vault側に無い状態を再現）
+        dst_dir = root / "dst"
+        dst_dir.mkdir()
+        dst_file = dst_dir / "CLAUDE.md"
+        dst_file.write_text("old content", encoding="utf-8")
+
+        logs = sync_from_vault.copy_file(src_file, dst_file, base_dir=dst_dir, dry_run=False)
+
+        assert logs == ["DELETE CLAUDE.md"]
+        assert not dst_file.exists()
+
+
+def test_Important4_単一ファイルコピーでsrcもdstも存在しない場合は何もしない():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        src_file = root / "README.md"
+        dst_dir = root / "dst"
+        dst_dir.mkdir()
+        dst_file = dst_dir / "README.md"
+
+        logs = sync_from_vault.copy_file(src_file, dst_file, base_dir=dst_dir, dry_run=False)
+
+        assert logs == []
+        assert not dst_file.exists()
