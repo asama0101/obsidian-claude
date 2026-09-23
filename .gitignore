@@ -19,3 +19,18 @@ __pycache__/
 
 # superpowers ワークフロー成果物（spec/plan、コミット対象外）
 docs/superpowers/
+
+# Playwright MCP ログ
+.playwright-mcp/
+
+# Claude Code ランタイム状態（従来.git/info/excludeにのみ存在していたローカル限定ルールを昇格）
+.claude/scheduled_tasks.lock
+.claude/scheduled_tasks.json
+.claude/routines/.state/
+.claude/worktrees/
+.claude/checkpoints/
+.claude/mailbox/
+.claude/agent-registry.json
+.claude/agent-memory-local
+.claude/first-run
+.claude/assistant-daemon-state.json
