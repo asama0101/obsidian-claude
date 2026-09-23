@@ -11,7 +11,8 @@ Vaultの内容に合わせて同期する。git操作（add/commit/push）は一
 - `.obsidian/`許可リスト方式ミラー
 - 個人ノート系フォルダ（00_Inbox等）の構造のみミラー
 
-エラー処理・CLIエントリポイントは後続タスクで追加する。
+symlink・ジャンクションのスキップ、読み取り不可ファイルのスキップ等の
+エラー処理・耐性も備える。CLIエントリポイントは後続タスクで追加する。
 """
 
 import filecmp
@@ -102,27 +103,19 @@ def _mirror_dir_recursive(
     for name in sorted(src_names):
         src_path = src_dir / name
         dst_path = dst_dir / name
+        if os.path.islink(src_path):
+            # シンボリックリンク・ジャンクションはたどらない（循環参照による無限
+            # 再帰を避けるため、ファイルとしてもディレクトリとしても扱わずスキップする）
+            rel_path = src_path.relative_to(src_root).as_posix()
+            logs.append(f"SKIP（symlink） {rel_path}")
+            continue
         if src_path.is_dir():
             has_subdirs = True
             _mirror_dir_recursive(
                 src_path, dst_path, src_root, dst_root, skip_names, structure_only, dry_run, logs
             )
         elif not structure_only:
-            rel_path = src_path.relative_to(src_root).as_posix()
-            try:
-                if not dst_path.exists():
-                    logs.append(f"ADD {rel_path}")
-                    if not dry_run:
-                        shutil.copy2(src_path, dst_path)
-                elif not filecmp.cmp(src_path, dst_path, shallow=False):
-                    logs.append(f"UPDATE {rel_path}")
-                    if not dry_run:
-                        shutil.copy2(src_path, dst_path)
-            except OSError:
-                # TODO(Task 3 GREEN): 読み取り不可ファイルのSKIPログを実装する
-                # （このスタブは二段階REDのための暫定措置であり、ここではまだログを
-                # 正しい形式で残さない）
-                pass
+            logs.extend(copy_file(src_path, dst_path, base_dir=dst_root, dry_run=dry_run))
 
     for name in sorted(dst_names - src_names):
         dst_path = dst_dir / name
@@ -168,19 +161,27 @@ def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[st
 
     Returns:
         実行した（またはdry_run=Trueでは実行予定の）操作ログの文字列リスト
-        （新規なら"ADD <relpath>"、更新なら"UPDATE <relpath>"、変更が無ければ空リスト）。
+        （新規なら"ADD <relpath>"、更新なら"UPDATE <relpath>"、変更が無ければ空リスト、
+        読み取り時にOSError（権限エラー・OneDriveオンデマンドファイル未ダウンロード等）が
+        発生すれば"SKIP（読み取り不可） <relpath>: <エラー内容>"）。
     """
     rel_path = dst.relative_to(base_dir).as_posix()
 
-    if not dst.exists():
-        action = "ADD"
-    elif not filecmp.cmp(src, dst, shallow=False):
-        action = "UPDATE"
-    else:
-        return []
+    try:
+        if not dst.exists():
+            action = "ADD"
+        elif not filecmp.cmp(src, dst, shallow=False):
+            action = "UPDATE"
+        else:
+            return []
 
-    if not dry_run:
-        shutil.copy2(src, dst)
+        if not dry_run:
+            shutil.copy2(src, dst)
+    except OSError as exc:
+        # 読み取り時のOSErrorはこのファイルだけスキップし処理を続行する（書き込み・
+        # 削除・ディレクトリ作成中のOSErrorはここでは捕捉せず、呼び出し元へ伝播させる）
+        return [f"SKIP（読み取り不可） {rel_path}: {exc}"]
+
     return [f"{action} {rel_path}"]
 
 
@@ -255,7 +256,13 @@ def run(dry_run: bool) -> list[str]:
 
     Returns:
         全カテゴリの操作ログを連結した文字列リスト。
+
+    Raises:
+        SystemExit: VAULT_ROOTが存在しない場合。フォールバックはしない。
     """
+    if not VAULT_ROOT.exists():
+        raise SystemExit(f"VAULT_ROOT が見つかりません: {VAULT_ROOT}")
+
     logs: list[str] = []
 
     logs += mirror_dir(
