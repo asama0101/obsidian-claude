@@ -151,6 +151,13 @@ def copy_file(src: Path, dst: Path, *, base_dir: Path, dry_run: bool) -> list[st
     return [f"{action} {rel_path}"]
 
 
+def mirror_obsidian_allowlist(
+    vault_obsidian: Path, repo_obsidian: Path, *, dry_run: bool
+) -> list[str]:
+    """.obsidian/配下を許可リスト方式でミラーする（スタブ、Task 2で本実装予定）。"""
+    return []
+
+
 def run(dry_run: bool) -> list[str]:
     """フルミラー・ディレクトリと単一ファイルコピーの同期を実行し、操作ログを集約する。
 
