@@ -439,3 +439,42 @@ def test_VAULT_ROOTが存在しない場合エラー終了する(monkeypatch):
             sync_from_vault.run(dry_run=True)
 
         assert str(fake_vault_root) in str(exc_info.value)
+
+
+# --- ここから Task 4: CLIエントリポイント ---
+
+
+def test_dry_runフラグ指定時はrun関数にdry_run_Trueが渡され操作ログとサマリーが標準出力に表示される(
+    monkeypatch, capsys
+):
+    captured = {"dry_run": None}
+
+    def fake_run(dry_run):
+        captured["dry_run"] = dry_run
+        return ["ADD foo.md", "UPDATE bar.md"]
+
+    monkeypatch.setattr(sync_from_vault, "run", fake_run)
+    monkeypatch.setattr(sys, "argv", ["sync_from_vault.py", "--dry-run"])
+
+    sync_from_vault.main()
+
+    assert captured["dry_run"] is True
+    out = capsys.readouterr().out
+    assert "ADD foo.md" in out
+    assert "UPDATE bar.md" in out
+    assert "2 件の操作" in out
+
+
+def test_dry_runフラグ省略時はrun関数にdry_run_Falseが渡される(monkeypatch):
+    captured = {"dry_run": None}
+
+    def fake_run(dry_run):
+        captured["dry_run"] = dry_run
+        return []
+
+    monkeypatch.setattr(sync_from_vault, "run", fake_run)
+    monkeypatch.setattr(sys, "argv", ["sync_from_vault.py"])
+
+    sync_from_vault.main()
+
+    assert captured["dry_run"] is False
