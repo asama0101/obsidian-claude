@@ -15,6 +15,7 @@ symlink・ジャンクションのスキップ、読み取り不可ファイル�
 エラー処理・耐性も備える。CLIエントリポイントは後続タスクで追加する。
 """
 
+import argparse
 import filecmp
 import os
 import shutil
@@ -307,7 +308,20 @@ def run(dry_run: bool) -> list[str]:
 
 
 def main() -> None:
-    pass
+    """CLIエントリポイント。`--dry-run`フラグを解釈しrun()を実行、結果を標準出力へ表示する。"""
+    parser = argparse.ArgumentParser(description="vaultから設定をコピーする")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="実際には変更せず、予定の操作を表示する",
+    )
+    args = parser.parse_args()
+
+    logs = run(dry_run=args.dry_run)
+
+    for line in logs:
+        print(line)
+    print(f"\n{'[dry-run] ' if args.dry_run else ''}{len(logs)} 件の操作")
 
 
 if __name__ == "__main__":
