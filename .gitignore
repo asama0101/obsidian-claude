@@ -16,3 +16,6 @@ desktop.ini
 __pycache__/
 *.pyc
 .claude/skills/vault/scripts/.venv/
+
+# superpowers ワークフロー成果物（spec/plan、コミット対象外）
+docs/superpowers/
