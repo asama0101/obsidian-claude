@@ -39,7 +39,7 @@
 
 ## スキル追加時の手順
 
-`project`スキル追加時の実績（コミット履歴: 「Add failing tests」→「Implement `*_create.py`」→「Add project skill: SKILL.md作成」）を土台にした手順。
+`project-add`スキル追加時の実績（当時の旧名称`project`でのコミット履歴: 「Add failing tests」→「Implement `*_create.py`」→「Add project skill: SKILL.md作成」）を土台にした手順。現行のスキル命名規則は`<name>-add`等の動詞的サフィックス付き（例: `task-add`, `meeting-followup`）。
 
 1. `scripts/tests/test_<name>_create.py`（あるいは相当のテスト）を先に書き、失敗することを確認する（RED）。
 2. `scripts/<name>_*.py`を実装し、テストを通す（GREEN）。標準出力は1行のJSON（`status`フィールドで結果を判定できる形式）で返す既存スクリプトの慣例に合わせる。
