@@ -23,6 +23,12 @@ docs/superpowers/
 # Playwright MCP ログ
 .playwright-mcp/
 
+# sync_from_vault.py（個人運用ツール。実体は git add -f で明示追跡してコミットする。
+# .venv/ のみ通常運用で無視）
+/sync_from_vault.py
+/test_sync_from_vault.py
+/.venv/
+
 # Claude Code ランタイム状態（従来.git/info/excludeにのみ存在していたローカル限定ルールを昇格）
 .claude/scheduled_tasks.lock
 .claude/scheduled_tasks.json
