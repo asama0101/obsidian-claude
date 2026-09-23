@@ -6,6 +6,7 @@
 
 import os
 import stat
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -718,4 +719,210 @@ def test_rmtreeのonexcコールバックはPermissionError以外の例外に対
     with pytest.raises(OSError):
         sync_from_vault._rmtree_onexc(failing_func, "some/path", OSError("boom"))
 
-    assert chmod_calls == []
+
+# --- ここから Task 5: コピー後のgit add/commit/push ---
+
+
+def _run_git(*args: str, cwd: Path) -> subprocess.CompletedProcess:
+    """テスト用のgitコマンド実行ヘルパー（実際のgitリポジトリ操作。モックなし）。"""
+    return subprocess.run(
+        ["git", *args], cwd=cwd, capture_output=True, text=True, check=True
+    )
+
+
+def _init_repo(repo_root: Path) -> None:
+    """git init 済み・mainブランチ・初期コミット済みのリポジトリを作る。"""
+    repo_root.mkdir(parents=True, exist_ok=True)
+    _run_git("init", "-b", "main", cwd=repo_root)
+    _run_git("config", "user.email", "test@example.com", cwd=repo_root)
+    _run_git("config", "user.name", "Test", cwd=repo_root)
+    (repo_root / "README.md").write_text("init", encoding="utf-8")
+    _run_git("add", "-A", cwd=repo_root)
+    _run_git("commit", "-m", "init", cwd=repo_root)
+
+
+def _add_bare_remote(repo_root: Path, remote_root: Path) -> None:
+    """git init --bare の偽リモートを作り、originとして登録してmainをpushしておく。"""
+    remote_root.mkdir(parents=True, exist_ok=True)
+    _run_git("init", "--bare", "-b", "main", cwd=remote_root)
+    _run_git("remote", "add", "origin", str(remote_root), cwd=repo_root)
+    _run_git("push", "origin", "main", cwd=repo_root)
+
+
+def _head_commit(repo_root: Path) -> str:
+    return _run_git("rev-parse", "HEAD", cwd=repo_root).stdout.strip()
+
+
+def test_extract_changed_pathsはADD_UPDATE_DELETE行だけを抽出しSKIP行は無視する():
+    logs = [
+        "ADD a.md",
+        "UPDATE b/c.md",
+        "DELETE d.md",
+        "SKIP（symlink） e.md",
+        "SKIP（読み取り不可） f.md: some error",
+    ]
+
+    result = sync_from_vault._extract_changed_paths(logs)
+
+    assert result == ["a.md", "b/c.md", "d.md"]
+
+
+def test_get_current_branchは現在のブランチ名を返す():
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp) / "repo"
+        _init_repo(repo_root)
+        _run_git("checkout", "-b", "feature", cwd=repo_root)
+
+        assert sync_from_vault._get_current_branch(repo_root) == "feature"
+
+
+def test_操作ログが空ならコミットもpushも行われない():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        repo_root = root / "repo"
+        _init_repo(repo_root)
+        remote_root = root / "origin.git"
+        _add_bare_remote(repo_root, remote_root)
+
+        before_head = _head_commit(repo_root)
+        before_remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+
+        sync_from_vault._commit_and_push([], repo_root)
+
+        assert _head_commit(repo_root) == before_head
+        assert (
+            _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+            == before_remote_head
+        )
+
+
+def test_現在のブランチがmain以外ならエラー終了しコミットpushされない():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        repo_root = root / "repo"
+        _init_repo(repo_root)
+        remote_root = root / "origin.git"
+        _add_bare_remote(repo_root, remote_root)
+        _run_git("checkout", "-b", "feature", cwd=repo_root)
+        (repo_root / "new.md").write_text("new content", encoding="utf-8")
+
+        before_head = _head_commit(repo_root)
+        before_remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+
+        with pytest.raises(SystemExit) as exc_info:
+            sync_from_vault._commit_and_push(["ADD new.md"], repo_root)
+
+        assert "feature" in str(exc_info.value)
+        assert _head_commit(repo_root) == before_head
+        assert (
+            _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+            == before_remote_head
+        )
+
+
+def test_変更されたパスのみがgit_addされ無関係な変更はステージされない():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        repo_root = root / "repo"
+        _init_repo(repo_root)
+        remote_root = root / "origin.git"
+        _add_bare_remote(repo_root, remote_root)
+
+        # 無関係な既存の未コミット変更（操作ログには含まれていない）
+        (repo_root / "README.md").write_text("unrelated local edit", encoding="utf-8")
+        # 操作ログに対応する新規ファイル
+        (repo_root / "new.md").write_text("new content", encoding="utf-8")
+
+        sync_from_vault._commit_and_push(["ADD new.md"], repo_root)
+
+        committed_files = _run_git(
+            "show", "--stat", "--pretty=format:", "HEAD", cwd=repo_root
+        ).stdout
+        assert "new.md" in committed_files
+        assert "README.md" not in committed_files
+
+        # 無関係な変更はステージされずワーキングツリーに残っている
+        status = _run_git("status", "--porcelain", cwd=repo_root).stdout
+        assert "README.md" in status
+
+
+def test_コミットメッセージに変更件数が含まれる():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        repo_root = root / "repo"
+        _init_repo(repo_root)
+        remote_root = root / "origin.git"
+        _add_bare_remote(repo_root, remote_root)
+
+        (repo_root / "new.md").write_text("new content", encoding="utf-8")
+        (repo_root / "README.md").write_text("updated readme", encoding="utf-8")
+
+        logs = ["ADD new.md", "UPDATE README.md", "SKIP（symlink） ignored.md"]
+        sync_from_vault._commit_and_push(logs, repo_root)
+
+        message = _run_git("log", "-1", "--pretty=%B", cwd=repo_root).stdout
+        assert "Sync from vault (2 changes)" in message
+
+
+def test_pushが実際に偽リモートへ反映される():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        repo_root = root / "repo"
+        _init_repo(repo_root)
+        remote_root = root / "origin.git"
+        _add_bare_remote(repo_root, remote_root)
+
+        before_head = _head_commit(repo_root)
+        (repo_root / "new.md").write_text("new content", encoding="utf-8")
+
+        sync_from_vault._commit_and_push(["ADD new.md"], repo_root)
+
+        local_head = _head_commit(repo_root)
+        remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+
+        assert local_head != before_head
+        assert local_head == remote_head
+        remote_file_content = _run_git(
+            "show", f"{remote_head}:new.md", cwd=repo_root
+        ).stdout
+        assert remote_file_content == "new content"
+
+
+def test_dry_run省略時かつ操作ログがあればcommit_and_pushが呼ばれる(monkeypatch):
+    captured = {"called": False, "logs": None, "repo_root": None}
+
+    def fake_run(dry_run):
+        return ["ADD foo.md"]
+
+    def fake_commit_and_push(logs, repo_root):
+        captured["called"] = True
+        captured["logs"] = logs
+        captured["repo_root"] = repo_root
+
+    monkeypatch.setattr(sync_from_vault, "run", fake_run)
+    monkeypatch.setattr(sync_from_vault, "_commit_and_push", fake_commit_and_push)
+    monkeypatch.setattr(sys, "argv", ["sync_from_vault.py"])
+
+    sync_from_vault.main()
+
+    assert captured["called"] is True
+    assert captured["logs"] == ["ADD foo.md"]
+    assert captured["repo_root"] == sync_from_vault.REPO_ROOT
+
+
+def test_dry_run指定時はcommit_and_pushが呼ばれない(monkeypatch):
+    called = {"value": False}
+
+    def fake_run(dry_run):
+        return ["ADD foo.md"]
+
+    def fake_commit_and_push(logs, repo_root):
+        called["value"] = True
+
+    monkeypatch.setattr(sync_from_vault, "run", fake_run)
+    monkeypatch.setattr(sync_from_vault, "_commit_and_push", fake_commit_and_push)
+    monkeypatch.setattr(sys, "argv", ["sync_from_vault.py", "--dry-run"])
+
+    sync_from_vault.main()
+
+    assert called["value"] is False
