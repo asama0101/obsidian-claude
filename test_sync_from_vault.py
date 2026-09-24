@@ -910,6 +910,40 @@ def test_dry_run省略時かつ操作ログがあればcommit_and_pushが呼ば�
     assert captured["repo_root"] == sync_from_vault.REPO_ROOT
 
 
+def test_run関数の操作ログはREPO_ROOTからの完全な相対パスになる(monkeypatch):
+    # 実運用バグ再現: run()配下のADD/UPDATE/DELETEログは、各カテゴリ呼び出し時のdst引数
+    # （例: REPO_ROOT / "80_Templates"）ではなく、REPO_ROOTからの完全な相対パスであるべき。
+    # ネストしたディレクトリ構造（カテゴリ直下でなくさらに1段以上深いファイル）を含む
+    # フィクスチャで、フルミラー対象・.obsidian許可リスト・個人ノート系フォルダの
+    # 3種類すべてを検証する。
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        vault_root = root / "vault"
+        repo_root = root / "repo"
+        vault_root.mkdir()
+        repo_root.mkdir()
+
+        # フルミラー対象（.claude）のネストしたファイル
+        (vault_root / ".claude" / "sub").mkdir(parents=True)
+        (vault_root / ".claude" / "sub" / "deep.md").write_text("deep", encoding="utf-8")
+
+        # .obsidian許可リストのファイル
+        (vault_root / ".obsidian").mkdir()
+        (vault_root / ".obsidian" / "app.json").write_text("app", encoding="utf-8")
+
+        # 個人ノート系フォルダのネストした末端ディレクトリ（.gitkeepが置かれる）
+        (vault_root / "40_Resources" / "Documents").mkdir(parents=True)
+
+        monkeypatch.setattr(sync_from_vault, "VAULT_ROOT", vault_root)
+        monkeypatch.setattr(sync_from_vault, "REPO_ROOT", repo_root)
+
+        logs = sync_from_vault.run(dry_run=False)
+
+        assert "ADD .claude/sub/deep.md" in logs
+        assert "ADD .obsidian/app.json" in logs
+        assert "ADD 40_Resources/Documents/.gitkeep" in logs
+
+
 def test_dry_run指定時はcommit_and_pushが呼ばれない(monkeypatch):
     called = {"value": False}
 
