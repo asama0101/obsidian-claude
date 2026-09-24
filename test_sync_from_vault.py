@@ -776,7 +776,67 @@ def test_get_current_branchは現在のブランチ名を返す():
         assert sync_from_vault._get_current_branch(repo_root) == "feature"
 
 
-def test_操作ログが空ならコミットもpushも行われない():
+# --- ここから fix round 2: git status ベースの実変更検知への修正 ---
+# 背景: 途中でクラッシュした実行（読み取り専用属性エラー等）の後に再実行すると、
+# ミラー処理自体は既に完了済み（disk上は正しい状態）なので今回のrun()のlogsは
+# 空になるが、前回のクラッシュでコミットされなかった実際の未コミット変更が
+# gitの作業ツリーに残ったままになる。「logsが空だからスキップ」という従来の判定では
+# この取りこぼしを見逃すため、_commit_and_pushはrun()のlogsではなく実際の
+# `git status --porcelain`（監視対象カテゴリパスに絞る）で判定するように変更した。
+# これに伴い_commit_and_pushはlogs引数を取らずrepo_rootのみを受け取るシグネチャに変更した。
+
+
+def test_get_git_status_pathsは監視対象カテゴリパスに絞ってgit_statusを実行する(monkeypatch):
+    captured = {}
+
+    def fake_run(args, **kwargs):
+        captured["args"] = args
+        return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(sync_from_vault.subprocess, "run", fake_run)
+
+    sync_from_vault._get_git_status_paths(Path("dummy_repo"))
+
+    args = captured["args"]
+    assert args[:3] == ["git", "status", "--porcelain"]
+    assert "--" in args
+    for category in sync_from_vault.SYNC_CATEGORY_PATHS:
+        assert category in args
+
+
+def test_get_git_status_pathsは通常のステータス行と未追跡行からパスを抽出する(monkeypatch):
+    def fake_run(args, **kwargs):
+        return subprocess.CompletedProcess(
+            args=args,
+            returncode=0,
+            stdout=" M modified.md\n?? untracked.md\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr(sync_from_vault.subprocess, "run", fake_run)
+
+    result = sync_from_vault._get_git_status_paths(Path("dummy_repo"))
+
+    assert result == ["modified.md", "untracked.md"]
+
+
+def test_get_git_status_pathsはrename行から新パスのみを抽出する(monkeypatch):
+    def fake_run(args, **kwargs):
+        return subprocess.CompletedProcess(
+            args=args,
+            returncode=0,
+            stdout="R  old_name.md -> new_name.md\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr(sync_from_vault.subprocess, "run", fake_run)
+
+    result = sync_from_vault._get_git_status_paths(Path("dummy_repo"))
+
+    assert result == ["new_name.md"]
+
+
+def test_git_statusにも変更が無ければコミットもpushも行われない():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         repo_root = root / "repo"
@@ -787,13 +847,52 @@ def test_操作ログが空ならコミットもpushも行われない():
         before_head = _head_commit(repo_root)
         before_remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
 
-        sync_from_vault._commit_and_push([], repo_root)
+        sync_from_vault._commit_and_push(repo_root)
 
         assert _head_commit(repo_root) == before_head
         assert (
             _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
             == before_remote_head
         )
+
+
+def test_クラッシュ後の再実行でrunの操作ログが空でも実際の未コミット変更はコミットpushされる(
+    monkeypatch,
+):
+    # 実運用バグの再現: 前回クラッシュしたrun()でミラー処理自体は完了済み（disk上は
+    # 正しい状態）だが、コミット前にクラッシュしたため未コミットの変更が作業ツリーに
+    # 残っている状態を再現する。再実行のrun()は差分なしのため空ログを返すが、
+    # 実際の未コミット変更（README.mdは監視対象カテゴリの単一ファイル）は
+    # コミット・pushされるべきである。
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        repo_root = root / "repo"
+        _init_repo(repo_root)
+        remote_root = root / "origin.git"
+        _add_bare_remote(repo_root, remote_root)
+
+        (repo_root / "README.md").write_text("crashed run leftover content", encoding="utf-8")
+
+        before_head = _head_commit(repo_root)
+
+        def fake_run(dry_run):
+            return []
+
+        monkeypatch.setattr(sync_from_vault, "run", fake_run)
+        monkeypatch.setattr(sync_from_vault, "REPO_ROOT", repo_root)
+        monkeypatch.setattr(sys, "argv", ["sync_from_vault.py"])
+
+        sync_from_vault.main()
+
+        local_head = _head_commit(repo_root)
+        remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+
+        assert local_head != before_head
+        assert local_head == remote_head
+        remote_file_content = _run_git(
+            "show", f"{remote_head}:README.md", cwd=repo_root
+        ).stdout
+        assert remote_file_content == "crashed run leftover content"
 
 
 def test_現在のブランチがmain以外ならエラー終了しコミットpushされない():
@@ -804,13 +903,14 @@ def test_現在のブランチがmain以外ならエラー終了しコミットp
         remote_root = root / "origin.git"
         _add_bare_remote(repo_root, remote_root)
         _run_git("checkout", "-b", "feature", cwd=repo_root)
-        (repo_root / "new.md").write_text("new content", encoding="utf-8")
+        # README.mdは監視対象カテゴリの単一ファイルであり、実際にgit statusで検知される
+        (repo_root / "README.md").write_text("updated on feature branch", encoding="utf-8")
 
         before_head = _head_commit(repo_root)
         before_remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
 
         with pytest.raises(SystemExit) as exc_info:
-            sync_from_vault._commit_and_push(["ADD new.md"], repo_root)
+            sync_from_vault._commit_and_push(repo_root)
 
         assert "feature" in str(exc_info.value)
         assert _head_commit(repo_root) == before_head
@@ -820,7 +920,7 @@ def test_現在のブランチがmain以外ならエラー終了しコミットp
         )
 
 
-def test_変更されたパスのみがgit_addされ無関係な変更はステージされない():
+def test_監視対象カテゴリ外の変更はgit_addされずカテゴリ内の変更のみステージされる():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         repo_root = root / "repo"
@@ -828,22 +928,22 @@ def test_変更されたパスのみがgit_addされ無関係な変更はステ�
         remote_root = root / "origin.git"
         _add_bare_remote(repo_root, remote_root)
 
-        # 無関係な既存の未コミット変更（操作ログには含まれていない）
-        (repo_root / "README.md").write_text("unrelated local edit", encoding="utf-8")
-        # 操作ログに対応する新規ファイル
-        (repo_root / "new.md").write_text("new content", encoding="utf-8")
+        # 監視対象カテゴリ外の無関係な変更（リポジトリ直下の任意のファイル）
+        (repo_root / "unrelated_file.md").write_text("unrelated local edit", encoding="utf-8")
+        # 監視対象カテゴリ内の変更（README.mdは単一ファイルカテゴリ）
+        (repo_root / "README.md").write_text("updated readme", encoding="utf-8")
 
-        sync_from_vault._commit_and_push(["ADD new.md"], repo_root)
+        sync_from_vault._commit_and_push(repo_root)
 
         committed_files = _run_git(
             "show", "--stat", "--pretty=format:", "HEAD", cwd=repo_root
         ).stdout
-        assert "new.md" in committed_files
-        assert "README.md" not in committed_files
+        assert "README.md" in committed_files
+        assert "unrelated_file.md" not in committed_files
 
-        # 無関係な変更はステージされずワーキングツリーに残っている
+        # カテゴリ外の変更はステージされずワーキングツリーに残っている
         status = _run_git("status", "--porcelain", cwd=repo_root).stdout
-        assert "README.md" in status
+        assert "unrelated_file.md" in status
 
 
 def test_コミットメッセージに変更件数が含まれる():
@@ -854,11 +954,10 @@ def test_コミットメッセージに変更件数が含まれる():
         remote_root = root / "origin.git"
         _add_bare_remote(repo_root, remote_root)
 
-        (repo_root / "new.md").write_text("new content", encoding="utf-8")
         (repo_root / "README.md").write_text("updated readme", encoding="utf-8")
+        (repo_root / "CLAUDE.md").write_text("new claude md", encoding="utf-8")
 
-        logs = ["ADD new.md", "UPDATE README.md", "SKIP（symlink） ignored.md"]
-        sync_from_vault._commit_and_push(logs, repo_root)
+        sync_from_vault._commit_and_push(repo_root)
 
         message = _run_git("log", "-1", "--pretty=%B", cwd=repo_root).stdout
         assert "Sync from vault (2 changes)" in message
@@ -873,9 +972,10 @@ def test_pushが実際に偽リモートへ反映される():
         _add_bare_remote(repo_root, remote_root)
 
         before_head = _head_commit(repo_root)
-        (repo_root / "new.md").write_text("new content", encoding="utf-8")
+        (repo_root / ".claude").mkdir()
+        (repo_root / ".claude" / "new.md").write_text("new content", encoding="utf-8")
 
-        sync_from_vault._commit_and_push(["ADD new.md"], repo_root)
+        sync_from_vault._commit_and_push(repo_root)
 
         local_head = _head_commit(repo_root)
         remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
@@ -883,20 +983,19 @@ def test_pushが実際に偽リモートへ反映される():
         assert local_head != before_head
         assert local_head == remote_head
         remote_file_content = _run_git(
-            "show", f"{remote_head}:new.md", cwd=repo_root
+            "show", f"{remote_head}:.claude/new.md", cwd=repo_root
         ).stdout
         assert remote_file_content == "new content"
 
 
 def test_dry_run省略時かつ操作ログがあればcommit_and_pushが呼ばれる(monkeypatch):
-    captured = {"called": False, "logs": None, "repo_root": None}
+    captured = {"called": False, "repo_root": None}
 
     def fake_run(dry_run):
         return ["ADD foo.md"]
 
-    def fake_commit_and_push(logs, repo_root):
+    def fake_commit_and_push(repo_root):
         captured["called"] = True
-        captured["logs"] = logs
         captured["repo_root"] = repo_root
 
     monkeypatch.setattr(sync_from_vault, "run", fake_run)
@@ -906,7 +1005,6 @@ def test_dry_run省略時かつ操作ログがあればcommit_and_pushが呼ば�
     sync_from_vault.main()
 
     assert captured["called"] is True
-    assert captured["logs"] == ["ADD foo.md"]
     assert captured["repo_root"] == sync_from_vault.REPO_ROOT
 
 
@@ -950,7 +1048,7 @@ def test_dry_run指定時はcommit_and_pushが呼ばれない(monkeypatch):
     def fake_run(dry_run):
         return ["ADD foo.md"]
 
-    def fake_commit_and_push(logs, repo_root):
+    def fake_commit_and_push(repo_root):
         called["value"] = True
 
     monkeypatch.setattr(sync_from_vault, "run", fake_run)
