@@ -100,6 +100,7 @@ def mirror_dir(
     skip_names: frozenset[str] = frozenset(),
     structure_only: bool = False,
     dry_run: bool = False,
+    repo_root: Path | None = None,
 ) -> list[str]:
     """src配下をdstへ完全ミラーする。
 
@@ -121,6 +122,10 @@ def mirror_dir(
             この場合、dst側の.gitkeep以外のファイルはsrc側に同名ファイルが
             存在するかどうかに関わらず無条件で削除対象になる。
         dry_run: Trueの場合はファイルシステムに一切書き込まず、操作ログだけを返す。
+        repo_root: ADD/UPDATE/DELETEログの相対パス表記の基準ディレクトリ。
+            省略時はdst（このカテゴリのミラー先ディレクトリ）を基準にする
+            （単体呼び出し時の従来互換）。git add対象パスとして使う場合は
+            リポジトリルートを明示的に渡す。
 
     Returns:
         実行した（またはdry_run=Trueでは実行予定の）操作ログの文字列リスト
@@ -136,7 +141,8 @@ def mirror_dir(
         # 区別できないため、こちらは_mirror_dir_recursive内の従来通りの削除セマンティクスに従う）
         logs.append(f"SKIP（ミラー元ディレクトリ不在） {src}")
         return logs
-    _mirror_dir_recursive(src, dst, src, dst, skip_names, structure_only, dry_run, logs)
+    log_root = repo_root if repo_root is not None else dst
+    _mirror_dir_recursive(src, dst, src, log_root, skip_names, structure_only, dry_run, logs)
     return logs
 
 
@@ -156,6 +162,10 @@ def _mirror_dir_recursive(
     末端ディレクトリ（サブディレクトリを持たないディレクトリ。src側の構造で判定）には
     `.gitkeep`を置き、末端でなくなったディレクトリからは`.gitkeep`を取り除く。この判定は
     毎回src側の現状から再計算する（前回の状態は記憶しない）。
+
+    dst_rootはADD/UPDATE/DELETEログの相対パス表記の基準ディレクトリ（mirror_dirが
+    repo_root指定時はリポジトリルート、未指定時はこのカテゴリのミラー先ディレクトリ）
+    であり、再帰全体を通じて変わらない。
     """
     if not dry_run:
         dst_dir.mkdir(parents=True, exist_ok=True)
@@ -315,7 +325,7 @@ OBSIDIAN_ALLOWLIST_FILES = frozenset(
 
 
 def mirror_obsidian_allowlist(
-    vault_obsidian: Path, repo_obsidian: Path, *, dry_run: bool
+    vault_obsidian: Path, repo_obsidian: Path, *, dry_run: bool, repo_root: Path | None = None
 ) -> list[str]:
     """.obsidian/配下を許可リスト方式でミラーする。
 
@@ -327,6 +337,9 @@ def mirror_obsidian_allowlist(
         vault_obsidian: Vault側の.obsidian/ディレクトリ。
         repo_obsidian: リポジトリ側の.obsidian/ディレクトリ（無ければ新規作成する）。
         dry_run: Trueの場合はファイルシステムに一切書き込まず、操作ログだけを返す。
+        repo_root: ADD/UPDATE/DELETEログの相対パス表記の基準ディレクトリ。
+            省略時はrepo_obsidianを基準にする（単体呼び出し時の従来互換）。
+            git add対象パスとして使う場合はリポジトリルートを明示的に渡す。
 
     Returns:
         実行した（またはdry_run=Trueでは実行予定の）操作ログの文字列リスト。
@@ -336,6 +349,8 @@ def mirror_obsidian_allowlist(
     if not dry_run:
         repo_obsidian.mkdir(parents=True, exist_ok=True)
 
+    log_root = repo_root if repo_root is not None else repo_obsidian
+
     for name in sorted(OBSIDIAN_ALLOWLIST_FILES):
         src_path = vault_obsidian / name
         dst_path = repo_obsidian / name
@@ -344,13 +359,16 @@ def mirror_obsidian_allowlist(
             logs.append(f"SKIP（symlink） {name}")
             continue
         if src_path.exists():
-            logs += copy_file(src_path, dst_path, base_dir=repo_obsidian, dry_run=dry_run)
+            logs += copy_file(src_path, dst_path, base_dir=log_root, dry_run=dry_run)
         elif dst_path.exists():
-            logs.append(f"DELETE {name}")
+            rel_path = dst_path.relative_to(log_root).as_posix()
+            logs.append(f"DELETE {rel_path}")
             if not dry_run:
                 _unlink_with_retry(dst_path)
 
-    logs += mirror_dir(vault_obsidian / "themes", repo_obsidian / "themes", dry_run=dry_run)
+    logs += mirror_dir(
+        vault_obsidian / "themes", repo_obsidian / "themes", dry_run=dry_run, repo_root=repo_root
+    )
 
     return logs
 
@@ -389,11 +407,22 @@ def run(dry_run: bool) -> list[str]:
         REPO_ROOT / ".claude",
         skip_names=CLAUDE_SKIP_NAMES,
         dry_run=dry_run,
+        repo_root=REPO_ROOT,
     )
-    logs += mirror_dir(VAULT_ROOT / "80_Templates", REPO_ROOT / "80_Templates", dry_run=dry_run)
-    logs += mirror_dir(VAULT_ROOT / "82_Bases", REPO_ROOT / "82_Bases", dry_run=dry_run)
     logs += mirror_dir(
-        VAULT_ROOT / "90_SkillFlows", REPO_ROOT / "90_SkillFlows", dry_run=dry_run
+        VAULT_ROOT / "80_Templates",
+        REPO_ROOT / "80_Templates",
+        dry_run=dry_run,
+        repo_root=REPO_ROOT,
+    )
+    logs += mirror_dir(
+        VAULT_ROOT / "82_Bases", REPO_ROOT / "82_Bases", dry_run=dry_run, repo_root=REPO_ROOT
+    )
+    logs += mirror_dir(
+        VAULT_ROOT / "90_SkillFlows",
+        REPO_ROOT / "90_SkillFlows",
+        dry_run=dry_run,
+        repo_root=REPO_ROOT,
     )
 
     logs += copy_file(
@@ -404,12 +433,16 @@ def run(dry_run: bool) -> list[str]:
     )
 
     logs += mirror_obsidian_allowlist(
-        VAULT_ROOT / ".obsidian", REPO_ROOT / ".obsidian", dry_run=dry_run
+        VAULT_ROOT / ".obsidian", REPO_ROOT / ".obsidian", dry_run=dry_run, repo_root=REPO_ROOT
     )
 
     for folder in PERSONAL_NOTE_FOLDERS:
         logs += mirror_dir(
-            VAULT_ROOT / folder, REPO_ROOT / folder, structure_only=True, dry_run=dry_run
+            VAULT_ROOT / folder,
+            REPO_ROOT / folder,
+            structure_only=True,
+            dry_run=dry_run,
+            repo_root=REPO_ROOT,
         )
 
     return logs
