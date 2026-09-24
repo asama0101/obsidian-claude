@@ -550,6 +550,18 @@ def _commit_and_push(repo_root: Path) -> None:
 
     subprocess.run(["git", "add", "--", *changed_paths], cwd=repo_root, check=True)
 
+    # core.autocrlf等の改行コード正規化により、git add後にHEADと同一内容として
+    # ステージされ実質差分が消えるケースがある（git status --porcelainは正規化前の
+    # 見かけ上の差分を検知するため、changed_pathsが非空でもここで実質差分が無くなりうる）。
+    # 何もステージされていなければgit commitは"nothing to commit"で失敗するため、
+    # 事前にgit diff --cached --quietの終了コード（0=差分なし, 1=差分あり）で判定する。
+    diff_check = subprocess.run(
+        ["git", "diff", "--cached", "--quiet"], cwd=repo_root
+    )
+    if diff_check.returncode == 0:
+        print("変更なし（正規化により実質差分なし）。コミット・pushをスキップします。")
+        return
+
     count = len(changed_paths)
     message = f"Sync from vault ({count} changes)\n\n" + "\n".join(changed_paths)
     subprocess.run(["git", "commit", "-m", message], cwd=repo_root, check=True)
