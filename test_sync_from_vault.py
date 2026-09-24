@@ -1058,6 +1058,54 @@ def test_run関数の操作ログはREPO_ROOTからの完全な相対パスに�
         assert "ADD 40_Resources/Documents/.gitkeep" in logs
 
 
+# --- ここから fix round 3: core.autocrlf正規化によりgit add後に実質差分が消えるケース ---
+# 背景: git status --porcelainは改行コード正規化前の見かけ上の差分を検知するが、
+# git add時にcore.autocrlfの正規化が働き、実際にはHEADと同一内容としてステージされる
+# （＝実質差分なし）ケースがある。この場合git commitへ何も渡っておらず
+# "nothing to commit, working tree clean"で失敗し、CalledProcessErrorが未処理のまま
+# 伝播してクラッシュしていた。_commit_and_pushはgit add後にgit diff --cached --quietで
+# 実際に何かステージされたかを確認し、無ければcommit/pushを行わずスキップすべきである。
+
+
+def test_autocrlf正規化によりgit_add後に実質差分が消えた場合はcommitされずクラッシュもしない():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        repo_root = root / "repo"
+        repo_root.mkdir(parents=True, exist_ok=True)
+        _run_git("init", "-b", "main", cwd=repo_root)
+        _run_git("config", "user.email", "test@example.com", cwd=repo_root)
+        _run_git("config", "user.name", "Test", cwd=repo_root)
+        # 実運用のリポジトリ設定（core.autocrlf=true）を再現する
+        _run_git("config", "core.autocrlf", "true", cwd=repo_root)
+        target = repo_root / "README.md"
+        # CRLF改行で初期コミットする（core.autocrlf=trueの下でリポジトリに記録される形式）
+        target.write_bytes(b"line1\r\nline2\r\n")
+        _run_git("add", "-A", cwd=repo_root)
+        _run_git("commit", "-m", "init", cwd=repo_root)
+        remote_root = root / "origin.git"
+        _add_bare_remote(repo_root, remote_root)
+
+        before_head = _head_commit(repo_root)
+        before_remote_head = _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+
+        # vault側の生バイト（LF）をshutil.copy2で直接書き込む挙動を再現する
+        # （sync_from_vault.copy_file内部でのshutil.copy2呼び出しに相当）
+        target.write_bytes(b"line1\nline2\n")
+
+        # git status --porcelainは改行コードの違いを見かけ上の変更として検知する
+        status_before = _run_git("status", "--porcelain", cwd=repo_root).stdout
+        assert "README.md" in status_before
+
+        # クラッシュせず正常に完了し、commit・pushのどちらも行われないこと
+        sync_from_vault._commit_and_push(repo_root)
+
+        assert _head_commit(repo_root) == before_head
+        assert (
+            _run_git("rev-parse", "main", cwd=remote_root).stdout.strip()
+            == before_remote_head
+        )
+
+
 def test_dry_run指定時はcommit_and_pushが呼ばれない(monkeypatch):
     called = {"value": False}
 
