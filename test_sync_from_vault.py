@@ -799,9 +799,25 @@ def test_get_git_status_pathsは監視対象カテゴリパスに絞ってgit_st
 
     args = captured["args"]
     assert args[:3] == ["git", "status", "--porcelain"]
-    assert "--" in args
-    for category in sync_from_vault.SYNC_CATEGORY_PATHS:
-        assert category in args
+    assert args[3] == "--"
+    # SYNC_CATEGORY_PATHSを参照せず期待値をハードコードする（自己言及的アサーションを避け、
+    # SYNC_CATEGORY_PATHSから項目が欠落した場合にもこのテストが検出できるようにする）
+    assert set(args[4:]) == {
+        ".claude",
+        "80_Templates",
+        "82_Bases",
+        "90_SkillFlows",
+        "CLAUDE.md",
+        "README.md",
+        ".obsidian",
+        "00_Inbox",
+        "10_Daily",
+        "20_Projects",
+        "30_Areas",
+        "40_Resources",
+        "50_Archives",
+        "81_Attachments",
+    }
 
 
 def test_get_git_status_pathsは通常のステータス行と未追跡行からパスを抽出する(monkeypatch):
