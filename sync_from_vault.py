@@ -464,6 +464,8 @@ def _extract_changed_paths(logs: list[str]) -> list[str]:
     """操作ログからADD/UPDATE/DELETE行だけを抜き出し、対象パスの一覧を返す。
 
     SKIPで始まる行（symlinkスキップ・読み取り不可スキップ等）は無視する。
+    git add対象パスの決定にはもう使わない（_get_git_status_pathsを使う）。
+    ログ表示用の補助関数として残している。
     """
     paths: list[str] = []
     for line in logs:
@@ -474,18 +476,69 @@ def _extract_changed_paths(logs: list[str]) -> list[str]:
     return paths
 
 
-def _commit_and_push(logs: list[str], repo_root: Path) -> None:
-    """操作ログを元にgit add/commit/pushを一気通貫で行う。
+# _commit_and_pushが`git status --porcelain`の対象範囲として絞り込む監視対象カテゴリパス
+# （run()がミラーする全カテゴリに対応。この範囲外の変更はコミット対象にしない）
+SYNC_CATEGORY_PATHS = (
+    ".claude",
+    "80_Templates",
+    "82_Bases",
+    "90_SkillFlows",
+    "CLAUDE.md",
+    "README.md",
+    ".obsidian",
+) + PERSONAL_NOTE_FOLDERS
 
-    操作ログが空、または実際に変更されたパスが無ければ何もせず終了する。
+
+def _parse_porcelain_paths(porcelain_output: str) -> list[str]:
+    """`git status --porcelain`の出力からパス一覧を抽出する。
+
+    各行は先頭2文字のステータスコード + 半角スペース1文字 + パスの形式
+    （`git status --porcelain`はv1フォーマットを既定で使う）。
+    リネーム（例: "R  old.md -> new.md"）の場合は" -> "以降の新パスのみを採用する。
+    """
+    paths: list[str] = []
+    for line in porcelain_output.splitlines():
+        if not line:
+            continue
+        raw_path = line[3:]
+        if " -> " in raw_path:
+            raw_path = raw_path.split(" -> ", 1)[1]
+        paths.append(raw_path)
+    return paths
+
+
+def _get_git_status_paths(repo_root: Path) -> list[str]:
+    """監視対象カテゴリパス（SYNC_CATEGORY_PATHS）に絞ってgit statusを実行し、変更パス一覧を返す。
+
+    run()が今回返した操作ログとは無関係に、gitの作業ツリーに実際に残っている
+    未コミットの変更（前回クラッシュ実行の取りこぼし等を含む）を都度確認するために使う。
+    """
+    result = subprocess.run(
+        ["git", "status", "--porcelain", "--", *SYNC_CATEGORY_PATHS],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return _parse_porcelain_paths(result.stdout)
+
+
+def _commit_and_push(repo_root: Path) -> None:
+    """監視対象カテゴリ配下の実際の未コミット変更を元にgit add/commit/pushを一気通貫で行う。
+
+    判定にはrun()が返した今回の操作ログではなく、`git status --porcelain`
+    （監視対象カテゴリパスに絞る）を使う。前回クラッシュした実行でミラー処理自体は
+    完了済み（disk上は正しい状態）だが、コミット前にクラッシュしたため未コミットの
+    変更が作業ツリーに残っているケースも、今回の操作ログの有無に関わらず検知して
+    コミット・pushする。
     現在のブランチがmainでなければ、コミット・pushを行わずSystemExitで中断する
     （個人運用ツールのためロールバックは実装せず、subprocessの例外はそのまま伝播させる）。
 
     Args:
-        logs: run()が返した操作ログの文字列リスト。
         repo_root: git操作の対象リポジトリのルートディレクトリ。
     """
-    if not logs:
+    changed_paths = _get_git_status_paths(repo_root)
+    if not changed_paths:
         print("変更なし。コミット・pushをスキップします。")
         return
 
@@ -495,15 +548,9 @@ def _commit_and_push(logs: list[str], repo_root: Path) -> None:
             f"現在のブランチは'{branch}'です。mainブランチでのみコミット・pushを行います。中断します。"
         )
 
-    changed_paths = _extract_changed_paths(logs)
-    if not changed_paths:
-        # 全行がSKIPだった場合の念のためのガード（通常はlogsが空のケースで既に処理済み）
-        print("変更なし。コミット・pushをスキップします。")
-        return
-
     subprocess.run(["git", "add", "--", *changed_paths], cwd=repo_root, check=True)
 
-    count = sum(1 for line in logs if not line.startswith("SKIP"))
+    count = len(changed_paths)
     message = f"Sync from vault ({count} changes)\n\n" + "\n".join(changed_paths)
     subprocess.run(["git", "commit", "-m", message], cwd=repo_root, check=True)
 
@@ -527,7 +574,7 @@ def main() -> None:
     print(f"\n{'[dry-run] ' if args.dry_run else ''}{len(logs)} 件の操作")
 
     if not args.dry_run:
-        _commit_and_push(logs, REPO_ROOT)
+        _commit_and_push(REPO_ROOT)
 
 
 if __name__ == "__main__":
