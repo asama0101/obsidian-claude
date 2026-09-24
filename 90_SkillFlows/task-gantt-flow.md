@@ -11,7 +11,7 @@ flowchart TD
     B -- 存在する --> C{GANTT_START/GANTT_ENDマーカーがあるか}
     C -- ない --> C1[gantt_marker_not_foundエラーを返す]
     C -- ある --> D["20_Projects/*/Tasks/*.mdと30_Areas/Tasks/*.mdのtaskノートパスを走査する"]
-    D --> E[各ノートを読み込み type!=&quot;task&quot; または読み込みエラーのものを除外する]
+    D --> E["各ノートを読み込み type!=&quot;task&quot; または読み込みエラーのものを除外する"]
     E --> F{タスクを分類する}
     F -- status: 5_cancel --> Fx[除外して集計対象から外す]
     F -- 期間条件を満たさない --> Fx
