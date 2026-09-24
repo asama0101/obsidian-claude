@@ -35,7 +35,10 @@ CLI入力（フリーフォーム）。
    を実行する。`--project`は省略可能で、省略時（プロジェクトなしを選んだ場合）
    は`30_Areas/Tasks/`へ保存される。既存プロジェクトを選んだ場合・新規作成した
    場合は`20_Projects/<Name>/Tasks/`へ保存される。議事録経由ではないため
-   `--source`は付与しない。
+   `--source`は付与しない。`--project`に渡す値はプレーン名・`[[Name]]`形式の
+   どちらでもよく、`task_save.py`が`vault_lib.normalize_project_link`で正規化
+   してから`project`フロントマターへ`[[Name]]`形式で書き込む（既に`[[Name]]`
+   形式なら二重ラップしない）。
 4. `{"status": "error", "reason": "project_not_found"}`（`--project`が
    `20_Projects/<Name>/`として実在しない値だった場合、exit code 1）が返ったら、
    候補一覧を出し直して再度ユーザーに選択を依頼する。

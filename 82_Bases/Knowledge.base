@@ -1,7 +1,13 @@
-filters: type in ["knowhow", "webclip"]
+filters:
+  or:
+    - type == "knowhow"
+    - type == "webclip"
 views:
   - type: table
     name: All
+    filters:
+      and:
+        - '!file.folder.contains("80_Templates")'
     order:
       - file.name
       - tags

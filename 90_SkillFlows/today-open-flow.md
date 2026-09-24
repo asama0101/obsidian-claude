@@ -47,8 +47,18 @@ flowchart TD
     MeetingResult -->|失敗<br/>未接続・API呼び出し失敗等| MeetingFailed[失敗した旨を記録する<br/>today-openの処理内容は巻き戻さない]
     class MeetingFailed error
 
-    MeetingResult -->|成功| Report[ブランチ状態・デイリーノート作成有無・<br/>meeting-setupスキルの実行結果をユーザーに報告する]
-    MeetingFailed --> Report
+    MeetingResult -->|成功| CallGantt[続けてtask-ganttスキルの実行フローを呼び出す<br/>タスクのガントチャートを最新化する]
+    MeetingFailed --> CallGantt
+    class CallGantt claude
+
+    CallGantt --> GanttResult{task_gantt.pyの実行は成功したか}
+    class GanttResult python
+
+    GanttResult -->|失敗<br/>daily_note_not_found/gantt_marker_not_found| GanttFailed[失敗した旨を記録する<br/>today-openの処理内容は巻き戻さない]
+    class GanttFailed error
+
+    GanttResult -->|成功| Report[ブランチ状態・デイリーノート作成有無・<br/>meeting-setupスキルの実行結果・<br/>task-ganttスキルの実行結果をユーザーに報告する]
+    GanttFailed --> Report
     class Report claude
 
     classDef python fill:#dbe9ff,stroke:#4472c4,color:#1a1a1a;
@@ -63,11 +73,13 @@ flowchart TD
 - **当日日付のブランチは既に存在するか**: 既存なら`branch: "existing"`としてcheckoutのみ行う。存在しなければ`main`から新規作成し`branch: "created"`となる。新規作成時、`origin`リモートが設定されていれば`main`を`git pull --ff-only`で最新化する（失敗しても処理は続行する）。
 - **当日のデイリーノートは既に存在するか**: 存在すれば`daily_note: "skipped"`となり以降の転記処理は行わない。存在しなければ`daily_note: "created"`となり、前日ノートが見つかった場合は`carryover_source`にその日付が入る（見つからなければ`null`）。
 - **meeting-setupスキルの呼び出しは成功したか**: Google Calendar MCP未接続やAPI呼び出し失敗時はここで失敗として扱われるが、`today-open`本来の処理（ブランチ作成・デイリーノート作成）は既に完了しているため巻き戻さない。失敗した旨は最終報告に含める。
+- **task_gantt.pyの実行は成功したか**: `daily_note`が`"skipped"`（既存ノート再利用）の場合も含め、`status: "ok"`なら毎回実行する（`task_gantt.py`はマーカー区間を毎回上書きする冪等な処理のため、再実行しても問題ない）。`daily_note_not_found`/`gantt_marker_not_found`はここで失敗として扱われるが、`today-open`本来の処理は巻き戻さない。失敗した旨は最終報告に含める。
 
 ## 関連ドキュメント
 
 - [today-open/SKILL.md](../.claude/skills/vault/skills/today-open/SKILL.md): 本フローの一次情報
 - [meeting-setup/SKILL.md](../.claude/skills/vault/skills/meeting-setup/SKILL.md): today-open/today-closeスキルからのmeeting-setupスキル自動呼び出しの詳細
+- [task-gantt/SKILL.md](../.claude/skills/vault/skills/task-gantt/SKILL.md): today-openスキルからのtask-ganttスキル自動呼び出しの詳細
 
 ---
-最終更新: 2026-09-23
+最終更新: 2026-09-24

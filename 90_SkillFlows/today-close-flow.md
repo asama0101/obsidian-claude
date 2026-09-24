@@ -1,28 +1,28 @@
 # today-close スキルのフロー
 
-1日の作業終了時に、当日ブランチの変更をデイリーノートへ反映してコミットし、`main`へ統合するまでの処理を自動化する。`today-close`は単なる「1日の変更をコミットするスキル」ではなく、**タスク・議事録の締め忘れがないかを確認し、締め忘れていればユーザーに見直しを促すスキル**である。本ドキュメントは、今後実装予定の新規ロジック（議事録`attendance`未更新ノートの一覧提示・確認、およびタスクの日付・ステータスの見直し促進）を含む設計フローである。`(新規)`と付記した処理は、現状の`today-close`スキル（`close_day.py`）にはまだ存在しない処理を指す。
+1日の作業終了時に、当日ブランチの変更をデイリーノートへ反映してコミットし、`main`へ統合するまでの処理を自動化する。`today-close`は単なる「1日の変更をコミットするスキル」ではなく、**タスク・議事録の締め忘れがないかを確認し、締め忘れていればユーザーに見直しを促すスキル**である。議事録`attendance`未更新ノートの一覧提示・確認、およびタスクの日付・ステータスの見直し促進を含む、実装済みの処理フローである。
 
-> **凡例**: 🔵 Python処理（決定的・機械的） / 🟠 Claude判断・ユーザー確認 / 🔴 エラー・中断 / ⚪ 未実装（今後追加予定の処理）
+> **凡例**: 🔵 Python処理（決定的・機械的） / 🟠 Claude判断・ユーザー確認 / 🔴 エラー・中断
 
 ```mermaid
 flowchart TD
     A[today-closeスキルを実行する] --> B[会議予定の開催状況を確認する<br/>meeting-setupスキルの実行フローを呼び出す]
-    B --> B1["meeting_sync.pyの既存出力<br/>(needs_attendance_check)を確認する(新規)"]
-    B1 --> B2{開催日が当日以前かつ<br/>attendanceが1_scheduledのまま<br/>未更新のノートが<br/>needs_attendance_checkに含まれるか}
-    B2 -- 該当ノートあり --> B3["該当ノート一覧を提示し<br/>出席状況を確認する<br/>(新規・要ユーザー確認)"]
-    B3 --> B4["ユーザーの回答に応じて<br/>meeting_sync.py --set-attendanceで<br/>該当ノートのattendanceを更新する(新規)"]
+    B --> B1["meeting_sync.pyの既存出力<br/>(needs_attendance_check)を確認する"]
+    B1 --> B2{開催日が本日より前（当日は含まない）かつ<br/>attendanceが1_scheduledのまま<br/>未更新のノートが<br/>needs_attendance_checkに含まれるか}
+    B2 -- 該当ノートあり --> B3["該当ノート一覧を提示し<br/>出席状況を確認する<br/>（要ユーザー確認）"]
+    B3 --> B4["ユーザーの回答に応じて<br/>meeting_sync.py --set-attendanceで<br/>該当ノートのattendanceを更新する"]
     B2 -- 該当ノートなし --> B5
     B4 --> B5
-    B5{"attendance確定済みだが未消化の<br/>アクションアイテムが残る議事録が<br/>needs_task_checkに含まれるか(新規)"}
-    B5 -- あり --> B6["該当議事録一覧を提示し、<br/>meeting-followupスキルの実行を促す(新規)<br/>（処理は中断せず続行する）"]
+    B5{"attendance確定済みだが未消化の<br/>アクションアイテムが残る議事録が<br/>needs_task_checkに含まれるか"}
+    B5 -- あり --> B6["該当議事録一覧を提示し、<br/>meeting-followupスキルの実行を促す<br/>（処理は中断せず続行する）"]
     B5 -- なし --> C
     B6 --> C
     C{現在のブランチは<br/>YYYY-MM-DD形式か}
     C -- いいえ --> C1[エラー: not_on_daily_branch<br/>当日ブランチへ切り替えて再実行するよう案内する]
-    C -- はい --> D["Vault内の全タスクノートを<br/>確認する(新規)"]
-    D --> E{"次のいずれかに該当する<br/>タスクがあるか(新規)<br/>①created_dateが本日かつstart_date未設定<br/>②start_dateが本日かつstatusが1_todo<br/>③due_dateが本日かつstatusが4_done/5_cancel以外"}
-    E -- あり --> E1["該当タスク一覧を提示する(新規)"]
-    E1 --> E2["Baseビューから日付・ステータスを<br/>見直すよう促し、処理を中断する<br/>修正後は再度today-closeスキルを<br/>実行するよう案内する(新規)"]
+    C -- はい --> D["Vault内の全タスクノートを<br/>確認する"]
+    D --> E{"次のいずれかに該当する<br/>タスクがあるか<br/>①created_dateが本日かつstart_date未設定<br/>②start_dateが本日かつstatusが1_todo<br/>③due_dateが本日かつstatusが4_done/5_cancel以外"}
+    E -- あり --> E1["該当タスク一覧を提示する"]
+    E1 --> E2["Baseビューから日付・ステータスを<br/>見直すよう促し、処理を中断する<br/>修正後は再度today-closeスキルを<br/>実行するよう案内する"]
     E -- なし --> G[当日ブランチを作成してから更新された<br/>ノートの一覧を収集する]
     G --> H[更新ノートをtype別<br/>project/meeting/task/knowhow/webclip/otherに<br/>グルーピングする]
     H --> I[当日デイリーノートの<br/>更新ノート一覧ブロックを書き換える]
@@ -40,18 +40,18 @@ flowchart TD
     P --> Q
 
     class B claude
-    class B1 future
-    class B2 future
-    class B3 future
-    class B4 future
-    class B5 future
-    class B6 future
+    class B1 claude
+    class B2 claude
+    class B3 claude
+    class B4 python
+    class B5 claude
+    class B6 claude
     class C python
     class C1 error
-    class D future
-    class E future
-    class E1 future
-    class E2 future
+    class D python
+    class E python
+    class E1 error
+    class E2 error
     class G python
     class H python
     class I python
@@ -69,7 +69,6 @@ flowchart TD
     classDef python fill:#dbe9ff,stroke:#4472c4,color:#1a1a1a;
     classDef claude fill:#ffe9cc,stroke:#e08000,color:#1a1a1a;
     classDef error fill:#ffd6d6,stroke:#c00000,color:#1a1a1a;
-    classDef future fill:#e6e6e6,stroke:#666666,stroke-dasharray: 5 5,color:#1a1a1a;
 ```
 
 ## 補足
@@ -80,14 +79,20 @@ flowchart TD
 - 未コミットの変更が無い場合はコミット処理をスキップする。
 - 会議予定確認（meeting-setupスキル呼び出し）がGoogle Calendar MCP未接続等で失敗しても、today-close本来の処理（コミット・マージ・ブランチ削除）は継続する。
 - pushの失敗は致命的エラーとしない。originリモートが無い場合はpush自体をスキップし、pushが失敗した場合も許容する。
-- （新規）タスクの日付・ステータス見直しチェックは、次の3条件のいずれかに該当するタスクを対象とする。1つでも該当タスクがあれば、一覧を提示した上で**処理を中断する**（コミット・マージ等の後続処理には進まない）。ユーザーはBaseビューから該当タスクの日付・ステータスを修正し、再度`today-close`スキルを実行する。
+- タスクの日付・ステータス見直しチェックは、次の3条件のいずれかに該当するタスクを対象とする。
   1. `created_date`が本日かつ`start_date`が未設定（新規作成したがいつ着手するか決めていないタスク）
   2. `start_date`が本日かつ`status`が`1_todo`（今日着手する予定だったが、終業時点で未着手のままのタスク）
   3. `due_date`が本日かつ`status`が`4_done`/`5_cancel`以外（今日が期限だが、終業時点で完了・キャンセルになっていないタスク）
-- （新規）このチェックはユーザーへの確認を挟まず自動で該当タスクを検出するが、検出後の修正自体はユーザーがBaseビューから行う（today-closeスキル側で日付を自動で書き換えることはしない）。
-- （新規）議事録`attendance`未更新ノートの検出ロジック自体は`meeting_sync.py`の`_scan_stale_and_pending`に既に実装済みで、`needs_attendance_check`として結果に含まれる（`needs_task_check`も同様に実装済み）。today-closeスキルが新規に担うのは、この既存の検出結果を消費して該当ノート一覧をユーザーに提示し、確認を得た上で`meeting_sync.py --set-attendance`（既存の実行モード）で反映するオーケストレーション部分のみである。この一括確認は、`meeting-setup`スキルから「開催確認」パターンが削除され`attendance`を基本ユーザーが手動更新する運用に変更されたことに伴う、更新忘れ防止のための代替措置である。attendance確認はタスクの日付見直しと異なり、today-closeスキルの会話内でその場でユーザーに確認し反映する（処理を中断してBase修正を待つ形にはしない）。
-- （新規）タスクの日付見直しチェックが機能するには、`task_save.py`側の改修も必要である。現行の`task_save.py`はタスク作成時に`start_date`へ常に当日日付を自動セットするため、`start_date`が未設定のタスクは現状発生しない。改修後は、タスク作成時に新設の`created_date`のみをセットし、`start_date`はユーザーが明示的に指定しない限り空のままにする必要がある。
-- （新規）`needs_task_check`（attendance確定済みだが未消化のアクションアイテムが残る議事録）は、これまで旧`meeting`スキルのタスク化フローが消費していたが、タスク化が`meeting-followup`スキルへ独立したことで、消費先が無いまま埋もれる恐れがあった。そのため`today-close`にもこの一覧提示を追加する。ただし`needs_task_check`は日付を問わず全件対象の恒常的なリマインダーであり（`meeting-setup`のSKILL.md記載の仕様通り）、タスクの日付見直しチェックとは異なり**処理を中断しない**。一覧提示後も後続のコミット・マージ処理はそのまま続行する。
+- 1つでも該当タスクがあれば、一覧を提示した上で**処理を中断する**（コミット・マージ等の後続処理には進まない）。
+- ユーザーはBaseビューから該当タスクの日付・ステータスを修正し、再度`today-close`スキルを実行する。
+- このチェックはユーザーへの確認を挟まず自動で該当タスクを検出するが、検出後の修正自体はユーザーがBaseビューから行う（today-closeスキル側で日付を自動で書き換えることはしない）。
+- 議事録`attendance`未更新ノートの検出ロジック自体は`meeting_sync.py`の`_scan_stale_and_pending`に既に実装済みで、`needs_attendance_check`として結果に含まれる（`needs_task_check`も同様に実装済み）。
+- today-closeスキルが新規に担うのは、この既存の検出結果を消費して該当ノート一覧をユーザーに提示し、確認を得た上で`meeting_sync.py --set-attendance`（既存の実行モード）で反映するオーケストレーション部分のみである。
+- この一括確認は、`meeting-setup`スキルから「開催確認」パターンが削除され`attendance`を基本ユーザーが手動更新する運用に変更されたことに伴う、更新忘れ防止のための代替措置である。
+- attendance確認はタスクの日付見直しと異なり、today-closeスキルの会話内でその場でユーザーに確認し反映する（処理を中断してBase修正を待つ形にはしない）。
+- タスクの日付見直しチェックが機能するために必要な`task_save.py`側の改修は完了済みである（`task_save.py`はタスク作成時に`created_date`のみをセットし、`start_date`は空欄のまま作成する）。
+- `needs_task_check`（attendance確定済みだが未消化のアクションアイテムが残る議事録）は、これまで旧`meeting`スキルのタスク化フローが消費していたが、タスク化が`meeting-followup`スキルへ独立したことで、消費先が無いまま埋もれる恐れがあった。そのため`today-close`にもこの一覧提示を追加する。
+- ただし`needs_task_check`は日付を問わず全件対象の恒常的なリマインダーであり（`meeting-setup`のSKILL.md記載の仕様通り）、タスクの日付見直しチェックとは異なり**処理を中断しない**。一覧提示後も後続のコミット・マージ処理はそのまま続行する。
 
 ## 関連ドキュメント
 
@@ -95,4 +100,4 @@ flowchart TD
 - [close_day.py](../.claude/skills/vault/scripts/close_day.py): 実装本体
 
 ---
-最終更新: 2026-09-23
+最終更新: 2026-09-24

@@ -24,8 +24,8 @@ description: |
    today-close本来の処理（コミット・マージ・ブランチ削除）は継続する。
 
 2. `meeting_sync.py`の直近の実行結果のうち`needs_attendance_check`を
-   確認する。開催日が当日以前で`attendance`が`1_scheduled`のまま未更新の
-   ノートが含まれていれば、該当ノート一覧（`note_path`・`title`）を提示し
+   確認する。開催日が本日より前（当日は含まない）で`attendance`が
+   `1_scheduled`のまま未更新のノートが含まれていれば、該当ノート一覧（`note_path`・`title`）を提示し
    「実施済み/不参加」をユーザーにまとめて確認する。確認結果は
    `PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --set-attendance <note_path> --attendance <1_scheduled|2_done|3_skip>`
    （実施済みなら`2_done`、不参加なら`3_skip`）で反映する。該当ノートが

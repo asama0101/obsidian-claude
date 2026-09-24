@@ -65,6 +65,7 @@ flowchart TD
 - 新規プロジェクト作成を選んだ場合は`project-add`スキルを呼び出す（別スキルへの委譲）。
 - プロジェクトなしで進める場合、保存先は`30_Areas/Tasks/`に固定される。
 - `task_save.py`の`--project`は任意（省略時`None`）であり、省略時は`30_Areas/Tasks/`に保存される。「プロジェクトなし」は正式な選択肢として扱われる。
+- `--project`に渡す値はプレーン名・`[[Name]]`形式のどちらでもよく、`task_save.py`が`vault_lib.normalize_project_link`で正規化してから`project`フロントマターへ`[[Name]]`形式で書き込む（既に`[[Name]]`形式なら二重ラップしない）。
 - `task_save.py`はタスク作成時に`created_date`のみをセットし、`start_date`は空のまま作成する（ユーザーが後からデイリーノートに埋め込まれたBaseビューから指定する想定であり、`today-close`スキルによる自動入力は行わない）。作成日当日中に`start_date`を指定しなかった場合は、[`today-close-flow.md`](today-close-flow.md)のタスク日付見直しチェックにより検出され、処理が中断されてユーザーへの見直しが促される。
 - 保存先はプロジェクトありの場合`20_Projects/<名前>/Tasks/`、プロジェクトなしの場合`30_Areas/Tasks/`になる。
 - `--source`には議事録ノートへのwikilinkを付与する（既存の`task_save.py`の`--source`引数と同じ役割）。

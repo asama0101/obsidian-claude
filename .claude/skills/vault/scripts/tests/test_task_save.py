@@ -161,6 +161,38 @@ def test_source未指定ならsource_meetingは空欄のまま(dt):
     assert 'source_meeting: ""' in fm_text
 
 
+def test_projectにプレーン名を渡すとリンク形式で書き込まれる(dt):
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="Pythonのスキルアップ",
+        due_date=None,
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    assert 'project: "[[Pythonのスキルアップ]]"' in fm_text
+
+
+def test_projectに既にリンク形式を渡しても二重ラップしない冪等性の回帰防止(dt):
+    """build_note_text()の冪等性の回帰検知テスト。
+
+    Task1（vault_lib.normalize_project_link単体テスト）で正規化ロジック自体の動作を保証。
+    このintegrationテスト（Task2）では、task_save.py経由で呼び出す際も
+    同じ冪等性が保証されることを確認する。
+    RED→GREEN サイクル的には RED段階で PASS していたが、将来誰かが
+    冪等性を壊したときに検知するレグレッション防止が目的。
+    """
+    note_text = task_save.build_note_text(
+        _TEMPLATE_TEXT,
+        title="資料を送る",
+        project="[[Pythonのスキルアップ]]",
+        due_date=None,
+        dt=dt,
+    )
+    fm_text, _ = _split(note_text)
+    assert 'project: "[[Pythonのスキルアップ]]"' in fm_text
+
+
 def _make_vault(tmp, project_names=()):
     vault_root = Path(tmp)
     template_dir = vault_root / "80_Templates"
@@ -251,3 +283,21 @@ def test_存在しないプロジェクトはエラーになる():
         output = json.loads(result.stdout)
         assert output == {"status": "error", "reason": "project_not_found"}
         assert not (vault_root / "20_Projects" / "NoSuchProject").exists()
+
+
+def test_プレーン名でproject指定してもディレクトリ解決とfrontmatterが正しい():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = _make_vault(tmp, project_names=["VaultMigration"])
+        result = _run(
+            vault_root,
+            "--title",
+            "資料を送る",
+            "--project",
+            "VaultMigration",
+        )
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        note_path = Path(output["note_path"])
+        assert note_path.parent == vault_root / "20_Projects" / "VaultMigration" / "Tasks"
+        content = note_path.read_text(encoding="utf-8")
+        assert 'project: "[[VaultMigration]]"' in content

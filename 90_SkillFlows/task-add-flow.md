@@ -49,6 +49,7 @@ flowchart TD
 - プロジェクト解決フローは`meeting-followup`・`meeting-setup`のタスク化パターンとも共通の設計であり、同一の描き方をする。
 - 「プロジェクトなしで進める」を選んだ場合、保存先フォルダは`30_Areas/Tasks/`に決定される。既存プロジェクトを選んだ場合・新規作成した場合は`20_Projects/<名前>/Tasks/`になる。
 - `task_save.py`の`--project`は任意（省略時`None`）であり、省略時は保存先が`30_Areas/Tasks/`になる（`task-add`が「プロジェクトなしで進める」を選べるのはこの実装による）。既存プロジェクトを指定した場合・新規作成した場合は`20_Projects/<名前>/Tasks/`になる。
+- `--project`に渡す値はプレーン名・`[[Name]]`形式のどちらでもよく、`task_save.py`が`vault_lib.normalize_project_link`で正規化してから`project`フロントマターへ`[[Name]]`形式で書き込む（既に`[[Name]]`形式なら二重ラップしない）。
 - `task_save.py`は作成時に`created_date`のみを自動セットし、`start_date`は空欄のまま作成する（`status`はテンプレートの既定値`1_todo`のまま）。`start_date`は、ユーザーが後からデイリーノートに埋め込まれたBaseビューから指定する想定であり（`today-close`スキルによる自動入力は行わない）、作成日当日中に指定しなかった場合は[`today-close-flow.md`](today-close-flow.md)のタスク日付見直しチェックにより検出され、処理が中断されてユーザーへの見直しが促される。
 
 ## 関連ドキュメント

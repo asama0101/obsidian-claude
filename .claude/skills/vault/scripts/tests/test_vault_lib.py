@@ -231,6 +231,24 @@ def test_set_marker_blockでマーカー行を保持し中身を置換する():
     assert result == "before\n<!-- START -->\nnew inner\n<!-- END -->\nafter"
 
 
+def test_has_marker_blockで両方存在する場合はTrue():
+    text = "before\n<!-- START -->\ninner line1\ninner line2\n<!-- END -->\nafter"
+    result = vault_lib.has_marker_block(text, "START", "END")
+    assert result is True
+
+
+def test_has_marker_blockで両方存在しない場合はFalse():
+    text = "no markers here"
+    result = vault_lib.has_marker_block(text, "START", "END")
+    assert result is False
+
+
+def test_has_marker_blockで開始マーカーのみある場合はFalse():
+    text = "before\n<!-- START -->\ninner line1\nno end marker"
+    result = vault_lib.has_marker_block(text, "START", "END")
+    assert result is False
+
+
 def test_見出し直後から次の見出し直前までの範囲を返す():
     import re
 
@@ -353,3 +371,27 @@ def test_extract_project_nameでリンク形式からプロジェクト名を取
 
 def test_extract_project_nameでリンク形式でなければそのまま返す():
     assert vault_lib.extract_project_name("PlainName") == "PlainName"
+
+
+def test_normalize_project_linkでプレーン名をリンク形式にラップする():
+    assert vault_lib.normalize_project_link("Pythonのスキルアップ") == "[[Pythonのスキルアップ]]"
+
+
+def test_normalize_project_linkで既にリンク形式なら変更しない():
+    assert vault_lib.normalize_project_link("[[VaultMigration]]") == "[[VaultMigration]]"
+
+
+def test_normalize_project_linkで空文字列はそのまま返す():
+    assert vault_lib.normalize_project_link("") == ""
+
+
+def test_normalize_project_linkで空白のみはそのまま空文字列扱いになる():
+    assert vault_lib.normalize_project_link("   ") == ""
+
+
+def test_normalize_project_linkで前後空白をtrimしてからラップする():
+    assert vault_lib.normalize_project_link("  Pythonのスキルアップ  ") == "[[Pythonのスキルアップ]]"
+
+
+def test_normalize_project_linkで前後空白付きリンク形式もtrimして冪等になる():
+    assert vault_lib.normalize_project_link("  [[VaultMigration]]  ") == "[[VaultMigration]]"

@@ -26,7 +26,7 @@ def build_note_text(
     filled = vault_lib.fill_template(template_text, title=title, dt=dt)
     fm_text, body_text = vault_lib.split_frontmatter(filled)
 
-    fm_text = vault_lib.set_fm_value(fm_text, "project", project)
+    fm_text = vault_lib.set_fm_value(fm_text, "project", vault_lib.normalize_project_link(project))
     fm_text = vault_lib.set_fm_raw_value(fm_text, "created_date", dt.strftime("%Y-%m-%d"))
     # start_date はテンプレート側で空欄のままにするため、ここでは一切セットしない
     # due_date は fill_template で今日の日付が入るため、未指定時は明示的に空欄へ戻す

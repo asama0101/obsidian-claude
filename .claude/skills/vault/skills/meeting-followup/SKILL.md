@@ -43,7 +43,10 @@ description: |
 4. `PYTHONUTF8=1 python .claude/skills/vault/scripts/task_save.py --title <item> [--project <project>] --source "[[議事録ノート名]]"`
    を実行してタスクノートを作成する（`start_date`は空欄のまま、`status`は
    テンプレートの既定値`1_todo`のまま作成される）。`--project`は省略可能で、
-   プロジェクトなしを選んだ場合は省略する。
+   プロジェクトなしを選んだ場合は省略する。`--project`に渡す値はプレーン名・
+   `[[Name]]`形式のどちらでもよく、`task_save.py`が`vault_lib.normalize_project_link`
+   で正規化してから`project`フロントマターへ`[[Name]]`形式で書き込む
+   （既に`[[Name]]`形式なら二重ラップしない）。
 5. タスクノート作成後、
    `PYTHONUTF8=1 python .claude/skills/vault/scripts/meeting_sync.py --link-task <議事録ノートのパス> --item-text <元のアクションアイテム本文> --item-index <出現順インデックス> --task-note <タスクノート名>`
    を実行する。これにより議事録ノート側の該当チェックボックス行が、

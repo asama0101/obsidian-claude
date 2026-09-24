@@ -9,5 +9,6 @@
   "newFileFolderPath": "00_Inbox",
   "attachmentFolderPath": "81_Attachments",
   "alwaysUpdateLinks": true,
-  "showUnsupportedFiles": true
+  "showUnsupportedFiles": true,
+  "openBehavior": "daily"
 }

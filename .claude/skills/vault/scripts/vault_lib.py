@@ -198,6 +198,16 @@ def set_marker_block(text: str, start_marker: str, end_marker: str, new_inner: s
     return f"{before}\n{new_inner}\n{after}"
 
 
+def has_marker_block(text: str, start_marker: str, end_marker: str) -> bool:
+    """開始マーカーと終了マーカーの両方が存在するかを判定する。"""
+    start_line = f"<!-- {start_marker} -->"
+    end_line = f"<!-- {end_marker} -->"
+    start_idx = text.find(start_line)
+    if start_idx == -1:
+        return False
+    return text.find(end_line, start_idx) != -1
+
+
 # 次の見出し行(セクションの終端)を探すための正規表現
 _NEXT_HEADING_PATTERN = re.compile(r"^#", re.MULTILINE)
 
@@ -244,6 +254,21 @@ def extract_project_name(value: str) -> str:
     """
     match = _PROJECT_LINK_PATTERN.match(value)
     return match.group(1) if match else value
+
+
+def normalize_project_link(value: str) -> str:
+    """プレーンなプロジェクト名を "[[Name]]" 形式へ正規化する（冪等）。
+
+    既に "[[Name]]" 形式ならそのまま返す。空文字列（前後空白のみを含む
+    場合も含む）は「project未指定」の意味を保持するためラップしない。
+    前後の空白はtrimしてから判定・整形する。
+    """
+    stripped = value.strip()
+    if not stripped:
+        return stripped
+    if _PROJECT_LINK_PATTERN.match(stripped):
+        return stripped
+    return f"[[{stripped}]]"
 
 
 def fuzzy_project_match(text: str, projects_dir: Path) -> str | None:

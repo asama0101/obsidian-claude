@@ -27,6 +27,7 @@ docs/superpowers/
 # .venv/ のみ通常運用で無視）
 /sync_from_vault.py
 /test_sync_from_vault.py
+/sync_from_vault.bat
 /.venv/
 
 # Claude Code ランタイム状態（従来.git/info/excludeにのみ存在していたローカル限定ルールを昇格）

@@ -12,6 +12,11 @@ type: daily
 > [!WARNING]+ 📅 要スケジュール確認タスク
 > ![[Tasks.base#ScheduleCheck]]
 
+## 📊 タスクガントチャート
+*（`/task-gantt` 実行時に自動更新される）*
+<!-- GANTT_START -->
+<!-- GANTT_END -->
+
 ## 📂 アクティブプロジェクト
 ![[Projects.base#Active]]
 

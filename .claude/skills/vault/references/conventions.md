@@ -15,11 +15,33 @@ vaultプラグインの全スキルが従う共通ルール。決定的な処理
 YAMLとして再構成せず、該当キーの行だけを文字列操作で置換する
 （コメントや手書き整形を壊さないため）。
 
+## taskノートの`project`値
+taskノートの`project`フロントマター値は常に`[[Name]]`形式
+（Obsidianのwikilink）で統一する。`82_Bases/Tasks.base`の
+`ProjectTasks`/`ProjectCompletedTasks`ビューは`project ==
+link(this.file.name)`というLink型前提のフィルタを使っている。
+そのため、プレーンテキストのままでは正しく表示されない。
+
+書き込み前に`vault_lib.normalize_project_link(value: str) -> str`
+（`extract_project_name`の直後に配置）で正規化してから
+`set_fm_value`に渡す。
+
+- 冪等: 既に`[[Name]]`形式なら変更しない
+- 空文字列は正規化対象外: project未指定の意味を保持するため
+  `"[[]]"`のような値にしない
+- 実装例: `task_save.py:29`（`build_note_text`関数内）
+
 ## マーカー間コンテンツの置換
 `vault_lib.get_marker_block` / `set_marker_block`を使う。
 `<!-- X_START -->`〜`<!-- X_END -->`の間だけを置き換える
 （マーカー行自体は残す）。対象: CARRYOVER（today）、
-UPDATED_NOTES（close）、NEW_MEETING（meeting）。
+UPDATED_NOTES（close）、NEW_MEETING（meeting）、GANTT（task-gantt）。
+
+`set_marker_block`は対象ノートにマーカーが存在しない場合、
+無変更で元のテキストをそのまま返す（サイレント）。呼び出し元が
+書き込みの成否を正確に報告する必要がある場合は、事前に
+`vault_lib.has_marker_block`でマーカーの存在を確認すること
+（`task_gantt.py`の実装を参照）。
 
 ## Templater風プレースホルダ
 `vault_lib.fill_template`が扱う4種のみ: `{{title}}`

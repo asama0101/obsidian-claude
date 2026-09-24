@@ -36,8 +36,17 @@ description: |
    やAPI呼び出し失敗等でmeeting-setupスキル側が失敗した場合がある。その場合でも、
    today-openの処理（ブランチ作成・デイリーノート作成）は既に完了しているため
    巻き戻さない。失敗した旨は結果報告に含める。
-4. 正常終了（`status: "ok"`）ならユーザーに結果（ブランチ状態・デイリーノート作成有無・
-   Carryover転記元、およびmeeting-setupスキルの実行結果）を簡潔に報告する。
+4. 続けてtask-ganttスキルの実行フローを呼び出す（`task_gantt.py`を引数なしで
+   実行する）。1日の開始時点でタスクのガントチャートを最新化しておくためである。
+   `daily_note`が`"skipped"`（既存ノートを再利用）の場合も含め、`status: "ok"`
+   なら常に実行する（`task_gantt.py`はマーカー区間を毎回上書きする冪等な処理
+   のため、再実行しても問題ない）。`status: "error"`
+   （`daily_note_not_found`/`gantt_marker_not_found`）が返っても、
+   today-openの処理（ブランチ作成・デイリーノート作成・meeting-setupスキルの
+   実行結果）は巻き戻さない。失敗した旨は結果報告に含める。
+5. 正常終了（`status: "ok"`）ならユーザーに結果（ブランチ状態・デイリーノート作成有無・
+   Carryover転記元、meeting-setupスキルの実行結果、およびtask-ganttスキルの
+   実行結果）を簡潔に報告する。
 
 ## 備考
 - 当日ブランチの作成前に、`origin`リモートが設定されていれば`main`を
@@ -48,3 +57,5 @@ description: |
   （連続していなくてもよい）を使う。見つからなければCarryoverは空のまま作成する。
 - meeting-setupスキルの自動実行の詳細は`meeting-setup/SKILL.md`の
   「today-open/today-closeスキルからの呼び出しについて」を参照。
+- task-ganttスキルの詳細（対象タスクの絞り込み条件・出力形式）は
+  `task-gantt/SKILL.md`を参照。
