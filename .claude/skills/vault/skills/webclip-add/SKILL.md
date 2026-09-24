@@ -16,7 +16,7 @@ Webページの内容を後から参照できる形でVaultに保存する。
 
 ## 出力
 - `81_Attachments/` にダウンロード保存した主要画像
-- `WebClip_Template.md` ベースのノート（`30_Areas/WebClips/`）
+- `WebClip_Template.md` ベースのノート（`40_Resources/WebClips/`）
 
 ## 処理の流れ
 1. **対象URLを受け取ったら、まずPlaywrightのMCPツールが使用可能か確認する。**
@@ -94,7 +94,7 @@ Webページの内容を後から参照できる形でVaultに保存する。
    - `full_text`中の`![alt](URL)`は、ダウンロードできた画像はローカル埋め込み
      `![[81_Attachments/...]]`に置換され、ダウンロードに失敗した箇所は
      取り除かれた上で「📄 クリップ本文」セクションにblockquote形式で入る。
-   - `WebClip_Template.md`ベースのノートを`30_Areas/WebClips/`に作成し、
+   - `WebClip_Template.md`ベースのノートを`40_Resources/WebClips/`に作成し、
      結果（`note_path`・`images_saved`・`images_failed`）をJSONで出力する。
 6. **Claudeが結果を要約報告する。**
    - 作成したノートのパス、保存できた画像数、失敗した画像があればその旨を

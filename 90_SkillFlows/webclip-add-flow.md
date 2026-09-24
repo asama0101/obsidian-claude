@@ -33,7 +33,7 @@ flowchart TD
     S -- 失敗 --> U[そのURLをスキップし失敗リストに記録する]
     T --> V
     U --> V[WebClip_Template.mdを基にノート本文を組み立てる]
-    V --> W[30_Areas/WebClips/にノートを保存する]
+    V --> W[40_Resources/WebClips/にノートを保存する]
     W --> X[note_path・images_saved・images_failedをJSONで出力する]
     X --> Y[Claudeが作成結果と失敗画像の有無をユーザーに報告する]
 

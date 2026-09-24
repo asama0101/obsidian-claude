@@ -174,7 +174,7 @@ def test_gitがクォートするファイル名も一覧に含まれる():
         _run_git(["checkout", "-b", branch], cwd=root)
         daily_note = root / "10_Daily" / f"{branch}.md"
         _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-        _write(root / "30_Areas" / "Knowledge" / "status --check(x).md", "content")
+        _write(root / "40_Resources" / "Knowledge" / "status --check(x).md", "content")
 
         result = _run_close_day(root)
 

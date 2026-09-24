@@ -1,1 +1,6 @@
-{}
+{
+  "cssTheme": "Typora-Vue",
+  "baseFontSizeAction": false,
+  "showRibbon": false,
+  "showViewHeader": true
+}

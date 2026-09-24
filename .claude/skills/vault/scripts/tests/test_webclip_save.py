@@ -53,7 +53,7 @@ def _make_vault(tmp):
         TEMPLATE_TEXT, encoding="utf-8"
     )
     (vault_root / "81_Attachments").mkdir()
-    (vault_root / "30_Areas" / "WebClips").mkdir(parents=True)
+    (vault_root / "40_Resources" / "WebClips").mkdir(parents=True)
     (vault_root / "20_Projects").mkdir()
     return vault_root
 

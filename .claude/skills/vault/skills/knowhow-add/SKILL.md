@@ -16,7 +16,7 @@ description: |
 
 ## 出力
 `Knowhow_Template.md` の構造（概要→手順→注意点）に整形した
-ノート（`30_Areas/Knowledge/`）。
+ノート（`40_Resources/Knowledge/`）。
 
 ## 処理の流れ
 1. Claude が入力（雑多なメモ・ログ・コンソール出力等）を読み、
@@ -43,7 +43,7 @@ description: |
    を参照）。
 5. `PYTHONUTF8=1 python .claude/skills/vault/scripts/knowhow_save.py --content-json <path> --tag <確定したタグ>`
    を実行する。スクリプトが `Knowhow_Template.md` を展開し、
-   `30_Areas/Knowledge/` にノートを保存して `{"note_path": "..."}` を
+   `40_Resources/Knowledge/` にノートを保存して `{"note_path": "..."}` を
    出力する。
 6. 出力された `note_path` を確認し、保存結果をユーザーに報告する。
 

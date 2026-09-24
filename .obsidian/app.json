@@ -1,1 +1,13 @@
-{}
+{
+  "defaultViewMode": "preview",
+  "readableLineLength": false,
+  "showInlineTitle": false,
+  "foldHeading": true,
+  "foldIndent": true,
+  "showLineNumber": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "00_Inbox",
+  "attachmentFolderPath": "81_Attachments",
+  "alwaysUpdateLinks": true,
+  "showUnsupportedFiles": true
+}

@@ -121,7 +121,7 @@ def main(argv: list[str] | None = None) -> int:
     dt = datetime.datetime.now()
     note_text = build_note(content, template_text, dt, tag=args.tag)
 
-    out_dir = vault_root / "30_Areas" / "Knowledge"
+    out_dir = vault_root / "40_Resources" / "Knowledge"
     out_dir.mkdir(parents=True, exist_ok=True)
     filename = vault_lib.sanitize_filename(content["title"]) + ".md"
     note_path = vault_lib.unique_path(out_dir, filename)

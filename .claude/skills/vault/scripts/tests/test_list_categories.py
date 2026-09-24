@@ -35,7 +35,7 @@ def test_単一のKnowhowノートからタグを収集する():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
         _write_note(
-            vault_root / "30_Areas" / "Knowledge" / "note.md",
+            vault_root / "40_Resources" / "Knowledge" / "note.md",
             ["python/pandas"],
         )
         result = list_categories.list_category_tags(vault_root)
@@ -46,15 +46,15 @@ def test_両ディレクトリで重複するタグは1件に統合されソー�
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
         _write_note(
-            vault_root / "30_Areas" / "Knowledge" / "note1.md",
+            vault_root / "40_Resources" / "Knowledge" / "note1.md",
             ["python/pandas"],
         )
         _write_note(
-            vault_root / "30_Areas" / "WebClips" / "note2.md",
+            vault_root / "40_Resources" / "WebClips" / "note2.md",
             ["python/pandas"],
         )
         _write_note(
-            vault_root / "30_Areas" / "WebClips" / "note3.md",
+            vault_root / "40_Resources" / "WebClips" / "note3.md",
             ["git/rebase"],
         )
         result = list_categories.list_category_tags(vault_root)
@@ -65,15 +65,15 @@ def test_スラッシュ0個と2個以上のタグは除外される():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
         _write_note(
-            vault_root / "30_Areas" / "Knowledge" / "flat.md",
+            vault_root / "40_Resources" / "Knowledge" / "flat.md",
             ["knowhow"],
         )
         _write_note(
-            vault_root / "30_Areas" / "Knowledge" / "deep.md",
+            vault_root / "40_Resources" / "Knowledge" / "deep.md",
             ["a/b/c"],
         )
         _write_note(
-            vault_root / "30_Areas" / "Knowledge" / "valid.md",
+            vault_root / "40_Resources" / "Knowledge" / "valid.md",
             ["python/pandas"],
         )
         result = list_categories.list_category_tags(vault_root)
@@ -84,7 +84,7 @@ def test_main実行でJSONがstdoutに出力される():
     with tempfile.TemporaryDirectory() as tmp:
         vault_root = Path(tmp)
         _write_note(
-            vault_root / "30_Areas" / "Knowledge" / "note.md",
+            vault_root / "40_Resources" / "Knowledge" / "note.md",
             ["python/pandas"],
         )
         argv = ["--vault-root", str(vault_root)]

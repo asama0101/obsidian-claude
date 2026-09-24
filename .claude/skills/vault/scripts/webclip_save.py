@@ -4,7 +4,7 @@ Claude側でWebFetch+要約して作成したJSON(title/summary/key_points/full_
 受け取り、summary/key_pointsの各項目に紐づく画像および、full_text中に
 ![alt](URL)形式でインライン埋め込まれた画像をまとめてダウンロードして
 81_Attachments/に保存し、WebClip_Template.mdベースのノートを
-30_Areas/WebClips/に作成する。標準ライブラリのみに依存する。
+40_Resources/WebClips/に作成する。標準ライブラリのみに依存する。
 """
 
 from __future__ import annotations
@@ -264,7 +264,7 @@ def main(argv: list[str] | None = None) -> int:
         tag=args.tag,
     )
 
-    dest_dir = vault_root / "30_Areas" / "WebClips"
+    dest_dir = vault_root / "40_Resources" / "WebClips"
     dest_dir.mkdir(parents=True, exist_ok=True)
     filename = f"{vault_lib.sanitize_filename(title) or 'webclip'}.md"
     note_path = vault_lib.unique_path(dest_dir, filename)
