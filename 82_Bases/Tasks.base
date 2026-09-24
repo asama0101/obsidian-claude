@@ -41,6 +41,8 @@ views:
         direction: ASC
       - property: due_date
         direction: ASC
+    columnSize:
+      file.name: 349
   - type: table
     name: ScheduleCheck
     filters:
@@ -88,12 +90,12 @@ views:
       - due_date
       - memo
     sort:
-      - property: start_date
-        direction: ASC
       - property: due_date
         direction: ASC
+      - property: start_date
+        direction: ASC
     columnSize:
-      file.name: 150
+      file.name: 423
   - type: table
     name: ProjectCompletedTasks
     filters:
@@ -105,6 +107,9 @@ views:
       - status
       - due_date
       - memo
+    sort:
+      - property: due_date
+        direction: ASC
     columnSize:
       file.name: 144
   - type: table
