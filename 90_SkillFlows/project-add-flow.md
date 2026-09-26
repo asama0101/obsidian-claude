@@ -6,18 +6,18 @@
 
 ```mermaid
 flowchart TD
-    A[ユーザーがプロジェクト作成を依頼する] --> B[Claudeがプロジェクト名を受け取る]
-    B --> C{期限の指定はあるか}
-    C -->|あり| D[期限付きでproject_create.pyを実行する]
-    C -->|なし| E[期限なしでproject_create.pyを実行する]
-    D --> F[20_Projects/名前/ が既に存在するか確認する]
+    A["ユーザーがプロジェクト作成を依頼する"] --> B["Claudeがプロジェクト名を受け取る"]
+    B --> C{"期限の指定はあるか"}
+    C -->|あり| D["期限付きでproject_create.pyを実行する"]
+    C -->|なし| E["期限なしでproject_create.pyを実行する"]
+    D --> F["20_Projects/名前/ が既に存在するか確認する"]
     E --> F
-    F --> G{project_already_existsか}
-    G -->|存在する| H[同名フォルダが既にあるとエラーを返す]
-    H --> I[既存ノートを使うか別名にするかユーザーに確認する]
-    G -->|存在しない| J[Project_Templateから概要ノートを作成する]
-    J --> K[Tasks/・Meetings/・Documents/フォルダを作成する]
-    K --> L[作成した概要ノートのパスをユーザーに報告する]
+    F --> G{"project_already_existsか"}
+    G -->|存在する| H["同名フォルダが既にあるとエラーを返す"]
+    H --> I["既存ノートを使うか別名にするかユーザーに確認する"]
+    G -->|存在しない| J["Project_Templateから概要ノートを作成する"]
+    J --> K["Tasks/・Meetings/・Documents/フォルダを作成する"]
+    K --> L["作成した概要ノートのパスをユーザーに報告する"]
 
     class B claude
     class C claude

@@ -6,65 +6,65 @@
 
 ```mermaid
 flowchart TD
-    Start([today_start.py を実行する]) --> CheckBlocked{未マージの過去日ブランチが残っているか}
+    Start(["today_start.py を実行する"]) --> CheckBlocked{"未マージの過去日ブランチが残っているか"}
     class CheckBlocked python
 
-    CheckBlocked -->|残っている| Blocked[ユーザーに未マージブランチの対応方針を確認し<br/>処理を先に進めない]
+    CheckBlocked -->|残っている| Blocked["ユーザーに未マージブランチの対応方針を確認し<br/>処理を先に進めない"]
     class Blocked error
 
-    CheckBlocked -->|残っていない| CheckBranch{当日日付のブランチは既に存在するか}
+    CheckBlocked -->|残っていない| CheckBranch{"当日日付のブランチは既に存在するか"}
     class CheckBranch python
 
-    CheckBranch -->|存在する| CheckoutExisting[既存の当日ブランチへcheckoutする]
+    CheckBranch -->|存在する| CheckoutExisting["既存の当日ブランチへcheckoutする"]
     class CheckoutExisting python
 
-    CheckBranch -->|存在しない| CreateBranch[originがあれば事前にmainを最新化したうえで<br/>mainから当日ブランチを新規作成しcheckoutする]
+    CheckBranch -->|存在しない| CreateBranch["originがあれば事前にmainを最新化したうえで<br/>mainから当日ブランチを新規作成しcheckoutする"]
     class CreateBranch python
 
-    CreateBranch --> CheckStray{mainに残っていた追跡済みファイルの<br/>未コミット変更があるか<br/>(未追跡の新規ファイルは対象外)}
+    CreateBranch --> CheckStray{"mainに残っていた追跡済みファイルの<br/>未コミット変更があるか<br/>(未追跡の新規ファイルは対象外)"}
     class CheckStray python
 
-    CheckStray -->|あり| CommitStray[新ブランチ上でgit add -u→コミットする<br/>stray_changes_committedにコミットSHAを記録する]
+    CheckStray -->|あり| CommitStray["新ブランチ上でgit add -u→コミットする<br/>stray_changes_committedにコミットSHAを記録する"]
     class CommitStray python
 
-    CheckStray -->|なし| CheckNote{当日のデイリーノートは既に存在するか}
+    CheckStray -->|なし| CheckNote{"当日のデイリーノートは既に存在するか"}
     CommitStray --> CheckNote
     CheckoutExisting --> CheckNote
     class CheckNote python
 
-    CheckNote -->|存在する| SkipNote[デイリーノートの作成をスキップする]
+    CheckNote -->|存在する| SkipNote["デイリーノートの作成をスキップする"]
     class SkipNote python
 
-    CheckNote -->|存在しない| FindPrev[10_Daily内で当日より前の日付のうち<br/>最も新しいノートを探す]
+    CheckNote -->|存在しない| FindPrev["10_Daily内で当日より前の日付のうち<br/>最も新しいノートを探す"]
     class FindPrev python
 
-    FindPrev --> ExtractCarryover[見つかった場合、そのノートのCARRYOVERブロックの<br/>中身だけを読み取る（元ノートは変更しない）]
+    FindPrev --> ExtractCarryover["見つかった場合、そのノートのCARRYOVERブロックの<br/>中身だけを読み取る（元ノートは変更しない）"]
     class ExtractCarryover python
 
-    ExtractCarryover --> CreateNote[Daily_Templateから当日のデイリーノートを作成し<br/>Carryoverの内容を転記する]
+    ExtractCarryover --> CreateNote["Daily_Templateから当日のデイリーノートを作成し<br/>Carryoverの内容を転記する"]
     class CreateNote python
 
-    SkipNote --> CallMeeting[続けてmeeting-setupスキルの実行フローを呼び出す<br/>カレンダー予定を議事録ノートに反映する]
+    SkipNote --> CallMeeting["続けてmeeting-setupスキルの実行フローを呼び出す<br/>カレンダー予定を議事録ノートに反映する"]
     CreateNote --> CallMeeting
     class CallMeeting claude
 
-    CallMeeting --> MeetingResult{meeting-setupスキルの呼び出しは成功したか}
+    CallMeeting --> MeetingResult{"meeting-setupスキルの呼び出しは成功したか"}
     class MeetingResult python
 
-    MeetingResult -->|失敗<br/>未接続・API呼び出し失敗等| MeetingFailed[失敗した旨を記録する<br/>today-openの処理内容は巻き戻さない]
+    MeetingResult -->|失敗<br/>未接続・API呼び出し失敗等| MeetingFailed["失敗した旨を記録する<br/>today-openの処理内容は巻き戻さない"]
     class MeetingFailed error
 
-    MeetingResult -->|成功| CallGantt[続けてtask-ganttスキルの実行フローを呼び出す<br/>タスクのガントチャートを最新化する]
+    MeetingResult -->|成功| CallGantt["続けてtask-ganttスキルの実行フローを呼び出す<br/>タスクのガントチャートを最新化する"]
     MeetingFailed --> CallGantt
     class CallGantt claude
 
-    CallGantt --> GanttResult{task_gantt.pyの実行は成功したか}
+    CallGantt --> GanttResult{"task_gantt.pyの実行は成功したか"}
     class GanttResult python
 
-    GanttResult -->|失敗<br/>daily_note_not_found/gantt_marker_not_found| GanttFailed[失敗した旨を記録する<br/>today-openの処理内容は巻き戻さない]
+    GanttResult -->|失敗<br/>daily_note_not_found/gantt_marker_not_found| GanttFailed["失敗した旨を記録する<br/>today-openの処理内容は巻き戻さない"]
     class GanttFailed error
 
-    GanttResult -->|成功| Report[ブランチ状態・デイリーノート作成有無・<br/>meeting-setupスキルの実行結果・<br/>task-ganttスキルの実行結果をユーザーに報告する]
+    GanttResult -->|成功| Report["ブランチ状態・デイリーノート作成有無・<br/>meeting-setupスキルの実行結果・<br/>task-ganttスキルの実行結果をユーザーに報告する"]
     GanttFailed --> Report
     class Report claude
 

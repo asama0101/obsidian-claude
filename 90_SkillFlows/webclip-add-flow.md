@@ -6,36 +6,36 @@
 
 ```mermaid
 flowchart TD
-    A[対象URLを受け取る] --> A1{Playwrightが使用可能か}
-    A1 -- 使用可能 --> B[PlaywrightでURLへ遷移する]
+    A["対象URLを受け取る"] --> A1{"Playwrightが使用可能か"}
+    A1 -- 使用可能 --> B["PlaywrightでURLへ遷移する"]
     A1 -- 使用不可 --> A2["ユーザーにPlaywrightのセットアップを促し処理を中断する"]
-    B --> C[ページ最下部までスクロールする]
-    C --> D[本文テキストと本文中の画像URL一覧を取得する]
-    D --> E{次ページへのリンクがあるか}
-    E -- ある --> F{巡回ページ数が上限20ページ以内か}
-    F -- 内 --> G[次ページへ遷移し本文・画像を追記取得する]
+    B --> C["ページ最下部までスクロールする"]
+    C --> D["本文テキストと本文中の画像URL一覧を取得する"]
+    D --> E{"次ページへのリンクがあるか"}
+    E -- ある --> F{"巡回ページ数が上限20ページ以内か"}
+    F -- 内 --> G["次ページへ遷移し本文・画像を追記取得する"]
     G --> E
-    F -- 超過 --> H[巡回を打ち切り、その旨を最終報告に含める]
+    F -- 超過 --> H["巡回を打ち切り、その旨を最終報告に含める"]
     H --> I
-    E -- ない --> I[開いたページ/タブを閉じる]
-    I --> J[取得した本文から要約・キーポイント・全文を作成する]
-    J --> K{会員限定等で本文が一部しか取得できなかったか}
-    K -- はい --> L[全文に断り書きを明記する]
+    E -- ない --> I["開いたページ/タブを閉じる"]
+    I --> J["取得した本文から要約・キーポイント・全文を作成する"]
+    J --> K{"会員限定等で本文が一部しか取得できなかったか"}
+    K -- はい --> L["全文に断り書きを明記する"]
     K -- いいえ --> M
-    L --> M[title/summary/key_points/full_textをJSONに書き出す]
-    M --> N[list_categories.pyで既存カテゴリタグ一覧を取得する]
-    N --> O[候補一覧と新規作成の選択肢をユーザーに提示し確定を待つ]
-    O --> P[webclip_save.pyを実行する]
-    P --> Q[summary/key_points/full_text中の画像URLを重複排除して収集する]
-    Q --> R[画像を81_Attachments/へ1件ずつダウンロードする]
-    R --> S{個々の画像ダウンロードは成功したか}
-    S -- 成功 --> T[ローカル埋め込み記法に置換する]
-    S -- 失敗 --> U[そのURLをスキップし失敗リストに記録する]
+    L --> M["title/summary/key_points/full_textをJSONに書き出す"]
+    M --> N["list_categories.pyで既存カテゴリタグ一覧を取得する"]
+    N --> O["候補一覧と新規作成の選択肢をユーザーに提示し確定を待つ"]
+    O --> P["webclip_save.pyを実行する"]
+    P --> Q["summary/key_points/full_text中の画像URLを重複排除して収集する"]
+    Q --> R["画像を81_Attachments/へ1件ずつダウンロードする"]
+    R --> S{"個々の画像ダウンロードは成功したか"}
+    S -- 成功 --> T["ローカル埋め込み記法に置換する"]
+    S -- 失敗 --> U["そのURLをスキップし失敗リストに記録する"]
     T --> V
-    U --> V[WebClip_Template.mdを基にノート本文を組み立てる]
-    V --> W[40_Resources/WebClips/にノートを保存する]
-    W --> X[note_path・images_saved・images_failedをJSONで出力する]
-    X --> Y[Claudeが作成結果と失敗画像の有無をユーザーに報告する]
+    U --> V["WebClip_Template.mdを基にノート本文を組み立てる"]
+    V --> W["40_Resources/WebClips/にノートを保存する"]
+    W --> X["note_path・images_saved・images_failedをJSONで出力する"]
+    X --> Y["Claudeが作成結果と失敗画像の有無をユーザーに報告する"]
 
     class A1 claude
     class A2 claude

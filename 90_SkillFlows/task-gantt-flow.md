@@ -6,27 +6,27 @@
 
 ```mermaid
 flowchart TD
-    A[task_gantt.pyを実行する] --> B{当日デイリーノートが存在するか}
-    B -- 存在しない --> B1[daily_note_not_foundエラーを返す]
-    B -- 存在する --> C{GANTT_START/GANTT_ENDマーカーがあるか}
-    C -- ない --> C1[gantt_marker_not_foundエラーを返す]
+    A["task_gantt.pyを実行する"] --> B{"当日デイリーノートが存在するか"}
+    B -- 存在しない --> B1["daily_note_not_foundエラーを返す"]
+    B -- 存在する --> C{"GANTT_START/GANTT_ENDマーカーがあるか"}
+    C -- ない --> C1["gantt_marker_not_foundエラーを返す"]
     C -- ある --> D["20_Projects/*/Tasks/*.mdと30_Areas/Tasks/*.mdのtaskノートパスを走査する"]
     D --> E["各ノートを読み込み type!=&quot;task&quot; または読み込みエラーのものを除外する<br/>本文の「📌 進捗メモ」見出し配下のチェックボックス行をtodosとして抽出する"]
-    E --> F{タスクを分類する}
-    F -- status: 5_cancel --> Fx[除外して集計対象から外す]
+    E --> F{"タスクを分類する"}
+    F -- status: 5_cancel --> Fx["除外して集計対象から外す"]
     F -- 期間条件を満たさない --> Fx
-    F -- "start_date/due_dateが未設定・形式不正、<br/>またはstart_date>due_date（順序逆転）" --> F2[日程未確定タスクとして収集する]
+    F -- "start_date/due_dateが未設定・形式不正、<br/>またはstart_date>due_date（順序逆転）" --> F2["日程未確定タスクとして収集する"]
     F -- "バー表示対象の判定条件（詳細は補足参照）" --> F3["バー表示タスクとして収集し、overdueフラグ・表示用終端日を設定する（詳細は補足参照）"]
     F2 --> G
-    F3 --> G[プロジェクト別にグルーピングする]
-    G --> H[Mermaid ganttチャートのコードブロックを生成する（色分け・milestone描画・終端調整を含む、詳細は補足参照）]
-    H --> I{日程未確定タスクが1件以上あるか}
-    I -- ある --> J[日程未確定タスク一覧をMarkdown箇条書きで生成する]
+    F3 --> G["プロジェクト別にグルーピングする"]
+    G --> H["Mermaid ganttチャートのコードブロックを生成する（色分け・milestone描画・終端調整を含む、詳細は補足参照）"]
+    H --> I{"日程未確定タスクが1件以上あるか"}
+    I -- ある --> J["日程未確定タスク一覧をMarkdown箇条書きで生成する"]
     I -- ない --> K
     J --> K["マーカー区間へ書き込む内容を組み立てる<br/>コールアウト内に収まるよう全行に'&gt; 'プレフィックスを付与する"]
-    K --> L[デイリーノートのGANTT_START/GANTT_END区間を上書きする]
-    L --> M[sections/bar_tasks/unscheduled_tasksの件数をJSONで標準出力する]
-    M --> N[Claudeが件数を要約してユーザーに報告する]
+    K --> L["デイリーノートのGANTT_START/GANTT_END区間を上書きする"]
+    L --> M["sections/bar_tasks/unscheduled_tasksの件数をJSONで標準出力する"]
+    M --> N["Claudeが件数を要約してユーザーに報告する"]
 
     class A python
     class B python

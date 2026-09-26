@@ -6,18 +6,18 @@
 
 ```mermaid
 flowchart TD
-    Start[task-breakdownスキルを実行する]
-    Start --> A[対象タスクノートを特定する<br/>未指定ならユーザーに確認する]
-    A --> B[Claudeが対象ノートの内容を読み、<br/>todo分解案を提示する]
+    Start["task-breakdownスキルを実行する"]
+    Start --> A["対象タスクノートを特定する<br/>未指定ならユーザーに確認する"]
+    A --> B["Claudeが対象ノートの内容を読み、<br/>todo分解案を提示する"]
     B --> C["todo項目一覧・各todoの期日（自由記述可）を<br/>ユーザーに確認する（自動確定しない）"]
     C --> D["task_todo_apply.pyを実行する<br/>--note &lt;path&gt; --todo &quot;&lt;text&gt;&quot; ..."]
-    D --> E{標準出力のstatusを確認する}
-    E -- "error: no_todos/note_not_found/<br/>not_a_task_note/path_outside_vault" --> E1[reasonをそのまま提示し<br/>処理を中断する]
-    E -- ok --> F[task_gantt.pyを実行し<br/>当日デイリーノートのガントチャートへ反映する]
-    F --> G{task_gantt.py側のstatusを確認する}
-    G -- error --> G1[daily_note_not_found等のエラーを<br/>握りつぶさず結果報告に含める]
+    D --> E{"標準出力のstatusを確認する"}
+    E -- "error: no_todos/note_not_found/<br/>not_a_task_note/path_outside_vault" --> E1["reasonをそのまま提示し<br/>処理を中断する"]
+    E -- ok --> F["task_gantt.pyを実行し<br/>当日デイリーノートのガントチャートへ反映する"]
+    F --> G{"task_gantt.py側のstatusを確認する"}
+    G -- error --> G1["daily_note_not_found等のエラーを<br/>握りつぶさず結果報告に含める"]
     G -- ok --> H
-    G1 --> H[結果（追加件数・置換/追記モード・<br/>ガント反映結果）を要約報告する]
+    G1 --> H["結果（追加件数・置換/追記モード・<br/>ガント反映結果）を要約報告する"]
 
     class A claude
     class B claude

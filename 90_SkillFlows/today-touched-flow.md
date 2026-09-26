@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TD
-    A["today_touched.pyを実行する"] --> B{当日ブランチが<br/>YYYY-MM-DD形式か}
+    A["today_touched.pyを実行する"] --> B{"当日ブランチが<br/>YYYY-MM-DD形式か"}
     B -- いいえ --> B1["エラー: not_on_daily_branch<br/>当日ブランチへ切り替えて<br/>再実行するよう案内する"]
     B -- はい --> C["git merge-base main HEADで<br/>分岐点を求める"]
     C --> D["分岐点以降のコミット済み変更<br/>＋ 未コミット変更のファイルパス<br/>和集合を収集する"]

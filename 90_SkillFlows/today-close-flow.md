@@ -6,9 +6,9 @@
 
 ```mermaid
 flowchart TD
-    A[today-closeスキルを実行する] --> B[会議予定の開催状況を確認する<br/>meeting-setupスキルの実行フローを呼び出す]
+    A["today-closeスキルを実行する"] --> B["会議予定の開催状況を確認する<br/>meeting-setupスキルの実行フローを呼び出す"]
     B --> B1["meeting_sync.pyの既存出力<br/>(needs_attendance_check)を確認する"]
-    B1 --> B2{開催日が本日より前（当日は含まない）かつ<br/>attendanceが1_scheduledのまま<br/>未更新のノートが<br/>needs_attendance_checkに含まれるか}
+    B1 --> B2{"開催日が本日より前（当日は含まない）かつ<br/>attendanceが1_scheduledのまま<br/>未更新のノートが<br/>needs_attendance_checkに含まれるか"}
     B2 -- 該当ノートあり --> B3["該当ノート一覧を提示し<br/>出席状況を確認する<br/>（要ユーザー確認）"]
     B3 --> B4["ユーザーの回答に応じて<br/>meeting_sync.py --set-attendanceで<br/>該当ノートのattendanceを更新する"]
     B2 -- 該当ノートなし --> B5
@@ -17,8 +17,8 @@ flowchart TD
     B5 -- あり --> B6["該当議事録一覧を提示し、<br/>meeting-followupスキルの実行を促す<br/>（処理は中断せず続行する）"]
     B5 -- なし --> C
     B6 --> C
-    C{現在のブランチは<br/>YYYY-MM-DD形式か}
-    C -- いいえ --> C1[エラー: not_on_daily_branch<br/>当日ブランチへ切り替えて再実行するよう案内する]
+    C{"現在のブランチは<br/>YYYY-MM-DD形式か"}
+    C -- いいえ --> C1["エラー: not_on_daily_branch<br/>当日ブランチへ切り替えて再実行するよう案内する"]
     C -- はい --> D["Vault内の全タスクノートを<br/>確認する"]
     D --> E{"次のいずれかに該当する<br/>タスクがあるか<br/>①created_dateが本日かつstart_date未設定<br/>②start_dateが本日かつstatusが1_todo<br/>③due_dateが本日かつstatusが4_done/5_cancel以外"}
     E -- あり --> E1["該当タスク一覧を提示する"]
@@ -28,20 +28,20 @@ flowchart TD
     H -- はい --> H1["処理を巻き戻さず、close_day.py側の<br/>同種チェックに委ねてそのまま続行する"]
     H -- いいえ --> I
     H1 --> I
-    I[close_day.pyを実行する]
-    I --> J{未コミットの変更があるか}
-    J -- あり --> K[変更をコミットする]
+    I["close_day.pyを実行する"]
+    I --> J{"未コミットの変更があるか"}
+    J -- あり --> K["変更をコミットする"]
     J -- なし --> L
-    K --> L{mainと当日ブランチのHEADが<br/>既に一致しているか}
-    L -- 一致 --> L1[既にclose済みとしてユーザーに伝える<br/>追加作業は不要]
-    L -- 不一致 --> M[mainへ git merge --ff-only で<br/>マージする]
-    M -- 失敗 --> M1[エラー: merge_failed<br/>詳細を提示しユーザーに解決方針を確認する<br/>自動解決はしない]
-    M -- 成功 --> M2{マージ直後の作業ツリーは<br/>マージ後のコミット内容と<br/>完全に一致しているか<br/>(git status --porcelainが空か)}
-    M2 -- 不一致 --> M3[エラー: post_merge_mismatch<br/>詳細を提示しgit statusで原因を調査するよう案内する<br/>ブランチ削除・pushは行わない<br/>自動修復はしない]
-    M2 -- 一致 --> N[当日ブランチを git branch -d で削除する]
-    N --> O{originリモートが設定されているか}
-    O -- あり --> P[origin/mainへのpushを試みる<br/>失敗しても許容する]
-    O -- なし --> Q[結果をユーザーに要約して報告する]
+    K --> L{"mainと当日ブランチのHEADが<br/>既に一致しているか"}
+    L -- 一致 --> L1["既にclose済みとしてユーザーに伝える<br/>追加作業は不要"]
+    L -- 不一致 --> M["mainへ git merge --ff-only で<br/>マージする"]
+    M -- 失敗 --> M1["エラー: merge_failed<br/>詳細を提示しユーザーに解決方針を確認する<br/>自動解決はしない"]
+    M -- 成功 --> M2{"マージ直後の作業ツリーは<br/>マージ後のコミット内容と<br/>完全に一致しているか<br/>(git status --porcelainが空か)"}
+    M2 -- 不一致 --> M3["エラー: post_merge_mismatch<br/>詳細を提示しgit statusで原因を調査するよう案内する<br/>ブランチ削除・pushは行わない<br/>自動修復はしない"]
+    M2 -- 一致 --> N["当日ブランチを git branch -d で削除する"]
+    N --> O{"originリモートが設定されているか"}
+    O -- あり --> P["origin/mainへのpushを試みる<br/>失敗しても許容する"]
+    O -- なし --> Q["結果をユーザーに要約して報告する"]
     P --> Q
 
     class B claude
