@@ -6,7 +6,6 @@ date: "{{date:YYYY-MM-DD}}"
 url: ""
 attendance: "1_scheduled"
 ---
-# {{title}}
 
 ## 📌 概要・目的
 - **開催日時:** {{date:YYYY-MM-DD}} (<span>{{date:ddd}}</span>) {{time:HH:mm}} 〜

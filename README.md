@@ -1,7 +1,7 @@
 # README（Obsidian×Claude Code環境）
 
 Obsidian VaultとClaude Codeプラグイン`vault`を1リポジトリで管理するモノレポ。
-Vault本体（Markdownノート・テンプレート・Bases定義）と、その運用を自動化するClaude Codeスキル群（`.claude/skills/vault/`配下の9スキル）を同居させている。
+Vault本体（Markdownノート・テンプレート・Bases定義）と、その運用を自動化するClaude Codeスキル群（`.claude/skills/vault/`配下の11スキル）を同居させている。
 両者は密結合しており、スキルが読み書きする対象はVault自身のノートである。
 
 このドキュメントは、このリポジトリを初めて触る人が迷わずセットアップ・利用開始できることを目的とする。
@@ -55,7 +55,7 @@ Windows（Git Bash）環境を前提に記載する。
 - **Git**: `today-open`／`today-close`スキルがブランチ作成・コミット・mainへのマージを行うため必須。
 - **Python**: `scripts/*.py`本体は標準ライブラリのみで動作し追加パッケージ不要。動作確認済み環境は3.14.3（`.claude/skills/vault/scripts/.venv/pyvenv.cfg`より）。テスト実行にはpytest（動作確認済み: 9.1.1）が必要である。`.claude/skills/vault/scripts/.venv/`に閉じたテスト専用の仮想環境を別途作る運用になっている。
 - **Obsidian本体**: Vaultの閲覧・編集用。設定の「コアプラグイン」で「Bases」を有効化する必要がある（`.obsidian/core-plugins.json`で`"bases": true`を確認済み）。
-- **Claude Code CLI**: スキルを実行するために必須。9スキル分のSKILL.mdは`.claude/skills/vault/skills/<name>/SKILL.md`に配置されており、このリポジトリをClaude Codeで開いて利用する運用である。有効化の仕組み（`.claude/settings.json`が存在せず、`.claude-plugin/plugin.json`も`.claude/skills/vault/`配下という通常と異なる位置にある）は未確認。
+- **Claude Code CLI**: スキルを実行するために必須。11スキル分のSKILL.mdは`.claude/skills/vault/skills/<name>/SKILL.md`に配置されており、このリポジトリをClaude Codeで開いて利用する運用である。有効化の仕組み（`.claude/settings.json`が存在せず、`.claude-plugin/plugin.json`も`.claude/skills/vault/`配下という通常と異なる位置にある）は未確認。
 - **Google Calendar MCP**（`list_events`ツール）: `meeting-setup`スキルに必須。未接続の場合`meeting-setup`は動作しない。`today-open`／`today-close`はカレンダー同期のために`meeting-setup`を自動的に呼び出す。ただし、そこが失敗しても両スキル本来の処理（ブランチ作成・コミット等）は継続される。
 - **Playwright MCP**（`mcp__plugin_playwright_playwright__browser_navigate`等）: `webclip-add`スキルに必須。未接続の場合、`webclip-add`はユーザーにセットアップを促して処理を中断する。
 - **Microsoft 365 MCP**: 任意。現状このリポジトリでは未接続。接続時のフィールド対応は[`references/meeting-field-mapping.md`](.claude/skills/vault/references/meeting-field-mapping.md)を参照。
@@ -72,7 +72,7 @@ Windows（Git Bash）環境を前提に記載する。
    claude
    ```
 
-   9スキル分のSKILL.mdは`.claude/skills/vault/skills/<name>/SKILL.md`に配置されている。有効化の具体的な仕組みは未確認のため、動作しない場合はClaude Code側のプラグイン・スキル設定を確認すること。
+   11スキル分のSKILL.mdは`.claude/skills/vault/skills/<name>/SKILL.md`に配置されている。有効化の具体的な仕組みは未確認のため、動作しない場合はClaude Code側のプラグイン・スキル設定を確認すること。
 3. 必要に応じて`claude mcp`コマンドでGoogle Calendar MCP・Playwright MCPを追加する（追加構文はMCPサーバー側の提供方法に依存するため本書では規定しない）。
 4. テスト専用の仮想環境を作成し、pytestをインストールする。
 
@@ -105,7 +105,6 @@ Windows（Git Bash）環境を前提に記載する。
 **エディタ**
 
 - 新規タブのデフォルトビューをリーディングビューにする
-- インラインタイトルをオフにする
 - 読みやすい行の長さをオフにする
 - 行番号をオンにする
 - ノートにMermaid図を表示をオンにする
@@ -142,6 +141,10 @@ Windows（Git Bash）環境を前提に記載する。
 - 新規ファイルの場所を`10_Daily`にする
 - テンプレートファイルの場所を`80_Templates/Daily_Template`にする
 
+**テンプレート**
+
+- テンプレートフォルダの場所を`80_Templates`にする
+
 ## 使い方
 
 ### 日次ワークフロー
@@ -166,36 +169,44 @@ flowchart TD
 
 ### スキル間の連携
 
-`today-open`／`today-close`はカレンダー同期のために`meeting-setup`を自動的に呼び出す。
+`today-open`はカレンダー同期のために`meeting-setup`を、ガントチャート更新のために`task-gantt`を自動的に呼び出す。
+`today-close`はカレンダー同期のために`meeting-setup`を自動的に呼び出す。
 `today-close`は議事録の未消化アクションアイテムを検知すると`meeting-followup`の実行を促す（処理は中断しない）。
+`today-close`は`close_day.py`実行の直前に`today-touched`を自動的に呼び出し、更新ノート一覧を最新化する。
 `meeting-setup`／`meeting-followup`／`task-add`はいずれも、プロジェクト割当の確認時に「新規プロジェクトを作成する」を選ぶと`project-add`を呼び出す。
-`knowhow-add`／`webclip-add`／`task-gantt`はこれらの連携を持たず単独で完結する。
+`task-breakdown`はtodo反映が成功すると`task-gantt`を自動的に呼び出してガントチャートへ反映する。
+`knowhow-add`／`webclip-add`のみが連携を持たず単独で完結する。
 
 ```mermaid
 flowchart LR
     TO["today-open"] -->|カレンダー同期を自動実行| MS["meeting-setup"]
+    TO -->|ガント更新を自動実行| TG["task-gantt"]
     TC["today-close"] -->|カレンダー同期を自動実行| MS
     TC -->|未消化アクションアイテムがあれば実行を促す| MF["meeting-followup"]
+    TC -->|close_day.py実行前に自動実行| TT["today-touched"]
     MS -->|プロジェクト新規作成を選択時| PA["project-add"]
     MF -->|プロジェクト新規作成を選択時| PA
     TA["task-add"] -->|プロジェクト新規作成を選択時| PA
+    TD["task-breakdown"] -->|todo反映後に自動実行| TG
 ```
 
 ### スキルの呼び出し方
 
 各スキルは発話トリガーまたはスラッシュコマンドで起動する。
 
-| スキル | トリガー発話例 | スラッシュコマンド |
-|--------|----------------|--------------------|
-| `today-open` | 「今日を始める」「デイリーノート作って」 | `/today` |
-| `meeting-setup` | 「議事録を作って」「今日の会議のノート作って」 | `/meeting-setup` |
-| `task-add` | 「タスクにして」「これタスク化して」 | `/task-add` |
+| スキル                | トリガー発話例                       | スラッシュコマンド                    |
+| ------------------ | ----------------------------- | ---------------------------- |
+| `today-open`       | 「今日を始める」「デイリーノート作って」          | `/today`                     |
+| `meeting-setup`    | 「議事録を作って」「今日の会議のノート作って」       | `/meeting-setup`             |
+| `task-add`         | 「タスクにして」「これタスク化して」            | `/task-add`                  |
 | `meeting-followup` | 「議事録からタスク化して」「アクションアイテムを整理して」 | `/meeting-followup <議事録ノート>` |
-| `webclip-add` | 「このページをクリップして」「Webクリップ作って」 | `/webclip <URL>` |
-| `knowhow-add` | 「これノウハウとして残して」「ナレッジ化して」 | `/knowhow` |
-| `project-add` | 「プロジェクトを始めて」「新規プロジェクト作って」 | `/project <name>` |
-| `task-gantt` | 「ガントチャート作って」「タスクの進捗を可視化して」 | `/task-gantt` |
-| `today-close` | 「今日を終わる」「クローズして」 | `/close` |
+| `webclip-add`      | 「このページをクリップして」「Webクリップ作って」    | `/webclip <URL>`             |
+| `knowhow-add`      | 「これノウハウとして残して」「ナレッジ化して」       | `/knowhow`                   |
+| `project-add`      | 「プロジェクトを始めて」「新規プロジェクト作って」     | `/project <name>`            |
+| `task-gantt`       | 「ガントチャート作って」「タスクの進捗を可視化して」    | `/task-gantt`                |
+| `task-breakdown`   | 「タスクを分解して」「todoに分解して」         | `/task-breakdown <タスクノート>`   |
+| `today-touched`    | 「今日の更新ノート一覧を更新して」「更新ノート一覧を最新化して」 | `/today-touched`             |
+| `today-close`      | 「今日を終わる」「クローズして」              | `/close`                     |
 
 ## ファイル・フォルダ構成
 
@@ -236,7 +247,7 @@ obsidian/
 ├── .claude-plugin/
 │   └── plugin.json            # プラグイン定義（name/version/description）
 ├── skills/
-│   └── <skill-name>/SKILL.md  # 各スキルの仕様（9スキル分）
+│   └── <skill-name>/SKILL.md  # 各スキルの仕様（11スキル分）
 ├── scripts/
 │   ├── vault_lib.py           # 共通ヘルパー（ファイル名サニタイズ・プロジェクト紐付け等）
 │   ├── <name>_*.py            # 各スキルのエントリポイント
@@ -259,6 +270,8 @@ obsidian/
 | `knowhow-add` | 雑多なメモ・ログをナレッジノートとして整形保存する | [SKILL.md](.claude/skills/vault/skills/knowhow-add/SKILL.md) |
 | `project-add` | プロジェクト概要ノートとTasks/Meetings/Documentsフォルダを一括作成する | [SKILL.md](.claude/skills/vault/skills/project-add/SKILL.md) |
 | `task-gantt` | Vault横断で全タスクノートを集計し、プロジェクト別のMermaid ganttチャートを当日デイリーノートに書き込む | [SKILL.md](.claude/skills/vault/skills/task-gantt/SKILL.md) |
+| `task-breakdown` | 既存のタスクノート1件をtodo項目へ分解し、進捗メモへ追記した上でガントチャートへ反映する | [SKILL.md](.claude/skills/vault/skills/task-breakdown/SKILL.md) |
+| `today-touched` | 日中いつでも「本日作成・更新したノート」一覧を再生成する（today-closeからも自動呼び出しされる） | [SKILL.md](.claude/skills/vault/skills/today-touched/SKILL.md) |
 | `today-close` | タスク・議事録の締め忘れを確認し、当日ブランチの変更をコミットしmainへマージする（1日の作業終了） | [SKILL.md](.claude/skills/vault/skills/today-close/SKILL.md) |
 
 ## Bases定義

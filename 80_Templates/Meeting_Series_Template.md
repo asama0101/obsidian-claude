@@ -6,7 +6,6 @@ last_updated: "{{date:YYYY-MM-DD}}"
 url: ""
 attendance: "1_scheduled"
 ---
-# {{title}}
 
 <!-- NEW_MEETING_START -->
 <!-- occurrence_id: "" attendance: "1_scheduled" date: "" -->

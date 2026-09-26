@@ -21,8 +21,15 @@ flowchart TD
     CheckBranch -->|存在しない| CreateBranch[originがあれば事前にmainを最新化したうえで<br/>mainから当日ブランチを新規作成しcheckoutする]
     class CreateBranch python
 
-    CheckoutExisting --> CheckNote{当日のデイリーノートは既に存在するか}
-    CreateBranch --> CheckNote
+    CreateBranch --> CheckStray{mainに残っていた追跡済みファイルの<br/>未コミット変更があるか<br/>(未追跡の新規ファイルは対象外)}
+    class CheckStray python
+
+    CheckStray -->|あり| CommitStray[新ブランチ上でgit add -u→コミットする<br/>stray_changes_committedにコミットSHAを記録する]
+    class CommitStray python
+
+    CheckStray -->|なし| CheckNote{当日のデイリーノートは既に存在するか}
+    CommitStray --> CheckNote
+    CheckoutExisting --> CheckNote
     class CheckNote python
 
     CheckNote -->|存在する| SkipNote[デイリーノートの作成をスキップする]
@@ -71,6 +78,7 @@ flowchart TD
 
 - **未マージの過去日ブランチが残っているか**: `git branch --no-merged main`で判定する。当日ブランチ以外にYYYY-MM-DD形式のブランチが残っていれば`status: "blocked"`となり、`today-open`の処理はそこで止まる。マージ・削除はスクリプト自身では行わない。
 - **当日日付のブランチは既に存在するか**: 既存なら`branch: "existing"`としてcheckoutのみ行う。存在しなければ`main`から新規作成し`branch: "created"`となる。新規作成時、`origin`リモートが設定されていれば`main`を`git pull --ff-only`で最新化する（失敗しても処理は続行する）。
+- **mainに残っていた追跡済みファイルの未コミット変更があるか**: `branch: "created"`のときのみ発生する分岐。`checkout -b`直後に`git status --porcelain --untracked-files=no`で検出する（未追跡の新規ファイルは対象外）。あれば新ブランチ上で`git add -u`→コミットし、コミットSHAを`stray_changes_committed`に記録する。無ければ`stray_changes_committed`は`null`のまま。既存の当日ブランチへの単純checkout（`branch: "existing"`）ではこの分岐自体を通らないため、常に`null`。
 - **当日のデイリーノートは既に存在するか**: 存在すれば`daily_note: "skipped"`となり以降の転記処理は行わない。存在しなければ`daily_note: "created"`となり、前日ノートが見つかった場合は`carryover_source`にその日付が入る（見つからなければ`null`）。
 - **meeting-setupスキルの呼び出しは成功したか**: Google Calendar MCP未接続やAPI呼び出し失敗時はここで失敗として扱われるが、`today-open`本来の処理（ブランチ作成・デイリーノート作成）は既に完了しているため巻き戻さない。失敗した旨は最終報告に含める。
 - **task_gantt.pyの実行は成功したか**: `daily_note`が`"skipped"`（既存ノート再利用）の場合も含め、`status: "ok"`なら毎回実行する（`task_gantt.py`はマーカー区間を毎回上書きする冪等な処理のため、再実行しても問題ない）。`daily_note_not_found`/`gantt_marker_not_found`はここで失敗として扱われるが、`today-open`本来の処理は巻き戻さない。失敗した旨は最終報告に含める。
@@ -82,4 +90,4 @@ flowchart TD
 - [task-gantt/SKILL.md](../.claude/skills/vault/skills/task-gantt/SKILL.md): today-openスキルからのtask-ganttスキル自動呼び出しの詳細
 
 ---
-最終更新: 2026-09-24
+最終更新: 2026-09-25

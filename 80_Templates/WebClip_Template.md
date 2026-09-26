@@ -4,7 +4,6 @@ url: ""
 date: "{{date:YYYY-MM-DD}}"
 tags:
 ---
-# {{title}}
 
 ## 📌 概要・要約
 - 

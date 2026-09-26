@@ -105,64 +105,13 @@ def test_変更が無い場合はコミットをスキップする():
         assert result.returncode == 0, result.stdout + result.stderr
         payload = json.loads(result.stdout)
         assert payload["status"] == "ok"
-        assert payload["updated_notes"] == []
+        assert "updated_notes" not in payload
         assert not payload["committed"]
         assert not payload["pushed"]
         assert payload["branch_deleted"]
 
 
-def test_更新ノート一覧の反映と除外対象の除外():
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _init_repo(root)
-        _write(root / "10_Daily" / ".gitkeep", "")
-        _write(root / "80_Templates" / "Daily_Template.md", "template original")
-        _commit_all(root, "initial commit")
-
-        branch = "2026-09-22"
-        _run_git(["checkout", "-b", branch], cwd=root)
-
-        daily_note = root / "10_Daily" / f"{branch}.md"
-        _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-        # コミット済みの更新ノート
-        _write(root / "20_Notes" / "Alpha.md", "alpha content")
-        _commit_all(root, "daily work committed part")
-
-        # 未コミットの更新ノート(新規/untracked)
-        _write(root / "20_Notes" / "Beta.md", "beta content")
-        # 除外対象: テンプレート配下の変更
-        _write(root / "80_Templates" / "Daily_Template.md", "template modified")
-        # 除外対象: .claude 配下
-        _write(root / ".claude" / "scratch.md", "scratch")
-        # 除外対象: .md 以外
-        _write(root / "images" / "photo.png", "binary-ish")
-
-        result = _run_close_day(root)
-
-        assert result.returncode == 0, result.stdout + result.stderr
-        payload = json.loads(result.stdout)
-        assert payload["status"] == "ok"
-        assert payload["updated_notes"] == ["Alpha", "Beta"]
-        assert payload["committed"]
-        assert payload["branch_deleted"]
-
-        # main にマージ後の内容を確認する
-        _run_git(["checkout", "main"], cwd=root)
-        merged_note_text = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
-        assert "**other**" in merged_note_text
-        assert "- [[Alpha]]" in merged_note_text
-        assert "- [[Beta]]" in merged_note_text
-        assert "scratch" not in merged_note_text
-
-        # 当日ブランチ自体が削除されていることを確認する
-        remaining_branches = _run_git(["branch", "--list", branch], cwd=root)
-        assert remaining_branches == ""
-
-
-def test_gitがクォートするファイル名も一覧に含まれる():
-    # スペースと括弧を含むファイル名は core.quotepath=false でも
-    # git status --porcelain がダブルクォートで囲むことがある
-    # (実データ検証で発見した実際のバグの再現)。
+def test_UPDATED_NOTESマーカーは変更されずupdated_notesキーも出力されない():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
@@ -170,48 +119,31 @@ def test_gitがクォートするファイル名も一覧に含まれる():
         _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
-        branch = "2026-09-25"
+        branch = "2026-10-02"
         _run_git(["checkout", "-b", branch], cwd=root)
         daily_note = root / "10_Daily" / f"{branch}.md"
-        _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-        _write(root / "40_Resources" / "Knowledge" / "status --check(x).md", "content")
-
-        result = _run_close_day(root)
-
-        assert result.returncode == 0, result.stdout + result.stderr
-        payload = json.loads(result.stdout)
-        assert payload["status"] == "ok"
-        assert payload["updated_notes"] == ["status --check(x)"]
-
-
-def test_全く新規のディレクトリ内のファイルも個別に一覧化される():
-    # 20_Projects/<新規プロジェクト>/Tasks/ のように、追跡済み
-    # ファイルが1つも無い全く新規のディレクトリにノートを作成した
-    # 場合、gitのデフォルト(untracked-files=normal)だと
-    # ディレクトリ名1行に集約され、ファイルが一覧から漏れる
-    # (実データ検証で発見した実際のバグの再現)。
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _init_repo(root)
-        _write(root / "10_Daily" / ".gitkeep", "")
-        _write(root / "80_Templates" / "Daily_Template.md", "template")
-        _commit_all(root, "initial commit")
-
-        branch = "2026-09-26"
-        _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "10_Daily" / f"{branch}.md"
-        _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-        _write(
-            root / "20_Projects" / "NewProject" / "Tasks" / "FirstTask.md",
-            "task content",
+        arbitrary_marker_content = "- 任意の既存内容（close_day.pyでは変更されないはず）"
+        content = _DAILY_NOTE_TEMPLATE.format(date=branch).replace(
+            "（`/close` 実行時に自動更新される）", arbitrary_marker_content
         )
+        _write(daily_note, content)
+        _commit_all(root, "add daily note")
+
+        # 更新ノートとなるファイルを追加する
+        # (従来のclose_day.pyならマーカーが上書きされていたはず)
+        _write(root / "20_Notes" / "Alpha.md", "alpha content")
 
         result = _run_close_day(root)
 
         assert result.returncode == 0, result.stdout + result.stderr
         payload = json.loads(result.stdout)
         assert payload["status"] == "ok"
-        assert payload["updated_notes"] == ["FirstTask"]
+        assert "updated_notes" not in payload
+        assert payload["committed"]
+
+        _run_git(["checkout", "main"], cwd=root)
+        merged = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
+        assert arbitrary_marker_content in merged
 
 
 def test_mainとHEADが一致していれば_already_closed():
@@ -275,141 +207,6 @@ def test_mainが分岐している場合はff_onlyマージに失敗する():
         assert payload["detail"]
 
 
-def test_normalize_meeting_seriesはmeetingに統合される():
-    assert close_day._normalize_note_type("meeting_series") == "meeting"
-
-
-@pytest.mark.parametrize("known", ["project", "meeting", "task", "knowhow", "webclip"])
-def test_normalize_既知typeはそのまま(known):
-    assert close_day._normalize_note_type(known) == known
-
-
-def test_normalize_未知typeはotherになる():
-    assert close_day._normalize_note_type("unknown_type") == "other"
-
-
-def test_normalize_Noneはotherになる():
-    assert close_day._normalize_note_type(None) == "other"
-
-
-def test_read_note_type_frontmatterのtype値を取得する():
-    with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / "note.md"
-        path.write_text("---\ntype: project\n---\nbody", encoding="utf-8")
-        assert close_day._read_note_type(path) == "project"
-
-
-def test_read_note_type_typeキーが無ければNone():
-    with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / "note.md"
-        path.write_text("---\ntags:\n  - x\n---\nbody", encoding="utf-8")
-        assert close_day._read_note_type(path) is None
-
-
-def test_read_note_type_frontmatterが無ければNone():
-    with tempfile.TemporaryDirectory() as tmp:
-        path = Path(tmp) / "note.md"
-        path.write_text("plain body without frontmatter", encoding="utf-8")
-        assert close_day._read_note_type(path) is None
-
-
-def test_read_note_type_ファイルが存在しなければNone():
-    missing_path = Path(tempfile.gettempdir()) / "does_not_exist_close_day_test.md"
-    assert not missing_path.exists()
-    assert close_day._read_note_type(missing_path) is None
-
-
-def test_stemとフルパスのtupleリストをソート済みで返す():
-    with tempfile.TemporaryDirectory() as tmp:
-        vault_root = Path(tmp)
-        paths = {
-            "20_Notes/Beta.md",
-            "20_Notes/Alpha.md",
-            "80_Templates/x.md",
-            "images/a.png",
-            "10_Daily/2026-09-22.md",
-        }
-        entries = close_day._filter_updated_notes(paths, "2026-09-22", vault_root)
-        assert entries == [
-            ("Alpha", vault_root / "20_Notes/Alpha.md"),
-            ("Beta", vault_root / "20_Notes/Beta.md"),
-        ]
-
-
-def test_type別に固定順でグルーピングされmeeting_seriesはmeetingへ統合される():
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _init_repo(root)
-        _write(root / "10_Daily" / ".gitkeep", "")
-        _write(root / "80_Templates" / "Daily_Template.md", "template")
-        _commit_all(root, "initial commit")
-
-        branch = "2026-09-28"
-        _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "10_Daily" / f"{branch}.md"
-        _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-
-        _write(root / "20_Projects" / "Zeta.md", "---\ntype: project\n---\nbody")
-        _write(
-            root / "20_Projects" / "Meetings" / "Alpha.md",
-            "---\ntype: meeting\n---\nbody",
-        )
-        _write(
-            root / "20_Projects" / "Meetings" / "Weekly.md",
-            "---\ntype: meeting_series\n---\nbody",
-        )
-        _write(root / "40_Tasks" / "DoThing.md", "---\ntype: task\n---\nbody")
-
-        result = _run_close_day(root)
-
-        assert result.returncode == 0, result.stdout + result.stderr
-        payload = json.loads(result.stdout)
-        assert sorted(payload["updated_notes"]) == ["Alpha", "DoThing", "Weekly", "Zeta"]
-
-        _run_git(["checkout", "main"], cwd=root)
-        merged = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
-
-        project_idx = merged.index("**project**")
-        meeting_idx = merged.index("**meeting**")
-        task_idx = merged.index("**task**")
-        assert project_idx < meeting_idx
-        assert meeting_idx < task_idx
-        assert "- [[Zeta]]" in merged
-        assert "- [[Alpha]]" in merged
-        assert "- [[Weekly]]" in merged
-        assert "- [[DoThing]]" in merged
-        assert merged.count("**meeting**") == 1
-        assert "**meeting_series**" not in merged
-        assert "**knowhow**" not in merged
-        assert "**webclip**" not in merged
-        assert "**other**" not in merged
-
-
-def test_単一typeのみ更新時はそのグループのみ表示される():
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _init_repo(root)
-        _write(root / "10_Daily" / ".gitkeep", "")
-        _write(root / "80_Templates" / "Daily_Template.md", "template")
-        _commit_all(root, "initial commit")
-
-        branch = "2026-09-29"
-        _run_git(["checkout", "-b", branch], cwd=root)
-        daily_note = root / "10_Daily" / f"{branch}.md"
-        _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
-        _write(root / "30_Knowhow" / "Tip.md", "---\ntype: knowhow\n---\nbody")
-
-        result = _run_close_day(root)
-
-        assert result.returncode == 0, result.stdout + result.stderr
-        _run_git(["checkout", "main"], cwd=root)
-        merged = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
-        assert "**knowhow**" in merged
-        assert "- [[Tip]]" in merged
-        for absent in ("**project**", "**meeting**", "**task**", "**webclip**", "**other**"):
-            assert absent not in merged
-
-
 def _task_frontmatter(*, created_date="", start_date="", due_date="", status="1_todo"):
     """タスクノートのfrontmatterテキストを組み立てるテスト用ヘルパー。"""
     return (
@@ -449,6 +246,23 @@ def test_scan_task_review_targets_条件2_start_dateが本日かつstatusが1_to
         targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
 
         assert [t["title"] for t in targets] == ["TaskB"]
+
+
+def test_scan_task_review_targets_条件2_start_dateが本日でもstatusが3_pendingなら対象外():
+    """3_pendingは意図的な保留状態であり、1_todo（単純な未着手忘れ）とは異なるため対象外とする。"""
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        task_path = vault_root / "20_Projects" / "ProjX" / "Tasks" / "TaskB2.md"
+        _write(
+            task_path,
+            _task_frontmatter(
+                created_date="2026-09-20", start_date="2026-09-23", status="3_pending"
+            ),
+        )
+
+        targets = close_day._scan_task_review_targets(vault_root, "2026-09-23")
+
+        assert targets == []
 
 
 def test_scan_task_review_targets_条件3_due_dateが本日かつstatusが未完了():
@@ -618,7 +432,33 @@ def test_main_タスク見直し対象があれば中断しコミットしない
         assert branch in remaining_branches
 
 
-def test_未知typeと削除済みファイルはotherグループに入る():
+def test_post_merge_diff_作業ツリーがクリーンなら空文字列():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _init_repo(root)
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _commit_all(root, "initial commit")
+
+        result = close_day._post_merge_diff(root)
+
+        assert result == ""
+
+
+def test_post_merge_diff_差分があれば非空のporcelain文字列():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _init_repo(root)
+        _write(root / "10_Daily" / ".gitkeep", "")
+        _commit_all(root, "initial commit")
+        _write(root / "10_Daily" / "stray.md", "stray content")
+
+        result = close_day._post_merge_diff(root)
+
+        assert result.strip() != ""
+        assert "stray.md" in result
+
+
+def test_main_マージ直後に不一致があればpost_merge_mismatchでブランチ削除もpushも行わない(monkeypatch, capsys):
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _init_repo(root)
@@ -626,31 +466,33 @@ def test_未知typeと削除済みファイルはotherグループに入る():
         _write(root / "80_Templates" / "Daily_Template.md", "template")
         _commit_all(root, "initial commit")
 
-        branch = "2026-09-27"
+        branch = "2026-10-04"
         _run_git(["checkout", "-b", branch], cwd=root)
         daily_note = root / "10_Daily" / f"{branch}.md"
-        _write(daily_note, _DAILY_NOTE_TEMPLATE.format(date=branch))
+        content = _DAILY_NOTE_TEMPLATE.format(date=branch).replace(
+            "（`/close` 実行時に自動更新される）", "- （本日の更新ノートなし）"
+        )
+        _write(daily_note, content)
+        _commit_all(root, "add daily note")
 
-        # 未知のtype値を持つノート
-        _write(root / "20_Notes" / "Mystery.md", "---\ntype: mystery\n---\nbody")
+        # マージ自体は成功させ、直後の整合性チェックだけ強制的に不一致にする
+        monkeypatch.setattr(
+            close_day,
+            "_post_merge_diff",
+            lambda vault_root: "?? unexpected_file.md\n",
+        )
 
-        # 追跡済みファイルを削除する
-        # (git statusでは'D'として検出されるが実体はもう無い)
-        deleted_note = root / "20_Notes" / "Ghost.md"
-        _write(deleted_note, "---\ntype: project\n---\nbody")
-        _commit_all(root, "add ghost note")
-        deleted_note.unlink()
+        exit_code = close_day.main(["--vault-root", str(root)])
 
-        result = _run_close_day(root)
+        assert exit_code == 1
+        payload = json.loads(capsys.readouterr().out)
+        assert payload["status"] == "post_merge_mismatch"
+        assert "unexpected_file.md" in payload["detail"]
+        assert "pushed" not in payload
+        assert "branch_deleted" not in payload
 
-        assert result.returncode == 0, result.stdout + result.stderr
-        payload = json.loads(result.stdout)
-        assert payload["status"] == "ok"
-        assert sorted(payload["updated_notes"]) == ["Ghost", "Mystery"]
+        # ブランチが削除されずに残っていることを確認する
+        remaining_branches = _run_git(["branch", "--list", branch], cwd=root)
+        assert branch in remaining_branches
 
-        _run_git(["checkout", "main"], cwd=root)
-        merged = (root / "10_Daily" / f"{branch}.md").read_text(encoding="utf-8")
-        assert "**other**" in merged
-        assert "- [[Mystery]]" in merged
-        assert "- [[Ghost]]" in merged
-        assert "**project**" not in merged
+

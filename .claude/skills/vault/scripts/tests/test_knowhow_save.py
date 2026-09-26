@@ -100,14 +100,6 @@ def test_original_textが加工されず引用形式で残る(template_text, dt)
     assert "## 📄 ノウハウ本文\n> 生ログ行1\n> 生ログ行2\n>   インデント行" in note
 
 
-def test_タイトルが本文見出しに反映される(template_text, dt):
-    content = _sample_content(title="日付フォーマットの罠")
-    note = knowhow_save.build_note(
-        content, template_text, dt, tag="python/pandas"
-    )
-    assert "# 日付フォーマットの罠" in note
-
-
 def _make_vault(tmp):
     vault_root = Path(tmp)
     (vault_root / "80_Templates").mkdir(parents=True)

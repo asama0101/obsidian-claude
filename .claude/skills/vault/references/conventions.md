@@ -43,6 +43,13 @@ UPDATED_NOTES（close）、NEW_MEETING（meeting）、GANTT（task-gantt）。
 `vault_lib.has_marker_block`でマーカーの存在を確認すること
 （`task_gantt.py`の実装を参照）。
 
+## taskノートの「進捗メモ」見出しセクション操作
+`vault_lib.PROGRESS_HEADING_PATTERN`（`## 📌 進捗メモ`見出しにマッチする正規表現）と、それを使う`get_heading_section` / `set_heading_section` / `extract_checkboxes`は、`task_gantt.py`（todoの読み取り・ガント上へのmilestone描画）と`task_todo_apply.py`（todoの追記・置換）の2ファイルで共有される規約である。
+
+- `get_heading_section(text, pattern)`: 見出し直後〜次見出し直前の範囲を前後の改行1個ずつを除去して返す。見出しが無ければ空文字。
+- `set_heading_section(text, pattern, new_content)`: 同範囲を`new_content`に置換する（前後に改行を1個ずつ挿入）。見出しが無ければ元のtextをそのまま返す。
+- `extract_checkboxes(section_text)`: `- [ ] 本文` / `- [x] 本文` / `- [X] 本文`形式のチェックボックス行を`(label, done)`のタプルのリストで返す。本文が空のプレースホルダー行は除外する。
+
 ## Templater風プレースホルダ
 `vault_lib.fill_template`が扱う4種のみ: `{{title}}`
 `{{date:YYYY-MM-DD}}` `{{date:ddd}}`（日本語の曜日1文字）

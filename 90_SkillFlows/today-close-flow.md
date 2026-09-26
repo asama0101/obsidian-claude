@@ -23,9 +23,12 @@ flowchart TD
     D --> E{"次のいずれかに該当する<br/>タスクがあるか<br/>①created_dateが本日かつstart_date未設定<br/>②start_dateが本日かつstatusが1_todo<br/>③due_dateが本日かつstatusが4_done/5_cancel以外"}
     E -- あり --> E1["該当タスク一覧を提示する"]
     E1 --> E2["Baseビューから日付・ステータスを<br/>見直すよう促し、処理を中断する<br/>修正後は再度today-closeスキルを<br/>実行するよう案内する"]
-    E -- なし --> G[当日ブランチを作成してから更新された<br/>ノートの一覧を収集する]
-    G --> H[更新ノートをtype別<br/>project/meeting/task/knowhow/webclip/otherに<br/>グルーピングする]
-    H --> I[当日デイリーノートの<br/>更新ノート一覧ブロックを書き換える]
+    E -- なし --> G["today-touchedスキルの実行フローを呼び出す<br/>(today_touched.pyを引数なしで実行し<br/>更新ノート一覧を最新化する)"]
+    G --> H{"エラー(not_on_daily_branch)が<br/>返ったか"}
+    H -- はい --> H1["処理を巻き戻さず、close_day.py側の<br/>同種チェックに委ねてそのまま続行する"]
+    H -- いいえ --> I
+    H1 --> I
+    I[close_day.pyを実行する]
     I --> J{未コミットの変更があるか}
     J -- あり --> K[変更をコミットする]
     J -- なし --> L
@@ -33,7 +36,9 @@ flowchart TD
     L -- 一致 --> L1[既にclose済みとしてユーザーに伝える<br/>追加作業は不要]
     L -- 不一致 --> M[mainへ git merge --ff-only で<br/>マージする]
     M -- 失敗 --> M1[エラー: merge_failed<br/>詳細を提示しユーザーに解決方針を確認する<br/>自動解決はしない]
-    M -- 成功 --> N[当日ブランチを git branch -d で削除する]
+    M -- 成功 --> M2{マージ直後の作業ツリーは<br/>マージ後のコミット内容と<br/>完全に一致しているか<br/>(git status --porcelainが空か)}
+    M2 -- 不一致 --> M3[エラー: post_merge_mismatch<br/>詳細を提示しgit statusで原因を調査するよう案内する<br/>ブランチ削除・pushは行わない<br/>自動修復はしない]
+    M2 -- 一致 --> N[当日ブランチを git branch -d で削除する]
     N --> O{originリモートが設定されているか}
     O -- あり --> P[origin/mainへのpushを試みる<br/>失敗しても許容する]
     O -- なし --> Q[結果をユーザーに要約して報告する]
@@ -54,6 +59,7 @@ flowchart TD
     class E2 error
     class G python
     class H python
+    class H1 python
     class I python
     class J python
     class K python
@@ -61,6 +67,8 @@ flowchart TD
     class L1 claude
     class M python
     class M1 error
+    class M2 python
+    class M3 error
     class N python
     class O python
     class P python
@@ -75,13 +83,14 @@ flowchart TD
 
 - **not_on_daily_branch**: 現在のブランチ名が`YYYY-MM-DD`形式でない場合のエラー。当日ブランチへ切り替えてから再実行する。
 - **merge_failed**: `git merge --ff-only`が失敗した場合（`main`が当日ブランチの分岐後に進んでいる等）。`--no-ff`やrebaseによる自動解決は行わず、詳細をそのまま提示してユーザーに解決方針を確認する。
+- **post_merge_mismatch**: `git merge --ff-only`自体は成功したが、マージ直後の作業ツリーが`main`のコミット内容と完全に一致していない（`git status --porcelain`が非空）場合。`merge_failed`とは異なりマージコマンド自体は失敗していない。このステータスではブランチ削除・pushのいずれも行わず当日ブランチは残る。スクリプトはこの時点で既に`git checkout main`を実行済みだが、`git merge --ff-only`はコミットを一切変えないため`main`と当日ブランチは同一コミットを指しており、`git status`での調査は`main`上のままでも当日ブランチをcheckoutしても実質的な違いはない。自動修復はしない。
 - **already_closed**: `main`と当日ブランチのHEADが既に一致している場合、追加の作業なしで終了する。
 - 未コミットの変更が無い場合はコミット処理をスキップする。
 - 会議予定確認（meeting-setupスキル呼び出し）がGoogle Calendar MCP未接続等で失敗しても、today-close本来の処理（コミット・マージ・ブランチ削除）は継続する。
 - pushの失敗は致命的エラーとしない。originリモートが無い場合はpush自体をスキップし、pushが失敗した場合も許容する。
 - タスクの日付・ステータス見直しチェックは、次の3条件のいずれかに該当するタスクを対象とする。
   1. `created_date`が本日かつ`start_date`が未設定（新規作成したがいつ着手するか決めていないタスク）
-  2. `start_date`が本日かつ`status`が`1_todo`（今日着手する予定だったが、終業時点で未着手のままのタスク）
+  2. `start_date`が本日かつ`status`が`1_todo`（今日着手する予定だったが、終業時点で未着手のままのタスク。`3_pending`は意図的な保留状態であり単純な未着手忘れとは異なるため対象外）
   3. `due_date`が本日かつ`status`が`4_done`/`5_cancel`以外（今日が期限だが、終業時点で完了・キャンセルになっていないタスク）
 - 1つでも該当タスクがあれば、一覧を提示した上で**処理を中断する**（コミット・マージ等の後続処理には進まない）。
 - ユーザーはBaseビューから該当タスクの日付・ステータスを修正し、再度`today-close`スキルを実行する。
@@ -93,11 +102,15 @@ flowchart TD
 - タスクの日付見直しチェックが機能するために必要な`task_save.py`側の改修は完了済みである（`task_save.py`はタスク作成時に`created_date`のみをセットし、`start_date`は空欄のまま作成する）。
 - `needs_task_check`（attendance確定済みだが未消化のアクションアイテムが残る議事録）は、これまで旧`meeting`スキルのタスク化フローが消費していたが、タスク化が`meeting-followup`スキルへ独立したことで、消費先が無いまま埋もれる恐れがあった。そのため`today-close`にもこの一覧提示を追加する。
 - ただし`needs_task_check`は日付を問わず全件対象の恒常的なリマインダーであり（`meeting-setup`のSKILL.md記載の仕様通り）、タスクの日付見直しチェックとは異なり**処理を中断しない**。一覧提示後も後続のコミット・マージ処理はそのまま続行する。
+- 更新ノート一覧（type別グルーピング・当日デイリーノートの`UPDATED_NOTES_START`/`UPDATED_NOTES_END`区間への書き込み）の再生成ロジックは`today-touched`スキル（`today_touched.py`）に切り出されている。`close_day.py`自体はこのマーカーに一切触れない。`today_touched.py`は`close_day.py`とimport/subprocess関係を持たない独立したスクリプトであり、毎回全体を再計算する冪等スクリプトである。
 
 ## 関連ドキュメント
 
 - [today-close/SKILL.md](../.claude/skills/vault/skills/today-close/SKILL.md): 本フローの一次情報
+- [today-touched/SKILL.md](../.claude/skills/vault/skills/today-touched/SKILL.md): 更新ノート一覧の再生成ロジックの一次情報
+- [today-touched-flow.md](./today-touched-flow.md): 更新ノート一覧再生成フロー図
 - [close_day.py](../.claude/skills/vault/scripts/close_day.py): 実装本体
+- [today_touched.py](../.claude/skills/vault/scripts/today_touched.py): 更新ノート一覧再生成の実装本体
 
 ---
-最終更新: 2026-09-24
+最終更新: 2026-09-25

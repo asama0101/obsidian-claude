@@ -276,6 +276,60 @@ def test_見出しが文書末尾のセクションなら末尾までを返す()
     assert text[span[0] : span[1]] == "\nline1\nline2"
 
 
+def test_get_heading_sectionで見出し直後から次の見出し直前までを取得する():
+    import re
+
+    text = "## 見出し1\nline1\nline2\n## 見出し2\nline3\n"
+    pattern = re.compile(r"^## 見出し1[ \t]*$", re.MULTILINE)
+    result = vault_lib.get_heading_section(text, pattern)
+    assert result == "line1\nline2"
+
+
+def test_get_heading_sectionで見出しが無ければ空文字():
+    import re
+
+    text = "## 別の見出し\nline1\n"
+    pattern = re.compile(r"^## 見出し1[ \t]*$", re.MULTILINE)
+    result = vault_lib.get_heading_section(text, pattern)
+    assert result == ""
+
+
+def test_set_heading_sectionで見出しあり置換する():
+    import re
+
+    text = "## 見出し1\nold1\nold2\n## 見出し2\nline3\n"
+    pattern = re.compile(r"^## 見出し1[ \t]*$", re.MULTILINE)
+    result = vault_lib.set_heading_section(text, pattern, "new content")
+    assert result == "## 見出し1\nnew content\n## 見出し2\nline3\n"
+
+
+def test_set_heading_sectionで見出しが無ければtextをそのまま返す():
+    import re
+
+    text = "## 別の見出し\nline1\n"
+    pattern = re.compile(r"^## 見出し1[ \t]*$", re.MULTILINE)
+    result = vault_lib.set_heading_section(text, pattern, "new content")
+    assert result == text
+
+
+def test_extract_checkboxesで未チェックとチェック済みが混在する():
+    section_text = "- [ ] task1\n- [x] task2\n- [X] task3\n"
+    result = vault_lib.extract_checkboxes(section_text)
+    assert result == [("task1", False), ("task2", True), ("task3", True)]
+
+
+def test_extract_checkboxesで空ラベルは除外する():
+    section_text = "- [ ] \n- [ ] task1\n"
+    result = vault_lib.extract_checkboxes(section_text)
+    assert result == [("task1", False)]
+
+
+def test_extract_checkboxesで対象外テキストは空リスト():
+    section_text = "no checkboxes here\njust text\n"
+    result = vault_lib.extract_checkboxes(section_text)
+    assert result == []
+
+
 def test_複数ディレクトリがある場合ソートされた名前を返す():
     with tempfile.TemporaryDirectory() as tmp:
         projects_dir = Path(tmp) / "Projects"

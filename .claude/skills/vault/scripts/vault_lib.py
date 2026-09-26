@@ -211,6 +211,9 @@ def has_marker_block(text: str, start_marker: str, end_marker: str) -> bool:
 # 次の見出し行(セクションの終端)を探すための正規表現
 _NEXT_HEADING_PATTERN = re.compile(r"^#", re.MULTILINE)
 
+# タスクノート本文の「進捗メモ」見出し(task_gantt.py/task_todo_apply.py共通)
+PROGRESS_HEADING_PATTERN = re.compile(r"^## 📌 進捗メモ[ \t]*$", re.MULTILINE)
+
 
 def find_heading_section(text: str, heading_pattern: re.Pattern) -> tuple[int, int] | None:
     """heading_patternにマッチする見出し行の直後から、次の見出し行の直前まで
@@ -225,6 +228,54 @@ def find_heading_section(text: str, heading_pattern: re.Pattern) -> tuple[int, i
     next_heading_match = _NEXT_HEADING_PATTERN.search(text, section_start)
     section_end = next_heading_match.start() if next_heading_match else len(text)
     return section_start, section_end
+
+
+def get_heading_section(text: str, heading_pattern: re.Pattern) -> str:
+    """heading_patternにマッチする見出し直後〜次見出し直前の範囲を、前後の
+    改行1個ずつを除去して返す。見出しが見つからなければ空文字。
+    """
+    span = find_heading_section(text, heading_pattern)
+    if span is None:
+        return ""
+
+    inner = text[span[0] : span[1]]
+    if inner.startswith("\n"):
+        inner = inner[1:]
+    if inner.endswith("\n"):
+        inner = inner[:-1]
+    return inner
+
+
+def set_heading_section(text: str, heading_pattern: re.Pattern, new_content: str) -> str:
+    """heading_patternにマッチする見出し直後〜次見出し直前の範囲を new_content
+    に置換する(前後に改行を1個ずつ挿入)。見出しが見つからなければ元の text を
+    そのまま返す。
+    """
+    span = find_heading_section(text, heading_pattern)
+    if span is None:
+        return text
+
+    before = text[: span[0]]
+    after = text[span[1] :]
+    return f"{before}\n{new_content}\n{after}"
+
+
+# `- [ ] 本文` / `- [x] 本文` / `- [X] 本文` 形式のチェックボックス行
+_CHECKBOX_LINE_PATTERN = re.compile(r"^- \[([ xX])\] ?(.*)$", re.MULTILINE)
+
+
+def extract_checkboxes(section_text: str) -> list[tuple[str, bool]]:
+    """section_textからチェックボックス行を抽出し、(label, done)のタプルの
+    リストで返す。本文が空のプレースホルダー行は除外する。
+    """
+    result = []
+    for match in _CHECKBOX_LINE_PATTERN.finditer(section_text):
+        label = match.group(2)
+        if not label.strip():
+            continue
+        done = match.group(1) in ("x", "X")
+        result.append((label, done))
+    return result
 
 
 def list_project_names(projects_dir: Path) -> list[str]:

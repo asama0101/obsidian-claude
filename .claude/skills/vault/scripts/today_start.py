@@ -3,6 +3,7 @@
 1日の作業開始時に実行する。未マージの過去日ブランチが残っていないか確認し、
 当日日付のgitブランチを作成・チェックアウトしたうえで、デイリーノートを
 テンプレートから作成する（前日ノートのCarryoverブロックがあれば転記する）。
+また、新規ブランチ作成時はmain上の未コミット変更を検出しコミットする。
 """
 
 from __future__ import annotations
@@ -55,10 +56,36 @@ def _has_origin_remote(vault_root: Path) -> bool:
         return False
 
 
+def _commit_stray_changes(vault_root: Path, today: str) -> str | None:
+    """mainに残っていた追跡済みファイルの未コミット変更を検出し、新ブランチ上でコミットする。
+
+    コミットした場合はそのコミットSHAを、変更が無ければNoneを返す。
+    """
+    # --untracked-files=no: 未追跡の新規ファイルは対象外(git add -uの対象範囲と一致させる)。
+    status_output = vault_lib.run_git(
+        "-c", "core.quotepath=false",
+        "status", "--porcelain", "--untracked-files=no",
+        cwd=vault_root,
+    )
+    if not status_output.strip():
+        return None
+
+    vault_lib.run_git("add", "-u", cwd=vault_root)
+    vault_lib.run_git(
+        "commit", "-m",
+        f"Commit stray uncommitted changes found on main before opening daily branch for {today}",
+        cwd=vault_root,
+    )
+    return vault_lib.run_git("rev-parse", "HEAD", cwd=vault_root).strip()
+
+
 def run(vault_root: Path, dt: datetime.datetime | None = None) -> dict:
     """today スキルの処理本体。結果を dict で返す(JSON化はしない)。"""
     dt = dt or datetime.datetime.now()
     today = dt.strftime("%Y-%m-%d")
+
+    # run()全体で使う。分岐に関わらずここで初期化する(既存ブランチパスでは常にNoneのまま)。
+    stray_commit_sha: str | None = None
 
     # 1. 未マージの過去日ブランチが残っていないか確認する。
     #    このスクリプト自身はマージ・削除しない。
@@ -70,7 +97,11 @@ def run(vault_root: Path, dt: datetime.datetime | None = None) -> dict:
         b for b in no_merged_branches if _DATE_RE.match(b) and b != today
     ]
     if blocked_branches:
-        return {"status": "blocked", "branches": blocked_branches}
+        return {
+            "status": "blocked",
+            "branches": blocked_branches,
+            "stray_changes_committed": stray_commit_sha,
+        }
 
     # 2. 当日ブランチの確認・作成(べき等)
     if today in _list_branch_names(vault_root):
@@ -84,11 +115,18 @@ def run(vault_root: Path, dt: datetime.datetime | None = None) -> dict:
         vault_lib.run_git("checkout", "-b", today, cwd=vault_root)
         branch_status = "created"
 
+        stray_commit_sha = _commit_stray_changes(vault_root, today)
+
     # 3. デイリーノートが既に存在する場合はCarryover転記をスキップする。
     daily_dir = vault_root / "10_Daily"
     daily_note_path = daily_dir / f"{today}.md"
     if daily_note_path.exists():
-        return {"status": "ok", "branch": branch_status, "daily_note": "skipped"}
+        return {
+            "status": "ok",
+            "branch": branch_status,
+            "daily_note": "skipped",
+            "stray_changes_committed": stray_commit_sha,
+        }
 
     # 4. 前日候補ノートを探す(連続していなくてもよい)。
     carryover_source_path = _find_carryover_source(daily_dir, today)
@@ -119,6 +157,7 @@ def run(vault_root: Path, dt: datetime.datetime | None = None) -> dict:
         "branch": branch_status,
         "daily_note": "created",
         "carryover_source": carryover_source,
+        "stray_changes_committed": stray_commit_sha,
     }
 
 

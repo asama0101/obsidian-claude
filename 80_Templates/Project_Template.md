@@ -3,7 +3,6 @@ type: project
 start_date: {{date:YYYY-MM-DD}}
 due_date: 
 ---
-# プロジェクト: {{title}}
 
 ## 🎯 概要・目的
 - 

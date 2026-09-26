@@ -19,11 +19,14 @@ views:
   - type: table
     name: Today
     filters:
-      and:
-        - start_date
-        - start_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today())
-        - status != "4_done"
-        - status != "5_cancel"
+      or:
+        - and:
+            - status == "4_done"
+            - start_date == if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today())
+        - and:
+            - status != "4_done"
+            - status != "5_cancel"
+            - start_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today())
     groupBy:
       property: status
       direction: ASC
@@ -51,13 +54,7 @@ views:
         - status != "5_cancel"
         - or:
             - "!start_date"
-            - "!due_date"
-            - and:
-                - start_date
-                - start_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today()) + "14d"
-            - and:
-                - due_date
-                - due_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today()) + "14d"
+            - start_date <= if(/^\d{4}-\d{2}-\d{2}$/.matches(this.file.basename), date(this.file.basename + " 00:00:00"), today()) + "14d"
     groupBy:
       property: start_date
       direction: ASC
@@ -71,8 +68,8 @@ views:
     sort:
       - property: project
         direction: ASC
-      - property: due_date
-        direction: ASC
+    columnSize:
+      note.status: 113
   - type: table
     name: ProjectTasks
     filters:

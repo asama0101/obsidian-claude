@@ -69,9 +69,6 @@ import vault_lib
 _OCCURRENCE_COMMENT_RE = re.compile(r'<!-- (occurrence_id: "[^"]*"[^>]*?) -->')
 _META_FIELD_RE = re.compile(r'(\w+): "([^"]*)"')
 
-# 本文冒頭の `# タイトル` 見出し行を読み取る正規表現
-_TITLE_RE = re.compile(r"^# (.+)$", re.MULTILINE)
-
 # 定例予定ノート本文の「開催日時」行を組み立てるためのテンプレート断片
 _MEETING_DATETIME_LINE_TEMPLATE = (
     "{{date:YYYY-MM-DD}} (<span>{{date:ddd}}</span>) {{time:HH:mm}} 〜"
@@ -269,11 +266,6 @@ def _set_occurrence_meta(text: str, **fields: str) -> str:
 
 def _get_occurrence_id(text: str) -> str | None:
     return _get_occurrence_meta(text).get("occurrence_id") or None
-
-
-def _get_note_title(body_text: str) -> str:
-    m = _TITLE_RE.search(body_text)
-    return m.group(1) if m else ""
 
 
 def _replace_body_line(inner: str, label: str, new_value: str) -> str:
@@ -525,13 +517,13 @@ def _scan_stale_and_pending(
 
             if attendance == "1_scheduled" and date and date < today:
                 needs_attendance.append(
-                    {"note_path": str(path), "title": _get_note_title(body_text)}
+                    {"note_path": str(path), "title": path.stem}
                 )
             elif attendance in ("2_done", "3_skip") and _has_unchecked_action_items(
                 body_text
             ):
                 needs_task.append(
-                    {"note_path": str(path), "title": _get_note_title(body_text)}
+                    {"note_path": str(path), "title": path.stem}
                 )
 
         elif note_type == "meeting_series":
@@ -547,7 +539,7 @@ def _scan_stale_and_pending(
 
             if occ_attendance == "1_scheduled" and occ_date and occ_date < today:
                 needs_attendance.append(
-                    {"note_path": str(path), "title": _get_note_title(body_text)}
+                    {"note_path": str(path), "title": path.stem}
                 )
             elif occ_attendance in ("2_done", "3_skip"):
                 current_block = vault_lib.get_marker_block(
@@ -555,7 +547,7 @@ def _scan_stale_and_pending(
                 )
                 if _has_unchecked_action_items(current_block):
                     needs_task.append(
-                        {"note_path": str(path), "title": _get_note_title(body_text)}
+                        {"note_path": str(path), "title": path.stem}
                     )
 
     return to_delete, needs_attendance, needs_task

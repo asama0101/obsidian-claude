@@ -1,7 +1,6 @@
 ---
 type: daily
 ---
-# {{title}} (<span>{{date:ddd}}</span>)
 
 ## 📅 本日の議事録
 ![[Meetings.base#Today]]
@@ -9,19 +8,19 @@ type: daily
 ## 📋 本日のタスク
 ![[Tasks.base#Today]]
 
-> [!WARNING]+ 📅 要スケジュール確認タスク
+> [!WARNING]- 📅 要スケジュール確認タスク（14日以内）
 > ![[Tasks.base#ScheduleCheck]]
 
-## 📊 タスクガントチャート
-*（`/task-gantt` 実行時に自動更新される）*
-<!-- GANTT_START -->
-<!-- GANTT_END -->
+> [!INFO]+ 📊 タスクガントチャート
+> *（`/task-gantt` 実行時に自動更新される）*
+> <!-- GANTT_START -->
+> <!-- GANTT_END -->
 
 ## 📂 アクティブプロジェクト
 ![[Projects.base#Active]]
 
 ## 🔗 本日作成・更新したノート
-*（`/today-close` 実行時に自動更新される）*
+*（`/today-touched` で日中いつでも更新。`/close` 実行時にも自動実行）*
 <!-- UPDATED_NOTES_START -->
 <!-- UPDATED_NOTES_END -->
 

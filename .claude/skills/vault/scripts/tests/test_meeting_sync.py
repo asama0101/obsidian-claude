@@ -114,7 +114,6 @@ def test_新規作成でproject推定される():
         assert (
             vault_lib.get_fm_value(fm, "url") == "https://meet.google.com/abc-defg-hij"
         )
-        assert "# VaultMigration定例MTG" in body
 
 
 def test_project推定できない場合はAreas配下に空欄で作成():
@@ -926,7 +925,7 @@ def test_単発で開催日が過去かつscheduledのままなら検出され�
         result2 = meeting_sync.sync_events([], vault_root)
 
         assert result2["needs_attendance_check"] == [
-            {"note_path": str(note_path), "title": "定例1on1"}
+            {"note_path": str(note_path), "title": "2026-09-21 定例1on1"}
         ]
 
 
@@ -1060,7 +1059,7 @@ def test_単発で2_doneかつ未チェックアイテムがあれば検出さ�
         result2 = meeting_sync.sync_events([], vault_root)
 
         assert result2["needs_task_check"] == [
-            {"note_path": str(note_path), "title": "定例1on1"}
+            {"note_path": str(note_path), "title": "2026-09-21 定例1on1"}
         ]
 
 
@@ -1076,7 +1075,7 @@ def test_単発で3_skipでも検出される():
         result2 = meeting_sync.sync_events([], vault_root)
 
         assert result2["needs_task_check"] == [
-            {"note_path": str(note_path), "title": "定例1on1"}
+            {"note_path": str(note_path), "title": "2026-09-21 定例1on1"}
         ]
 
 
@@ -1146,7 +1145,7 @@ def test_単発でattendanceが1_scheduledのままならneeds_task_checkに出�
 
         assert result2["needs_task_check"] == []
         assert result2["needs_attendance_check"] == [
-            {"note_path": str(note_path), "title": "定例1on1"}
+            {"note_path": str(note_path), "title": "2026-09-21 定例1on1"}
         ]
 
 
@@ -1170,7 +1169,7 @@ def test_単発で開催日が今日でも過去でも検出される():
         result2 = meeting_sync.sync_events([event], vault_root)
 
         assert result2["needs_task_check"] == [
-            {"note_path": str(note_path), "title": "定例1on1"}
+            {"note_path": str(note_path), "title": f"{today.isoformat()} 定例1on1"}
         ]
 
 
@@ -1331,7 +1330,7 @@ def test_新規イベント同期と同じ呼び出し内でneeds_task_checkも�
 
         assert len(result2["created"]) == 1
         assert result2["needs_task_check"] == [
-            {"note_path": str(existing_note_path), "title": "定例1on1"}
+            {"note_path": str(existing_note_path), "title": "2026-09-21 定例1on1"}
         ]
 
 

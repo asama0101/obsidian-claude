@@ -41,7 +41,13 @@ description: |
    上記2・3は、開催確認・アクションアイテム消化の抜け漏れを防ぐための
    確認ステップである。
 
-4. `close_day.py` を実行する。
+4. 続けて`today-touched`スキルの実行フローを呼び出す（`today_touched.py`を
+   引数なしで実行する）。手順1〜3で生じたノートの新規作成・更新も含め、
+   コミット直前の状態で更新ノート一覧を最新化するため、close_day.py実行の
+   直前に置く。エラー（`not_on_daily_branch`）が返っても、以降の処理は
+   巻き戻さず、close_day.py側の同種チェックに委ねる。
+
+5. `close_day.py` を実行する。
 
    ```
    PYTHONUTF8=1 python .claude/skills/vault/scripts/close_day.py
@@ -50,7 +56,7 @@ description: |
    Vault ルート以外から実行する場合や動作確認時は `--vault-root <path>`
    で対象を明示できる。
 
-5. スクリプトは標準出力に1行のJSONを返す。`status` フィールドに応じて
+6. スクリプトは標準出力に1行のJSONを返す。`status` フィールドに応じて
    次のように解釈する。
 
    - `"needs_task_review"`: タスクの日付・ステータス見直しが必要な状態。
@@ -59,6 +65,7 @@ description: |
      自体がここで打ち切っている）。該当タスクは次の3条件のいずれかを満たす。
      1. `created_date`が本日かつ`start_date`未設定
      2. `start_date`が本日かつ`status`が`1_todo`
+        （`3_pending`は意図的な保留状態であり、単純な未着手忘れとは異なるため対象外）
      3. `due_date`が本日かつ`status`が`4_done`/`5_cancel`以外
 
      ユーザーに該当タスク一覧を提示し、デイリーノートに埋め込まれた
@@ -69,7 +76,6 @@ description: |
 
      | フィールド | 内容 |
      |------------|------|
-     | `updated_notes` | 今日更新されたノート名の一覧 |
      | `committed` | コミットを行ったか |
      | `branch_deleted` | `main`へのff-onlyマージ後、当日ブランチを`git branch -d`で削除した（マージ直後のため通常失敗しない。万一失敗した場合はスクリプトが異常終了しJSON自体が出力されない。そのため値は常に`true`固定であり、削除の成否を判定した結果ではない） |
      | `pushed` | `origin`へpushできたか |
@@ -85,15 +91,40 @@ description: |
      ユーザーに提示し、`main` を先に取り込む（当日ブランチへ `main`
      を取り込んでから再実行する等）か手動でどう解決したいかの判断を
      仰ぐ。ユーザーの指示なしに競合解決を進めない。
+   - `"post_merge_mismatch"`: `main` へのff-onlyマージ自体は成功したが、
+     マージ直後の作業ツリーが `main` のコミット内容と完全に一致していない
+     （`git status --porcelain`が非空）。`merge_failed`とは異なりマージ
+     コマンド自体は失敗していない点に注意する。`detail`にporcelain形式の
+     差分をそのまま含む。**このステータスではブランチ削除（`git branch -d`）
+     ・`origin`へのpushのいずれも実行されていない**ため、当日ブランチは
+     削除されずに残る。スクリプトはこの時点で既に`git checkout main`を
+     実行済みであり、終了時点のカレントブランチは`main`である。ただし
+     `git merge --ff-only`はコミットを一切変えないため、`main`と当日
+     ブランチはこの時点で同一コミットを指しており、作業ツリーの状態を
+     調査するうえで`main`上のままでも当日ブランチをcheckoutしても実質的な
+     違いはない。`detail`の内容をそのままユーザーに提示し、`git status`で
+     原因（意図しないファイル変更等、OneDrive同期によるファイルシステム
+     レベルの復元等を含む）を調査するよう案内する。必要に応じて
+     `git checkout <当日ブランチ名>`で明示的に切り替えても構わない。
+     スクリプトはここでも自動修復しない。なお、Windows環境で
+     `core.autocrlf=true`設定時、改行コード正規化のタイミングにより実害の
+     ない誤検知が発生する可能性がある（既知の残存リスクとして受け入れ済み。
+     コード側での緩和策は未実装）。
 
-6. いずれの場合も、終了コードが非ゼロ（`needs_task_review`/`error`/
-   `merge_failed`）のときはVault の状態（現在のブランチ・`git status`）を
-   変更前後で確認し、意図しない状態のまま放置しない。
+7. いずれの場合も、終了コードが非ゼロ（`needs_task_review`/`error`/
+   `merge_failed`/`post_merge_mismatch`）のときはVault の状態（現在の
+   ブランチ・`git status`）を変更前後で確認し、意図しない状態のまま
+   放置しない。
 
 ## 備考
-- `main` へのff-onlyマージ成功後、当日ブランチは`git branch -d`
-  （安全な削除。未マージなら失敗する）で自動的に削除される。
+- `main` へのff-onlyマージ成功後、作業ツリーがマージ後のコミット内容と
+  完全に一致していることを確認したうえで、当日ブランチは`git branch -d`
+  （安全な削除。未マージなら失敗する）で自動的に削除される。不一致
+  （`post_merge_mismatch`）があればブランチ削除・pushは行わない。
 - 実装本体・詳細な除外規則は `scripts/close_day.py` を参照。
+- 更新ノート一覧の再生成ロジックは`today-touched`スキル（`scripts/today_touched.py`）
+  に切り出されている。呼び出し方の詳細は`today-touched/SKILL.md`の
+  「today-closeスキルからの呼び出しについて」を参照。
 - meeting-setupスキルの自動実行の詳細は`meeting-setup/SKILL.md`の
   「today-open/today-closeスキルからの呼び出しについて」を参照。
 - `needs_attendance_check`・`needs_task_check`の検出ロジック自体は

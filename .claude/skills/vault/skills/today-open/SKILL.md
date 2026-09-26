@@ -20,6 +20,8 @@ description: |
    - `status: "blocked"`
      - `branches`に未マージの過去日ブランチ名の一覧が入る。
      - このスクリプト自身はマージ・削除を行わない。
+     - `stray_changes_committed`は常に`null`（後述の新規ブランチ作成処理まで
+       到達していないため）。
      - ユーザーに「未マージの過去日ブランチ（例: `branches`の内容）が残っています。
        マージまたは破棄してから再実行してください」と確認し、対応方針が決まるまで
        `today-open`の処理を先に進めない。
@@ -30,6 +32,10 @@ description: |
        または`"created"`（`Daily_Template.md`から新規作成した）。
      - `daily_note`が`"created"`のとき、`carryover_source`に転記元にした前日ノートの
        日付（`YYYY-MM-DD`）が入る。前日ノートが見つからなければ`null`。
+     - `stray_changes_committed`: `branch`が`"created"`のとき、`main`上に残っていた
+       追跡済みファイルの未コミット変更を新ブランチ上でコミットした場合、その
+       コミットSHA（文字列）が入る。変更が無かった場合、または`branch`が
+       `"existing"`（既存の当日ブランチへの単純checkout）の場合は常に`null`。
 3. `status: "ok"`の場合、結果報告の前に続けてmeeting-setupスキルの実行フローを
    呼び出す（詳細は備考のリンク参照）。1日の開始時にカレンダー予定を
    反映した議事録ノートを揃えておくためである。Google Calendar MCP未接続
@@ -51,6 +57,15 @@ description: |
 ## 備考
 - 当日ブランチの作成前に、`origin`リモートが設定されていれば`main`を
   `git pull --ff-only`で最新化する（失敗しても処理は続行する）。
+- `main`から新規に当日ブランチを作成する場合（`branch: "created"`）、
+  `checkout -b`の直後に、`main`上に残っていた追跡済みファイルの未コミット
+  変更（`git status --porcelain --untracked-files=no`で検出。未追跡の新規
+  ファイルは対象外）があれば、新ブランチ上で`git add -u`→コミットする
+  （本来`branch-guard.sh`によりmain上での書き込みは発生しないはずだが、
+  OneDrive同期によるファイルシステムレベルの復元等、gitの外側で生じうる
+  想定外の変更に対する一般的な安全策）。既存の当日ブランチへの単純checkout
+  （`branch: "existing"`）ではこの処理は行われない。このパスは`main`を
+  一切checkoutしないため、構造上この機能が発動しない設計上の割り切りである。
 - Carryover転記は前日ノートの`<!-- CARRYOVER_START -->`〜`<!-- CARRYOVER_END -->`
   ブロックの中身のみを読み取り、元ノートは一切変更しない。
 - 前日ノートは`10_Daily/`内を日付降順に走査し、当日より前で最初に見つかったもの
