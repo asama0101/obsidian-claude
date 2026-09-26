@@ -10,7 +10,7 @@ flowchart TD
     Start --> A["対象タスクノートを特定する<br/>未指定ならユーザーに確認する"]
     A --> B["Claudeが対象ノートの内容を読み、<br/>todo分解案を提示する"]
     B --> C["todo項目一覧・各todoの期日（自由記述可）を<br/>ユーザーに確認する（自動確定しない）"]
-    C --> D["task_todo_apply.pyを実行する<br/>--note &lt;path&gt; --todo &quot;&lt;text&gt;&quot; ..."]
+    C --> D["task_todo_apply.pyを実行する<br/>--note <path> --todo '<text>' ..."]
     D --> E{"標準出力のstatusを確認する"}
     E -- "error: no_todos/note_not_found/<br/>not_a_task_note/path_outside_vault" --> E1["reasonをそのまま提示し<br/>処理を中断する"]
     E -- ok --> F["task_gantt.pyを実行し<br/>当日デイリーノートのガントチャートへ反映する"]
