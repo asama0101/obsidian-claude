@@ -15,6 +15,28 @@ vaultプラグインの全スキルが従う共通ルール。決定的な処理
 YAMLとして再構成せず、該当キーの行だけを文字列操作で置換する
 （コメントや手書き整形を壊さないため）。
 
+## 日付系frontmatterプロパティの型
+`date` / `start_date` / `due_date` / `created_date` / `last_updated`等のfrontmatter日付プロパティは、常にYAMLのdate型（クォート無し）で書き込む。
+テンプレート内に`{{date:YYYY-MM-DD}}`を直接frontmatterへ書いてはならない。
+Templater風プレースホルダの`{{...}}`はYAMLのflow-mapping構文と誤認識され、Obsidianのプロパティ型エラーを引き起こす。
+
+- テンプレート側（`80_Templates/*.md`）のfrontmatterは常に**空値**にする（例: `date: `）。テンプレート単体で開いても型エラーが起きないようにするため。
+- 各スクリプトは`fill_template` → `split_frontmatter`の後に、`vault_lib.set_fm_raw_value(fm_text, "<key>", dt.strftime("%Y-%m-%d"))`を呼んでクォート無しの値を明示的に書き込む。`set_fm_value`はダブルクォートで囲むため使わない。
+- body内（frontmatter外）で使う`{{date:YYYY-MM-DD}}`等は対象外。YAML frontmatterではないため`fill_template`のみで置換してよい（例: `Meeting_Series_Template.md`の見出し内プレースホルダ）。
+- 新規に日付系プロパティを追加する場合は、`.obsidian/types.json`に`"<key>": "date"`の型登録も行う。無いとObsidianのProperties機能が型を誤推定する。
+- 現在登録済みの日付系プロパティ: `date` / `start_date` / `due_date` / `created_date` / `last_updated`（`.obsidian/types.json:7-11`）。
+
+実装例:
+
+| ファイル | 行 | 関数 / 備考 |
+|---|---|---|
+| `vault_lib.py` | 119-121 | `set_fm_raw_value`定義 |
+| `knowhow_save.py` | 86 | `build_note` |
+| `webclip_save.py` | 203 | `build_note_text` |
+| `project_create.py` | 46, 49 | `create_project` |
+| `task_save.py` | 30, 33 | `build_note_text`（この規約の元になった既存実績パターン） |
+| `meeting_sync.py` | 170, 225, 413, 471 | 複数箇所 |
+
 ## taskノートの`project`値
 taskノートの`project`フロントマター値は常に`[[Name]]`形式
 （Obsidianのwikilink）で統一する。`82_Bases/Tasks.base`の

@@ -43,6 +43,7 @@ def create_project(
     template_text = (vault_root / _TEMPLATE_RELATIVE_PATH).read_text(encoding="utf-8")
     filled = vault_lib.fill_template(template_text, title=title, dt=dt)
     fm_text, body_text = vault_lib.split_frontmatter(filled)
+    fm_text = vault_lib.set_fm_raw_value(fm_text, "start_date", dt.strftime("%Y-%m-%d"))
 
     if due_date:
         fm_text = vault_lib.set_fm_raw_value(fm_text, "due_date", due_date)

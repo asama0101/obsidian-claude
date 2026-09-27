@@ -18,7 +18,7 @@ import project_create  # noqa: E402
 _TEMPLATE_TEXT = (
     "---\n"
     "type: project\n"
-    'start_date: "{{date:YYYY-MM-DD}}"\n'
+    "start_date: \n"
     "due_date: \n"
     "---\n"
     "# プロジェクト: {{title}}\n"
@@ -60,7 +60,8 @@ def test_正常系で3つのサブフォルダとノートが作成される(dt)
         assert note_path == project_dir / "新規プロジェクト.md"
 
         content = note_path.read_text(encoding="utf-8")
-        assert 'start_date: "2026-09-21"' in content
+        assert "start_date: 2026-09-21" in content
+        assert 'start_date: "2026-09-21"' not in content
         assert "type: project" in content
         assert "# プロジェクト: 新規プロジェクト" in content
 

@@ -25,7 +25,7 @@ TEMPLATE_TEXT = (
     '---\n'
     'type: webclip\n'
     'url: ""\n'
-    'date: "{{date:YYYY-MM-DD}}"\n'
+    'date: \n'
     'tags:\n'
     '  - webclip\n'
     '---\n'
@@ -356,6 +356,8 @@ def test_frontmatterのurlとdateが正しく設定される():
         assert vault_lib.get_fm_value(fm, "url") == "https://example.com/dated"
         today = datetime.date.today().strftime("%Y-%m-%d")
         assert vault_lib.get_fm_value(fm, "date") == today
+        assert f"date: {today}" in fm
+        assert f'date: "{today}"' not in fm
 
 
 def test_full_text内の画像記法が抽出されダウンロードされblockquote内でローカル埋め込みに置換される():

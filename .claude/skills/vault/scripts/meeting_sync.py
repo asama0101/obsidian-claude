@@ -167,7 +167,7 @@ def _create_single_note(event: dict, vault_root: Path) -> tuple[Path, str | None
     )
     fm_text = vault_lib.set_fm_value(fm_text, "project", project_match or "")
     fm_text = vault_lib.set_fm_value(fm_text, "calendar_event_id", event["id"])
-    fm_text = vault_lib.set_fm_value(fm_text, "date", start_dt.strftime("%Y-%m-%d"))
+    fm_text = vault_lib.set_fm_raw_value(fm_text, "date", start_dt.strftime("%Y-%m-%d"))
     fm_text = vault_lib.set_fm_value(fm_text, "url", event.get("hangoutLink", ""))
     fm_text = vault_lib.set_fm_value(fm_text, "attendance", "1_scheduled")
 
@@ -222,7 +222,7 @@ def _process_single_event(
         or new_location != old_location
         or new_attendees_text != old_attendees_text
     ):
-        fm_text = vault_lib.set_fm_value(fm_text, "date", new_date)
+        fm_text = vault_lib.set_fm_raw_value(fm_text, "date", new_date)
         fm_text = vault_lib.set_fm_value(fm_text, "url", new_url)
         body_text = _replace_body_line(body_text, "開催場所", new_location)
         body_text = _replace_body_line(body_text, "参加者", new_attendees_text)
@@ -410,7 +410,7 @@ def _create_series_note(event: dict, vault_root: Path, today: str) -> tuple[Path
     fm_text = vault_lib.set_fm_value(
         fm_text, "calendar_series_id", event["recurringEventId"]
     )
-    fm_text = vault_lib.set_fm_value(fm_text, "last_updated", today)
+    fm_text = vault_lib.set_fm_raw_value(fm_text, "last_updated", today)
     fm_text = vault_lib.set_fm_value(fm_text, "url", event.get("hangoutLink", ""))
 
     dest_dir = _resolve_dest_dir(vault_root, project_match)
@@ -468,7 +468,7 @@ def _process_series_event(
         result_bucket = "created"
 
     fm_text, body_text = vault_lib.split_frontmatter(new_text)
-    fm_text = vault_lib.set_fm_value(fm_text, "last_updated", today)
+    fm_text = vault_lib.set_fm_raw_value(fm_text, "last_updated", today)
     fm_text = vault_lib.set_fm_value(fm_text, "url", event.get("hangoutLink", ""))
     current_meta = _get_occurrence_meta(body_text)
     fm_text = vault_lib.set_fm_value(

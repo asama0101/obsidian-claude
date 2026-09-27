@@ -2,7 +2,7 @@
 type: meeting_series
 calendar_series_id: ""
 project: ""
-last_updated: "{{date:YYYY-MM-DD}}"
+last_updated: 
 url: ""
 attendance: "1_scheduled"
 ---

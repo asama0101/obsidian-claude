@@ -55,6 +55,15 @@ def test_categoryは書き込まれずtagsに確定タグが追加される(temp
     assert "python/pandas" in vault_lib.get_fm_tags(fm_text)
 
 
+def test_dateにノート作成日が設定される(template_text, dt):
+    content = _sample_content()
+    note = knowhow_save.build_note(
+        content, template_text, dt, tag="python/pandas"
+    )
+    fm_text, _ = vault_lib.split_frontmatter(note)
+    assert vault_lib.get_fm_value(fm_text, "date") == "2026-09-21"
+
+
 def test_overviewが概要セクションに入る(template_text, dt):
     content = _sample_content(overview="これは概要です。")
     note = knowhow_save.build_note(

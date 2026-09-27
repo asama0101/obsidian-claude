@@ -8,9 +8,16 @@ views:
     filters:
       and:
         - '!file.folder.contains("80_Templates")'
+    groupBy:
+      property: file.tags
+      direction: ASC
     order:
       - file.name
       - tags
+      - date
+    sort:
+      - property: date
+        direction: ASC
   - type: table
     name: ByCategory
     groupBy:

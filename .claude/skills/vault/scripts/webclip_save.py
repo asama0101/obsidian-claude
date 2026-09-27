@@ -200,6 +200,7 @@ def build_note_text(
     fm, body = vault_lib.split_frontmatter(text)
 
     fm = vault_lib.set_fm_value(fm, "url", url)
+    fm = vault_lib.set_fm_raw_value(fm, "date", dt.strftime("%Y-%m-%d"))
     fm = vault_lib.add_tag(fm, tag)
 
     body = body.replace(

@@ -1,6 +1,6 @@
 ---
 type: project
-start_date: {{date:YYYY-MM-DD}}
+start_date: 
 due_date: 
 ---
 

@@ -83,6 +83,7 @@ def build_note(
     fm_text, body_text = vault_lib.split_frontmatter(filled)
 
     fm_text = vault_lib.add_tag(fm_text, tag)
+    fm_text = vault_lib.set_fm_raw_value(fm_text, "date", dt.strftime("%Y-%m-%d"))
 
     body_text = _replace_section(
         body_text, _HEADING_OVERVIEW, render_bullets(content["overview"])

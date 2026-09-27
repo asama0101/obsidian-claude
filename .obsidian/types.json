@@ -6,6 +6,8 @@
     "tags": "tags",
     "due_date": "date",
     "start_date": "date",
-    "created_date": "date"
+    "created_date": "date",
+    "date": "date",
+    "last_updated": "date"
   }
 }

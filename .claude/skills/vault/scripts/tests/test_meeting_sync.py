@@ -111,6 +111,8 @@ def test_新規作成でproject推定される():
         assert vault_lib.get_fm_value(fm, "calendar_event_id") == "evt1"
         assert vault_lib.get_fm_value(fm, "project") == "[[VaultMigration]]"
         assert vault_lib.get_fm_value(fm, "date") == "2026-09-21"
+        assert "date: 2026-09-21" in fm
+        assert 'date: "2026-09-21"' not in fm
         assert (
             vault_lib.get_fm_value(fm, "url") == "https://meet.google.com/abc-defg-hij"
         )
@@ -153,6 +155,8 @@ def test_日時変更が反映されユーザー記入欄は変わらない():
         updated_text = note_path.read_text(encoding="utf-8")
         fm, body = vault_lib.split_frontmatter(updated_text)
         assert vault_lib.get_fm_value(fm, "date") == "2026-09-22"
+        assert "date: 2026-09-22" in fm
+        assert 'date: "2026-09-22"' not in fm
         assert "予算を確定した" in body
 
 
@@ -247,6 +251,8 @@ def test_定例イベント新規作成でseries_idとoccurrence_idが設定さ�
             vault_lib.get_fm_value(fm, "last_updated")
             == datetime.date.today().isoformat()
         )
+        assert f"last_updated: {datetime.date.today().isoformat()}" in fm
+        assert f'last_updated: "{datetime.date.today().isoformat()}"' not in fm
         assert 'occurrence_id: "occA"' in body
         assert "<!-- NEW_MEETING_START -->" in body
         assert "<!-- NEW_MEETING_END -->" in body
@@ -349,6 +355,8 @@ def test_新しい回への遷移で旧ブロックが退避され新ブロッ�
             vault_lib.get_fm_value(fm, "last_updated")
             == datetime.date.today().isoformat()
         )
+        assert f"last_updated: {datetime.date.today().isoformat()}" in fm
+        assert f'last_updated: "{datetime.date.today().isoformat()}"' not in fm
 
 
 def test_単発ノートのファイル名に開催日プレフィックスが付く():

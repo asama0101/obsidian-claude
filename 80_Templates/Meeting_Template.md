@@ -2,7 +2,7 @@
 type: meeting
 calendar_event_id: ""
 project: ""
-date: "{{date:YYYY-MM-DD}}"
+date: 
 url: ""
 attendance: "1_scheduled"
 ---
