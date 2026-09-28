@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -164,6 +165,38 @@ def _is_due_today(fields: dict, today: date) -> bool:
     return due_date == today and fields["status"] not in ("4_done", "5_cancel")
 
 
+_TODO_DUE_DATE_PATTERN = re.compile(r"【(\d{4}-\d{2}-\d{2})】")
+
+
+def _parse_todo_due_date(label: str) -> date | None:
+    """todoラベルから【YYYY-MM-DD】形式の期日を抽出する。
+
+    複数の期日表記がある場合は最初の1件を採用する。
+    期日表記が無ければNoneを返す。
+    日付形式が不正な場合もNoneを返す（例外は投げない）。
+    """
+    match = _TODO_DUE_DATE_PATTERN.search(label)
+    if match is None:
+        return None
+    return _parse_date(match.group(1))
+
+
+def _is_todo_overdue(todo: dict, today: date) -> bool:
+    """todoが期限超過かどうかを判定する。
+
+    todo は {"label": str, "done": bool} 形式の辞書。
+    完了済み(done=True)なら、期日が過去でも常にFalseを返す。
+    期日が無い場合もFalseを返す。
+    期日が today 以前（today 含む）で未完了ならTrueを返す。
+    """
+    if todo["done"]:
+        return False
+    due = _parse_todo_due_date(todo["label"])
+    if due is None:
+        return False
+    return due <= today
+
+
 def _build_status_tag(status: str, overdue: bool) -> str:
     """status/overdueの組からMermaid ganttのタスクタグ文字列を決定する。
 
@@ -309,9 +342,14 @@ def _build_mermaid_block(sections: list[dict]) -> str:
 
             for todo in task.get("todos", []):
                 todo_label = _escape_mermaid_label(todo["label"])
-                done_tag = "done, " if todo["done"] else ""
+                if todo["done"]:
+                    todo_tag = "done, "
+                elif todo.get("overdue"):
+                    todo_tag = "crit, "
+                else:
+                    todo_tag = ""
                 lines.append(
-                    f"    {todo_label} :{done_tag}milestone, t{task_id}, {task['start_date']}, 0d"
+                    f"    {todo_label} :{todo_tag}milestone, t{task_id}, {task['start_date']}, 0d"
                 )
                 task_id += 1
 
@@ -400,6 +438,8 @@ def run(vault_root: Path, today: date | None = None) -> dict:
                 # start_date基準の新条件で含まれたタスク。実due_dateはoverdue判定用に
                 # そのまま保持し、表示専用のdisplay_due_dateにwindow_endを別キーで持たせる。
                 fields["display_due_date"] = window_end.isoformat()
+            for todo in fields["todos"]:
+                todo["overdue"] = _is_todo_overdue(todo, today)
             fields["overdue"] = (
                 _is_overdue(fields, today)
                 or _is_late_start(fields, today)

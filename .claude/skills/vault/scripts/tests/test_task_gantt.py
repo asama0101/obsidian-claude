@@ -1572,3 +1572,104 @@ def test_CLIで実行時のエラーケースが終了コード1で返される(
         output = json.loads(result.stdout)
         assert output["status"] == "error"
         assert output["reason"] == "daily_note_not_found"
+
+
+# --- _parse_todo_due_date / _is_todo_overdue ---
+
+
+def test_parse_todo_due_dateはラベル中の期日表記を抽出する():
+    assert task_gantt._parse_todo_due_date("資料を作成する【2026-10-01】") == date(2026, 10, 1)
+
+
+def test_parse_todo_due_dateは期日表記が無ければNoneを返す():
+    assert task_gantt._parse_todo_due_date("資料を作成する") is None
+
+
+def test_parse_todo_due_dateは不正な日付形式ならNoneを返す():
+    assert task_gantt._parse_todo_due_date("資料を作成する【2026-13-01】") is None
+
+
+def test_parse_todo_due_dateは複数の期日表記があれば最初の1件を採用する():
+    assert task_gantt._parse_todo_due_date(
+        "資料を作成する【2026-10-01】後で確認【2026-11-01】"
+    ) == date(2026, 10, 1)
+
+
+def test_parse_todo_due_dateは半角括弧の表記にはマッチしない():
+    assert task_gantt._parse_todo_due_date("資料を作成する[2026-10-01]") is None
+
+
+def test_is_todo_overdueは完了済みなら期日が過去でも常にFalse():
+    todo = {"label": "資料を作成する【2020-01-01】", "done": True}
+    assert task_gantt._is_todo_overdue(todo, date(2026, 9, 28)) is False
+
+
+def test_is_todo_overdueは期日が今日以前かつ未完了ならTrue():
+    todo = {"label": "資料を作成する【2026-09-28】", "done": False}
+    assert task_gantt._is_todo_overdue(todo, date(2026, 9, 28)) is True
+
+
+def test_is_todo_overdueは期日が未来なら未完了でもFalse():
+    todo = {"label": "資料を作成する【2026-10-01】", "done": False}
+    assert task_gantt._is_todo_overdue(todo, date(2026, 9, 28)) is False
+
+
+def test_is_todo_overdueは期日表記が無ければFalse():
+    todo = {"label": "資料を作成する", "done": False}
+    assert task_gantt._is_todo_overdue(todo, date(2026, 9, 28)) is False
+
+
+def test_todoがoverdueかつ未完了ならcritタグ付きmilestone行になる():
+    task = _bar_task("taskA", start_date="2026-09-01", due_date="2026-09-15")
+    task["todos"] = [{"label": "サブタスク1", "done": False, "overdue": True}]
+    sections = [_section("ProjectA", bar_tasks=[task])]
+    block = task_gantt._build_mermaid_block(sections)
+    line = next(l for l in block.splitlines() if "サブタスク1" in l)
+    assert line.strip() == "サブタスク1 :crit, milestone, t2, 2026-09-01, 0d"
+
+
+def test_todoがoverdueでも完了済みならdoneタグのみのmilestone行になる():
+    task = _bar_task("taskA", start_date="2026-09-01", due_date="2026-09-15")
+    task["todos"] = [{"label": "サブタスク1", "done": True, "overdue": True}]
+    sections = [_section("ProjectA", bar_tasks=[task])]
+    block = task_gantt._build_mermaid_block(sections)
+    line = next(l for l in block.splitlines() if "サブタスク1" in l)
+    assert line.strip() == "サブタスク1 :done, milestone, t2, 2026-09-01, 0d"
+
+
+def test_todoがoverdueキー未設定でも従来通りタグ無しmilestone行になる():
+    task = _bar_task("taskA", start_date="2026-09-01", due_date="2026-09-15")
+    task["todos"] = [{"label": "サブタスク1", "done": False}]
+    sections = [_section("ProjectA", bar_tasks=[task])]
+    block = task_gantt._build_mermaid_block(sections)
+    line = next(l for l in block.splitlines() if "サブタスク1" in l)
+    assert line.strip() == "サブタスク1 :milestone, t2, 2026-09-01, 0d"
+
+
+def test_run経由で過去日付のtodoがcritタグ付きmilestone行になる():
+    with tempfile.TemporaryDirectory() as tmp:
+        vault_root = Path(tmp)
+        daily_path = _write_daily_note(
+            vault_root,
+            _TODAY,
+            f"<!-- {task_gantt._GANTT_START} -->\n<!-- {task_gantt._GANTT_END} -->",
+        )
+        tasks_dir = vault_root / "20_Projects" / "ProjectA" / "Tasks"
+        _write_task_with_todos(
+            tasks_dir,
+            "taskWithOverdueTodo",
+            ["- [ ] サブタスク1【2026-09-01】"],
+            start_date="2026-09-25",
+            due_date="2026-09-30",
+            project="[[ProjectA]]",
+        )
+
+        result = task_gantt.run(vault_root, today=_TODAY)
+
+        assert result["status"] == "ok"
+        new_text = daily_path.read_text(encoding="utf-8")
+        marker_inner = vault_lib.get_marker_block(
+            new_text, task_gantt._GANTT_START, task_gantt._GANTT_END
+        )
+        line = next(l for l in marker_inner.splitlines() if "サブタスク1" in l)
+        assert "crit, milestone" in line
