@@ -1,6 +1,6 @@
 ---
 name: gantt-update
-description: 今日のデイリーノートのガントチャートだけを、20_tasks のタスクから再生成する（ノートの作成や Obsidian の起動はしない）。ユーザーが「ガントを更新して」「ガントチャートを最新にして」「gantt-update」と言ったときに使う。
+description: 今日のデイリーノートのガントチャートだけを、20_tasks と 00_inbox のタスクから再生成する（ノートの作成や Obsidian の起動はしない）。ユーザーが「ガントを更新して」「ガントチャートを最新にして」「gantt-update」と言ったときに使う。
 allowed-tools: Bash(python ${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py --gantt-only) Bash(python "${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py" --gantt-only) Bash(python ${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py --gantt-only *) Bash(python "${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py" --gantt-only *) Bash(python .claude/skills/daily-start/daily_start.py --gantt-only) Bash(python .claude/skills/daily-start/daily_start.py --gantt-only *)
 ---
 

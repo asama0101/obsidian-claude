@@ -24,6 +24,13 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 PAST_DAYS = 0
 FUTURE_DAYS = 90
 
+# タスクを置くフォルダ（振り分け前の 00_inbox と、振り分け後の 20_tasks。どちらも直下だけ）
+TASK_DIRS = ("20_tasks", "00_inbox")
+# 進めるタスクの状態。idea / shelved / cancelled はダッシュボードの区分表・ガントに出さない
+ACTIVE = ("todo", "in_progress", "waiting", "requested")
+# ガントで名前の先頭に付ける印
+MARKS = {"waiting": "⏸", "requested": "✉"}
+
 
 def read(path):
     return path.read_text(encoding="utf-8")
@@ -114,11 +121,11 @@ def create_daily(vault, today):
 def is_late(status, start, due, today):
     """「遅れ」（ガントでは赤）の判定。ダッシュボードの Bases（daily-tasks.base）と同じ定義にする。
 
-    todo は start だけ、doing / pending は due だけを見る（使わない方は None でもよい）。
+    todo は start だけ、in_progress / waiting / requested は due だけを見る（使わない方は None でもよい）。
     """
     if status == "todo":
         return start <= today
-    if status in ("doing", "pending"):
+    if status in ("in_progress", "waiting", "requested"):
         return due < today
     return False
 
@@ -126,19 +133,22 @@ def is_late(status, start, due, today):
 def dashboard_group(props, today):
     """ダッシュボード（daily-tasks.base の formula 区分）と同じ区分を返す。該当なしは None。
 
-    "遅れ" / "今日が期限" / "進行中" / "保留" / "今日完了"（1つのタスクは最初に該当した区分だけ）。
+    "遅れ" / "今日が期限" / "作業中" / "依頼中" / "保留" / "今日完了"（1つのタスクは最初に該当した区分だけ）。
     「遅れ」は is_late と同じ定義（判定に要る日付が空なら遅れにしない）。
+    idea / shelved / cancelled は区分なし（アイデアは別の表で見る）。
     """
     status = props.get("status", "todo")
     start, due = to_date(props.get("start", "")), to_date(props.get("due", ""))
     if status == "done":
         return "今日完了" if to_date(props.get("completed", "")) == today else None
+    if status not in ACTIVE:
+        return None
     needed = start if status == "todo" else due
     if needed is not None and is_late(status, start, due, today):
         return "遅れ"
     if due == today:
         return "今日が期限"
-    return {"doing": "進行中", "pending": "保留"}.get(status)
+    return {"in_progress": "作業中", "requested": "依頼中", "waiting": "保留"}.get(status)
 
 
 def read_task(p):
@@ -166,6 +176,14 @@ def task_dates(props):
     return (start, due) if start and due else None
 
 
+def task_files(vault):
+    """タスクのノートの候補（TASK_DIRS の直下の .md）を返す。"""
+    files = []
+    for d in TASK_DIRS:
+        files += (vault / d).glob("*.md")
+    return sorted(files, key=lambda p: (p.stem, p.parent.name))
+
+
 def collect_gantt_tasks(vault, today, problems=None):
     """ガントに出すタスクを集める。
 
@@ -176,20 +194,22 @@ def collect_gantt_tasks(vault, today, problems=None):
     right = today + dt.timedelta(days=FUTURE_DAYS)
     tasks = []
     unreadable, undated = [], []
-    for p in sorted((vault / "20_tasks").glob("*.md")):
+    for p in task_files(vault):
         props, text = read_task(p)
         if props is None:
             unreadable.append(f"{p.stem}（{text}）")
             continue
         if props.get("type") != "task":
             continue
+        status = props.get("status", "todo")
+        if status not in ACTIVE and status != "done":
+            continue
         dates = task_dates(props)
         if dates is None:
-            if props.get("status", "todo") != "done":
+            if status != "done":
                 undated.append(p.stem)
             continue
         start, due = dates
-        status = props.get("status", "todo")
         if status == "done":
             if to_date(props.get("completed", "")) != today:
                 continue
@@ -199,8 +219,7 @@ def collect_gantt_tasks(vault, today, problems=None):
             continue
         late = is_late(status, start, due, today)
         name = clean(p.stem)
-        if status == "pending":
-            name = "⏸" + name
+        name = MARKS.get(status, "") + name
         if due < left:
             # 完了済みで期限が左端より前のものは、左端に1日分だけ寄せて表示する
             s, e = left, left
@@ -258,7 +277,7 @@ def build_gantt(tasks, today):
                 continue
             n += 1
             end = max(t["due"], t["start"]) + dt.timedelta(days=1)  # 終了日は排他的
-            tag = "crit, " if t["late"] else {"done": "done, ", "doing": "active, "}.get(t["status"], "")
+            tag = "crit, " if t["late"] else {"done": "done, ", "in_progress": "active, "}.get(t["status"], "")
             lines.append(f"    {t['name']} :{tag}t{n}, {t['start'].isoformat()}, {end.isoformat()}")
             for m in t["milestones"]:
                 n += 1

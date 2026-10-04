@@ -1,6 +1,6 @@
 """議事録ノートの「アクションアイテム」の節の解析と、処理済みの印付け。
 
-- 書式: `- [ ] 内容 @担当 期限:YYYY-MM-DD`（担当と期限は省略可。チェックボックスなしの `- 内容` も可）。
+- 書式: `- [ ] 内容 期限:YYYY-MM-DD`（期限は省略可。チェックボックスなしの `- 内容` も可）。担当は書かない（依頼はタスクの状態 requested で表す）。
 - 処理済みの印: 行末の `→ [[タスク名]]`。本文が1つのリンクだけの行（旧 Vault の印）も処理済みとみなす。
 - 項目は、行番号でなく文言で指定する（確認のあいだに Obsidian で行が増減しても、正しい行を指せるように）。
 """
@@ -10,7 +10,6 @@ ACTIONS_HEADING = "## アクションアイテム"
 # `- [ ] 内容`・`- [x] 内容`・`- 内容`（先頭に空白があってもよい）。
 _ITEM = re.compile(r"^\s*-\s+(?:\[([ xX])\]\s*)?(.*?)\s*$")
 _RESOLVED = re.compile(r"(?:^|\s)→\s*\[\[[^\[\]]+\]\]$|^\[\[[^\[\]]+\]\]$")
-_ASSIGNEE = re.compile(r"(?:^|\s)@(\S+)")
 _DUE = re.compile(r"(?:^|\s)期限:(\d{4}-\d{2}-\d{2})(?=\s|$)")
 _LINK_NAME = re.compile(r"^\[\[([^\]|#]+)")
 
@@ -57,14 +56,12 @@ def unresolved_actions(text):
 
 
 def parse_item(body):
-    """本文を {"text", "content", "assignee", "due"} に分ける。`text` は本文そのもの（`link` の指定に使う）。"""
-    assignee = _ASSIGNEE.search(body)
+    """本文を {"text", "content", "due"} に分ける。`text` は本文そのもの（`link` の指定に使う）。"""
     due = _DUE.search(body)
-    content = _DUE.sub(" ", _ASSIGNEE.sub(" ", body))
+    content = _DUE.sub(" ", body)
     return {
         "text": body,
         "content": " ".join(content.split()),
-        "assignee": assignee.group(1) if assignee else "",
         "due": due.group(1) if due else "",
     }
 

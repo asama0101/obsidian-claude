@@ -1,12 +1,20 @@
 ---
 type: task
-status: todo
+status: idea
 project:
-start: {{date:YYYY-MM-DD}}
-due: {{date:YYYY-MM-DD}}
+start:
+due:
 completed:
 memo:
 created: {{date:YYYY-MM-DD}}
 tags: []
 ---
 # {{title}}
+
+## 完了条件
+
+## チェックリスト
+
+## 経緯
+
+## 成果

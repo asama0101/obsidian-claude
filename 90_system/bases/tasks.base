@@ -1,13 +1,18 @@
 filters:
   and:
-    - file.inFolder("20_tasks")
+    - or:
+        - file.inFolder("20_tasks")
+        - file.inFolder("00_inbox")
     - type == "task"
 views:
   - type: table
     name: 未完了（期限順）
     filters:
-      and:
-        - status != "done"
+      or:
+        - status == "todo"
+        - status == "in_progress"
+        - status == "waiting"
+        - status == "requested"
     order:
       - file.name
       - status
@@ -21,8 +26,11 @@ views:
   - type: table
     name: プロジェクト別
     filters:
-      and:
-        - status != "done"
+      or:
+        - status == "todo"
+        - status == "in_progress"
+        - status == "waiting"
+        - status == "requested"
     groupBy:
       property: project
       direction: ASC
@@ -36,11 +44,48 @@ views:
       - property: due
         direction: ASC
   - type: table
-    name: 要修正
+    name: アイデア
+    filters:
+      and:
+        - status == "idea"
+    order:
+      - file.name
+      - project
+      - created
+      - memo
+    sort:
+      - property: created
+        direction: DESC
+  - type: table
+    name: 塩漬け・中止
     filters:
       or:
-        - start.isEmpty()
-        - due.isEmpty()
+        - status == "shelved"
+        - status == "cancelled"
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - project
+      - created
+      - memo
+    sort:
+      - property: created
+        direction: DESC
+  - type: table
+    name: 要修正
+    # 進めるタスクなのに日付が空のもの
+    filters:
+      and:
+        - or:
+            - status == "todo"
+            - status == "in_progress"
+            - status == "waiting"
+            - status == "requested"
+        - or:
+            - start.isEmpty()
+            - due.isEmpty()
     order:
       - file.name
       - status

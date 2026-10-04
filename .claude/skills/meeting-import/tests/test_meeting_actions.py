@@ -45,7 +45,7 @@ class VaultTestCase(unittest.TestCase):
 
 class TestList(VaultTestCase):
     def test_returns_the_unresolved_items_with_the_meeting_project_and_date(self):
-        self.write_meeting("- [ ] 資料を送る @自分 期限:2026-10-10", "- [ ] ", "- [x] 済んだ項目", "- [ ] 済み → [[T]]")
+        self.write_meeting("- [ ] 資料を送る 期限:2026-10-10", "- [ ] ", "- [x] 済んだ項目", "- [ ] 済み → [[T]]")
         code, out = run(self.vault, "list", "--meeting", MEETING)
         self.assertEqual(code, 0)
         self.assertEqual(
@@ -56,7 +56,7 @@ class TestList(VaultTestCase):
                 "path": f"70_meetings/{MEETING}.md",
                 "date": "2026-10-05",
                 "project": "P",
-                "items": [{"text": "資料を送る @自分 期限:2026-10-10", "content": "資料を送る", "assignee": "自分", "due": "2026-10-10"}],
+                "items": [{"text": "資料を送る 期限:2026-10-10", "content": "資料を送る", "due": "2026-10-10"}],
             },
         )
 

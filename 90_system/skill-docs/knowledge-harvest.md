@@ -1,0 +1,91 @@
+---
+type: doc
+status: draft
+created: 2026-10-04
+tags: [skill]
+---
+# knowledge-harvest
+
+## ひとことで
+今日のメモと、前回の棚卸し以降に更新したタスクの「経緯」から、残す価値のあるものを取り出して、人が読む知識と Claude のインプット（`80_context/`）のノートにするスキル。取り出した元の行には印を付ける。
+
+## 何ができるか
+- 棚卸しの対象を集める: 今日のデイリーの「今日のメモ」の、印のない項目と、前回の棚卸し以降に更新したタスク（`20_tasks/`・`00_inbox/` の直下）の「経緯」の、印のない行。
+- 各項目・各行の行き先を決めて、ノートを作るか、既存のノートに追記する。
+
+  | 行き先 | 置き場所（テンプレート） | 何を入れるか |
+  |---|---|---|
+  | 技術知見 | `80_context/knowledge/`（`context-knowledge.md`） | Claude の作業に効く、短く指示的な知見 |
+  | 判断記録 | `80_context/decisions/`（`decision.md`） | 背景・選択肢・決定・理由・影響・見直す条件 |
+  | 失敗記録 | `80_context/mistakes/`（`mistake.md`） | 何が起きたか・原因・対策・再発防止のルール |
+  | knowledge | `30_knowledge/`（`knowledge.md`） | 人が読み返す解説・手順・ノウハウ |
+  | research | `40_research/YYYY-MM-DD_<名前>.md`（`research.md`） | 外部の出典に基づく調べもの（URL だけのメモも含む） |
+  | doc | `10_projects/<名前>/` か `50_documents/`（`document.md`） | まとまった資料 |
+  | タスク | `00_inbox/`（`task.md`、`status: idea`） | 今日のメモのうち、やること |
+
+- プロジェクトごとの進捗ログ（`80_context/projects/<プロジェクト名> 進捗ログ.md`）の「現在の要約」を書き換え、「ログ」の先頭に日付の記録を足す。
+- 分野のタグを1〜3個付ける（既存のタグを優先。確認は不要で、新規のタグは報告で知らせる）。
+- 取り出した元の行の行末に ` → [[ノート名]]` を付け、タスクの「成果」に `- [[ノート名]]` を足す。
+- 索引（`80_context/_index.md`）と再発防止のルール（`80_context/_rules.md`）を作り直し、棚卸しの日時を記録する。
+
+## 使い方
+- 呼び出し: `daily-end` から呼ばれる。単独では「棚卸しして」「知識を整理して」と言うか、`/knowledge-harvest`。
+- 起きること:
+  1. 対象が集められ、行き先・ノート名（新規か追記か）・`project`・タグ・理由の案と、進捗ログの更新案が表で示される。
+  2. 1回の承認・訂正で、ノートが作られ（追記され）、元の行に印が付き、進捗ログが更新される（`daily-end` から呼ばれたときは、`daily-end` の1回の承認に含まれる）。
+  3. 索引とルールが再生成され、棚卸しの日時が記録される（何も残さなかった場合も行う）。
+  4. 作ったノート・追記したノート・付けたタグ・更新した進捗ログ・次にやることが報告される。
+- 会話の途中で判断や失敗が起きたときは、締めを待たずに、承認を得て1件だけ記録してよい（手順2〜6）。
+- 本文は、メモと経緯に書かれた内容だけで書かれる。確かめていないことは「未確認」とされる。このスキルの中では Web 検索などの調べものはしない。
+
+## ロジック
+対象集め・索引とルールの生成・日時の記録は `harvest.py`、行き先の判断・ノートの作成・印付けは Claude の推論処理。
+
+```mermaid
+flowchart TD
+  A[script: harvest.py targets] --> B(Claude: JSON の memo と tasks を読む。必要ならタスク本体と _index.md も読む)
+  B --> C(Claude: 残す価値と行き先を決める。既存ノートがあれば追記にする)
+  C --> D(Claude: 進捗ログの更新案を作る)
+  D --> E(Claude: 案を表で示す)
+  E --> F(ユーザー: 1回で承認・訂正する)
+  F --> G(Claude: ノートを作る・追記する。タグを付ける)
+  G --> H(Claude: 元の行に印を付け、タスクの成果にリンクを足す)
+  H --> I(Claude: 進捗ログを更新する)
+  I --> J[script: harvest.py index で _index.md と _rules.md を再生成]
+  J --> K[script: harvest.py mark で棚卸しの日時を記録]
+  K --> L(Claude: 作ったノート・タグ・進捗ログ・次にやることを報告)
+  classDef ai fill:#e8f0fe,stroke:#4285f4
+  classDef sc fill:#fef3e0,stroke:#f29900
+  class B,C,D,E,F,G,H,I,L ai
+  class A,J,K sc
+  subgraph 凡例
+    L1(Claude の推論処理):::ai
+    L2[スクリプトの自動処理]:::sc
+  end
+```
+
+`harvest.py` の動き:
+- `targets [--date YYYY-MM-DD]`: JSON を出す。
+  - `since`: 前回の棚卸しの日時（`90_system/harvest-state.json` の `last`）。記録がなければ今日の 0 時。
+  - `memo`: 今日のデイリーの `## 今日のメモ` の項目（字下げした子の行も含めて1項目）のうち、1行目に ` → [[` がないもの。
+  - `tasks`: `20_tasks/` と `00_inbox/` の直下で、ファイルの更新日時が `since` より後の `type: task` のノート。各タスクは `path`・`status`・`project`・`updated`・`progress`（`## 経緯` の、印のない行。日付の見出しは文脈として残し、中身のない見出しは除く）。
+- `index`: `80_context/_index.md` と `_rules.md` を作り直す（内容が同じなら書かない。`更新:` / `変更なし:` を出す）。
+  - 索引: 進行中のプロジェクト（`10_projects/<名前>/<名前>.md` で `status: active`）ごとの進捗ログの「現在の要約」（先頭の4行まで）、判断記録（「決定」の最初の行）、技術知見（「要約」の最初の行）、失敗記録（「何が起きたか」の最初の行）。
+  - ルール: 失敗記録の `## 再発防止のルール` の行を、ノートへのリンク付きで集める。
+- `mark [--at ISO日時]`: 棚卸しを終えた日時を `90_system/harvest-state.json` に記録する（既定は今）。
+
+## 保守者向け
+- 場所: `.claude/skills/knowledge-harvest/`（`SKILL.md`、`harvest.py`、`tests/`）
+- `harvest.py` は標準ライブラリだけで動く。`daily-start/daily_start.py` を import して、読み書き・frontmatter・タスクの一覧（`task_files`）の関数を使う。`--vault` を省略すると、スクリプトの3階層上を Vault ルートとする（`--vault` はサブコマンドの前に書く）。
+- 実行するコマンド（手順のとおり、そのまま）: `python "${CLAUDE_SKILL_DIR}/harvest.py" targets` → 承認後 `index` → `mark`
+- 読む: `60_daily/<今日>.md`、`20_tasks/` と `00_inbox/` の直下のタスク、`80_context/`、`10_projects/`、`90_system/harvest-state.json`
+- 書く: 上の表の置き場所のノート、`80_context/projects/<プロジェクト名> 進捗ログ.md`、元の行の行末の印、タスクの `## 成果`、`80_context/_index.md`・`_rules.md`、`90_system/harvest-state.json`
+- 制約:
+  - 承認までは、ノートを作らず、印も付けない。
+  - 印（` → [[`）のある行は取り出し済みとして二重に取り出さない。過去のデイリーのメモは対象にしない。
+  - `_index.md` と `_rules.md` は自動生成なので、手で編集しない（先頭に自動生成の注記が入る）。
+  - 外部サービスへ情報を送らない。秘密情報をノートに書かない。
+- 注意:
+  - 更新の判定はファイルの更新日時なので、Obsidian での編集や、ほかのスキルによる書き込み（印付けを含む）でも「更新した」とみなされる。`mark` は書き込みのあとに実行する。
+  - 索引・ルールは CLAUDE.md から `@80_context/_rules.md`・`@80_context/_index.md` で読み込まれる（CLAUDE.md の記載）。
+- テスト（unittest、追加インストール不要）: `python -m unittest discover -s .claude/skills/knowledge-harvest/tests`（対象の抽出、記録がないときの既定、索引とルールの生成）

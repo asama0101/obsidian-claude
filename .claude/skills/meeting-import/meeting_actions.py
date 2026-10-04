@@ -2,7 +2,7 @@
 """議事録ノートの「アクションアイテム」の節を読み、処理済みの印（タスクへのリンク）を付ける。
 
   meeting_actions.py list --meeting <議事録名>
-      未処理の項目と、議事録のプロジェクト・開催日を返す。項目は text（本文そのもの）・content・assignee・due。
+      未処理の項目と、議事録のプロジェクト・開催日を返す。項目は text（本文そのもの）・content・due。
   meeting_actions.py link --meeting <議事録名> --text <本文> --task <タスク名>
       その項目の行末に ` → [[タスク名]]` を足す。タスクのノートが 20_tasks/ に無ければ拒否する。
 

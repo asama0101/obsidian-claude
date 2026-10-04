@@ -16,7 +16,7 @@ allowed-tools: Bash(python ${CLAUDE_SKILL_DIR}/grilling_html.py *) Bash(python "
 - 質問 ID（`Q1`, `Q2`…）はセッション通しで一意にする（ラウンドでリセットしない）。
 
 ## 手順
-1. セッション作成: `python "${CLAUDE_SKILL_DIR}/grilling_html.py" init --theme "<テーマ>"` を実行する。テーマは ASCII の短い名前にする（Git Bash 経由の日本語引数は文字化けするため。例: `grilling-html`）。出力された絶対パス（以下 `<D>`）を控える。
+1. セッション作成: `python "${CLAUDE_SKILL_DIR}/grilling_html.py" init --theme "<テーマ>"` を実行する。テーマは ASCII の短い名前にする（Git Bash 経由の日本語引数は文字化けするため。例: `grilling-html`）。出力された絶対パス（以下 `<D>`）を控える。セッションのフォルダは `00_inbox/<日時>_grilling_<テーマ>/` にでき、後で `daily-end` の振り分けでプロジェクトのフォルダ（属さなければ `50_documents/`）へ移す。ほかのスキルから個人の情報を聞くとき（`personal-setup`）は `--parent <スクラッチパッド>` を付けて Vault の外に作る。
 2. 質問 JSON を書く。置き場所はスクラッチパッド。形式は `grilling_html.py` の docstring を参照（`title`, `intro`, `questions[]` = `id`, `title`, `body`, `multi`, `options[]` = `key`, `label`, `desc`、`recommended[]`, `reason`）。
 3. 生成: `python "${CLAUDE_SKILL_DIR}/grilling_html.py" render --session-dir "<D>" --round <N> --input <json>` → `<D>\round-N.html`。
 4. Playwright MCP で `browser_navigate` により `file:///<D のスラッシュ区切りパス>/round-N.html` を開く。ユーザーに「回答して『送信』を押し、ターミナルに『完了』と入力してください」と伝えて待つ。
@@ -45,4 +45,5 @@ round: <N>
 - 外部サービスへ送らない。HTML はローカルだけ。
 - JS の `alert/confirm/prompt` は使わない（ブラウザ操作が止まる）。
 - `file://` が開けない場合は、`--allow-unrestricted-file-access` 付きで Playwright MCP が設定されているかを確認する。
-- 生成物（`90_system/grilling/`）のうち、git で追跡するのは Markdown（`*.answers.md`・`final-summary.md`・`index.md`）だけ。HTML は `.gitignore` で除外している（合意内容は Markdown に残るため）。
+- 単一選択の質問には「選択をクリア」ボタンがある（選んだ後でも、選択なし＋自由入力に戻せる）。
+- 生成物はノートと同じ扱いで、Git では追跡しない。

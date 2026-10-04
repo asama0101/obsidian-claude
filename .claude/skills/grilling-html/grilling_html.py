@@ -1,7 +1,9 @@
 """grilling-html スキル用のスクリプト。
 
 サブコマンド:
-  init   --theme T            セッションフォルダを作り、パスを1行で出力する
+  init   --theme T [--parent P]  セッションフォルダを作り、パスを1行で出力する
+                              （既定の置き場所は 00_inbox。後で daily-end がプロジェクトへ振り分ける。
+                               --parent で別の場所に作れる。例: personal-setup はスクラッチパッドに作る）
   render --session-dir D --round N [--final] --input J.json
                               質問 JSON から round-N.html（または final.html）を生成し、パスを出力する
   index  --session-dir D      フォルダ内のファイルを並べた index.md を（再）生成する
@@ -27,14 +29,15 @@ INVALID = re.compile(r'[\\/:*?"<>|\s]+')
 
 
 def session_root(vault: Path) -> Path:
-    return vault / "90_system" / "grilling"
+    return vault / "00_inbox"
 
 
 def cmd_init(args) -> int:
     vault = Path(args.vault)
     stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H%M")
     theme = INVALID.sub("-", args.theme).strip("-") or "grilling"
-    d = session_root(vault) / f"{stamp}_{theme}"
+    parent = Path(args.parent) if args.parent else session_root(vault)
+    d = parent / f"{stamp}_grilling_{theme}"
     d.mkdir(parents=True, exist_ok=True)
     print(d)
     return 0
@@ -98,6 +101,7 @@ def main() -> int:
 
     p = sub.add_parser("init")
     p.add_argument("--theme", required=True)
+    p.add_argument("--parent", help="セッションフォルダを作る親フォルダ（既定: <Vault>/00_inbox）")
     p.set_defaults(fn=cmd_init)
 
     p = sub.add_parser("render")

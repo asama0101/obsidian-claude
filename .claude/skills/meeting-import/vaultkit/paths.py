@@ -13,7 +13,7 @@ def vault_root():
     override = os.environ.get("VAULT_ROOT")
     if override:
         return Path(override)
-    # <root>/.claude/skills/meeting-followup/vaultkit/paths.py
+    # <root>/.claude/skills/meeting-import/vaultkit/paths.py
     return Path(__file__).resolve().parents[4]
 
 

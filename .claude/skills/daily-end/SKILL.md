@@ -1,45 +1,55 @@
 ---
 name: daily-end
-description: 1日の終わりに、今日のデイリーノートの振り返りを下書きし、未完了タスクの整理案と、今日のメモ・インボックスの振り分け案を出す。承認後に、ノートとタスクを更新する。ユーザーが「1日を終える」「振り返りを書いて」「今日を締めて」「daily-end」と言ったときに使う。
-allowed-tools: Bash(python ${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py --gantt-only) Bash(python "${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py" --gantt-only) Bash(python .claude/skills/daily-start/daily_start.py --gantt-only)
+description: 1日の終わりに、振り返りの下書き、未完了タスクと idea の整理案、インボックスの振り分け案、知識の棚卸し（knowledge-harvest）の案、議事録の取り込み残りを出す。1回の承認で、ノートとタスクを更新する。ユーザーが「1日を終える」「振り返りを書いて」「今日を締めて」「daily-end」と言ったときに使う。
+allowed-tools: Bash(python ${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py --gantt-only) Bash(python "${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py" --gantt-only) Bash(python .claude/skills/daily-start/daily_start.py --gantt-only) Bash(python ${CLAUDE_SKILL_DIR}/../knowledge-harvest/harvest.py *) Bash(python "${CLAUDE_SKILL_DIR}/../knowledge-harvest/harvest.py" *) Bash(python .claude/skills/knowledge-harvest/harvest.py *)
 ---
 
 # daily-end
 
-Vault のルートで作業する。**ユーザーが承認するまで、ノートの編集もタスクの更新・削除もしない**（案を出して承認を待つ）。Git の操作はしない（ノートは Git で管理していない）。
+Vault のルートで作業する。**ユーザーが承認するまで、ノートの作成・編集・移動も、タスクの更新もしない**（案をまとめて出し、1回の承認を待つ）。Git の操作はしない（ノートは Git で管理していない）。
 
 ## 手順
 1. 対象は `60_daily/<今日 YYYY-MM-DD>.md`。無ければ、作成せずにユーザーへ伝えて終了する（作成は `daily-start`）。
 2. デイリーノートを読み、「今日のメモ」を把握する。空欄は「未記入」として扱い、書かれていない内容を作らない。
-3. `20_tasks/` のタスクを読み、次を把握する（frontmatter の `status` `due` `start` `completed` `memo`）。
+3. `20_tasks/` と `00_inbox/` の直下のタスク（`type: task`）を読み、次を把握する（frontmatter の `status` `due` `start` `completed` `memo` と、本文の「経緯」）。
    - 今日完了したもの（`completed` が今日）
-   - 未完了（`todo` / `doing` / `pending`）
-4. **振り返りの下書き**を作って提示する。次の見出しで数行ずつ。根拠がない項目は書かず「未記入」とする。
-   - できたこと（完了タスクから）
-   - 気づき・学び（今日のメモから）
+   - 進めるもの（`todo` / `in_progress` / `waiting` / `requested`）
+   - `idea`
+4. **振り返りの下書き**を作る。次の見出しで数行ずつ。根拠がない項目は書かず「未記入」とする。
+   - できたこと（完了タスク、今日の経緯から）
+   - 気づき・学び（今日のメモ、経緯から）
    - 明日へ（持ち越し・メモ）
-5. **未完了タスクの整理案**を、表で提示する。タスクごとに次のいずれかを推奨理由つきで示す。
+5. **未完了タスクの整理案**（進めるもの）を表にする。タスクごとに推奨と理由を示す。
    - 翌日へ: `start` / `due` の変更案
-   - 保留: `status: pending` と `memo` に理由
-   - 削除: 中止・不要になったもの（`cancelled` は使わない。削除は、対象の中身を示したうえで個別に確認する）
+   - 状態の変更: `in_progress`・`waiting`（保留。`memo` に理由）・`requested`（依頼中。`memo` に相手と内容）・`shelved`（塩漬け）・`cancelled`（中止）
    - 現状維持
-6. **インボックスの振り分け案**: `00_inbox/` にノート（`.gitkeep` 以外）があれば、ノートごとに移動先を推奨理由つきで表にする。無ければ省く。
-   - 移動先は、内容に応じて `10_projects/<名前>/`・`30_knowledge/`・`40_research/`（ファイル名に `YYYY-MM-DD_` を付ける）・`50_documents/` などから選ぶ。迷うものは、選択肢を示して聞く。決まらないものは残す。
-   - 移動先の種類のテンプレート（`90_system/templates/`）にないプロパティ（`type` など）があれば、補う案も示す。
-7. **今日のメモの振り分け案**: `## 今日のメモ` の節（次の `## ` まで）の各項目に、振り分け先を推奨理由つきで表にする。空なら省く。
-   - 1項目は1行（箇条書きは、子の行を含めて1項目）。行末に ` → [[` の印がある項目は処理済みなので対象外。
-   - 振り分け先は `knowledge`（自分の理解・手順・ノウハウ）・`research`（出典のある調べもの。URL だけのメモも含む）・`タスク`（やること）・`残す`（その日の記録で十分なもの）。迷うものは選択肢を示して聞く。
-   - 表の列: メモ（抜粋）・振り分け先・ノート名・`project`（`10_projects/` のプロジェクト名から。無ければ空）・理由。タスクは `start` / `due` も示す（メモに日付がなければ当日）。
-   - knowledge / research の名前・保存先は `knowledge-add` の規則（`.claude/skills/knowledge-add/SKILL.md` の手順4）に従う。同名のノートがあれば、追記か別名かを案に書く。
-8. ユーザーの承認（訂正があれば反映）を1回得てから、次を実行する。
-   - 承認された振り返りを、デイリーノートの `## 振り返り` に書く（既存の記述があれば追記し、上書きしない）。
-   - 承認されたタスクの更新を、各タスクの frontmatter に反映する。`status: done` にするときは `completed` も必ず入れる。
-   - 承認されたインボックスのノートを移動し、プロパティを補う。移動先に同名のファイルがあれば、上書きせずに伝える。
-   - 承認された今日のメモを、ノートにする。
-     - knowledge / research: `knowledge-add` の手順6・7・9（タグ・本文・作成）で作る。確認は、この承認で済んだものとする。本文はメモに書かれた内容だけで書き、足さない。
-     - タスク: `90_system/templates/task.md` に従い `20_tasks/<タスク名>.md` を作る（`status: todo`、`start` / `due` は承認された値、`created` は今日）。本文は見出しのあとに `デイリー [[YYYY-MM-DD]] のメモから作成。` と1行書く。
-     - 作ったら、元のメモの項目の行末（箇条書きは最初の行）に ` → [[ノート名]]` を付ける。ほかの文言は変えない。
-9. タスクを更新・作成した場合だけ、ガントを更新するため次のコマンドを**そのまま**1回実行する。引数の追加や改変、ほかのコマンドの実行はしない。
+   - タスクは削除しない（中止は `cancelled`）。
+6. **idea の見直し案**: `idea` のタスクごとに、`todo` にする（`start` / `due` の案。指定がなければ当日）・`idea` のまま・`shelved`・`cancelled` のどれかを推奨する。作成から日が浅いものは「`idea` のまま」でよい。
+7. **インボックスの振り分け案**: `00_inbox/` の直下（`.gitkeep` 以外）を1件ずつ表にする。無ければ省く。
+   - タスク（`type: task`）: `project`（`10_projects/` のプロジェクト名。属さなければ空）を決め、`20_tasks/` へ移す。状態と日付は手順5・6の案に合わせる。タイトルから目的が読み取れないものは、目的が分かる名前への変更案を出す。
+   - grilling-html のセッション（`<日時>_grilling_<テーマ>/` のフォルダ）・ダウンロードした資料などのファイル: プロジェクトに属せば `10_projects/<名前>/`、属さなければ `50_documents/` へ移す。
+   - 会議の文字起こし（`.docx` / `.vtt`）や会議のメモ: 移さず、`meeting-import` で議事録にすることを提案する。
+   - そのほかのノート: 内容に応じて移動先（`30_knowledge/`・`40_research/`（ファイル名に `YYYY-MM-DD_`）・`50_documents/` など）を推奨する。種類のテンプレート（`90_system/templates/`）にないプロパティ（`type` など）があれば補う案も示す。
+   - 迷うものは選択肢を示して聞く。決まらないものは残す。
+8. **知識の棚卸し**: `knowledge-harvest` スキル（`.claude/skills/knowledge-harvest/SKILL.md`）の手順2〜4で、今日のメモと、前回の棚卸し以降に更新したタスクの経緯から、案を作る。対象は、次のコマンドを**そのまま**実行して集める（`knowledge-harvest` の手順1の代わり）。
+   ```
+   python "${CLAUDE_SKILL_DIR}/../knowledge-harvest/harvest.py" targets
+   ```
+9. **議事録の取り込み残り**を指摘する（案ではなく報告）。
+   - `00_inbox/` に残っている文字起こし・会議のメモ
+   - 今日の議事録（`70_meetings/` の `date` が今日）のうち、アクションアイテムが空、またはタスクの印（` → [[`）がない行があるもの
+   - どちらも `meeting-import` で処理できることを添える。
+10. 手順4〜8の案をまとめて示し、ユーザーの承認（訂正があれば反映）を1回得る。
+11. 承認されたものを実行する。
+    - 振り返りを、デイリーノートの `## 振り返り` に書く（既存の記述があれば追記し、上書きしない）。
+    - タスクの更新を frontmatter に反映する。`status: done` にするときは `completed` も必ず入れる。
+    - インボックスの移動を行う。移動先に同名のものがあれば、上書きせずに伝える。
+    - 棚卸しを、`knowledge-harvest` の手順5で行う（確認は、この承認で済んだものとする）。続けて、次のコマンドを**そのまま**順に実行する（`knowledge-harvest` の手順6の代わり。棚卸しで何も残さなかった場合も実行する）。
+      ```
+      python "${CLAUDE_SKILL_DIR}/../knowledge-harvest/harvest.py" index
+      python "${CLAUDE_SKILL_DIR}/../knowledge-harvest/harvest.py" mark
+      ```
+12. タスクを更新・移動した場合だけ、ガントを更新するため次のコマンドを**そのまま**1回実行する。
 
 ```
 python "${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py" --gantt-only
@@ -47,5 +57,5 @@ python "${CLAUDE_SKILL_DIR}/../daily-start/daily_start.py" --gantt-only
 
 ## 注意
 - `<!-- gantt:start -->` と `<!-- gantt:end -->` のマーカーと、その間は編集しない。
-- 今日のメモの振り分けでは、元のメモの行は消さず、行末に印を付けるだけにする。対象は今日のデイリーだけ（過去のデイリーのメモは振り分けない）。
-- 結果は「何を書いたか・何を更新したか・メモから作ったノート（付けたタグ。新規のタグは明記）・次にやること」を簡潔に報告する。
+- 今日のメモと経緯の行は消さず、行末に印（` → [[ノート名]]`）を付けるだけにする。過去のデイリーのメモは対象にしない。
+- 結果は「何を書いたか・何を更新・移動したか・棚卸しで作ったノート（付けたタグ。新規のタグは明記）・取り込み残り・次にやること」を簡潔に報告する。

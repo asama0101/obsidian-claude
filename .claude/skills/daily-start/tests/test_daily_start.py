@@ -42,14 +42,16 @@ class TestIsLate(unittest.TestCase):
         self.assertTrue(ds.is_late("todo", D("2026-10-01"), D("2026-10-10"), TODAY))
         self.assertFalse(ds.is_late("todo", D("2026-10-05"), D("2026-10-10"), TODAY))
 
-    def test_doing_and_pending_are_late_when_due_is_before_today(self):
-        for status in ("doing", "pending"):
+    def test_in_progress_waiting_and_requested_are_late_when_due_is_before_today(self):
+        for status in ("in_progress", "waiting", "requested"):
             with self.subTest(status=status):
                 self.assertTrue(ds.is_late(status, D("2026-10-01"), D("2026-10-03"), TODAY))
                 self.assertFalse(ds.is_late(status, D("2026-10-01"), D("2026-10-04"), TODAY))
 
-    def test_done_is_never_late(self):
-        self.assertFalse(ds.is_late("done", D("2026-09-01"), D("2026-09-02"), TODAY))
+    def test_done_and_inactive_states_are_never_late(self):
+        for status in ("done", "idea", "shelved", "cancelled"):
+            with self.subTest(status=status):
+                self.assertFalse(ds.is_late(status, D("2026-09-01"), D("2026-09-02"), TODAY))
 
 
 class TestDashboardGroup(unittest.TestCase):
@@ -65,15 +67,20 @@ class TestDashboardGroup(unittest.TestCase):
             (dict(status="todo", start="2026-10-04", due="2026-10-10"), "遅れ"),
             (dict(status="todo", start="2026-10-05", due="2026-10-04"), "今日が期限"),
             (dict(status="todo", start="2026-10-05", due="2026-10-10"), None),
-            (dict(status="doing", start="2026-10-01", due="2026-10-03"), "遅れ"),
-            (dict(status="doing", start="2026-10-01", due="2026-10-04"), "今日が期限"),
-            (dict(status="doing", start="2026-10-01", due="2026-10-10"), "進行中"),
-            (dict(status="pending", start="2026-10-01", due="2026-10-10"), "保留"),
-            (dict(status="pending", start="2026-10-01", due="2026-10-01"), "遅れ"),
+            (dict(status="in_progress", start="2026-10-01", due="2026-10-03"), "遅れ"),
+            (dict(status="in_progress", start="2026-10-01", due="2026-10-04"), "今日が期限"),
+            (dict(status="in_progress", start="2026-10-01", due="2026-10-10"), "作業中"),
+            (dict(status="requested", start="2026-10-01", due="2026-10-10"), "依頼中"),
+            (dict(status="requested", start="2026-10-01", due="2026-10-03"), "遅れ"),
+            (dict(status="waiting", start="2026-10-01", due="2026-10-10"), "保留"),
+            (dict(status="waiting", start="2026-10-01", due="2026-10-01"), "遅れ"),
             (dict(status="done", completed="2026-10-04"), "今日完了"),
             (dict(status="done", completed="2026-10-03"), None),
             (dict(status="todo"), None),
-            (dict(status="doing"), "進行中"),
+            (dict(status="in_progress"), "作業中"),
+            (dict(status="idea", start="2026-10-01", due="2026-10-04"), None),
+            (dict(status="shelved", start="2026-10-01", due="2026-10-04"), None),
+            (dict(status="cancelled", start="2026-10-01", due="2026-10-04"), None),
         ]
         for props, expected in cases:
             with self.subTest(props=props):
@@ -85,13 +92,13 @@ class TestCollectGanttTasks(TempVault):
         return [t["name"] for t in ds.collect_gantt_tasks(self.vault, TODAY, problems)]
 
     def test_shows_open_tasks_in_range(self):
-        self.write_task("A", task("doing", "2026-10-01", "2026-10-10"))
+        self.write_task("A", task("in_progress", "2026-10-01", "2026-10-10"))
         self.write_task("B", task("todo", "2026-10-05", "2026-10-06"))
         self.assertEqual(self.names(), ["←A", "B"])
 
     def test_hides_late_todo_and_overdue_open_tasks(self):
         self.write_task("遅れtodo", task("todo", "2026-10-01", "2026-10-10"))
-        self.write_task("期限切れ", task("doing", "2026-09-01", "2026-10-03"))
+        self.write_task("期限切れ", task("in_progress", "2026-09-01", "2026-10-03"))
         self.assertEqual(self.names(), [])
 
     def test_a_todo_starting_today_is_shown_as_late(self):
@@ -105,13 +112,28 @@ class TestCollectGanttTasks(TempVault):
         self.write_task("日付不正", task("done", "2026-10-01", "2026-10-04", completed="2026-13-01"))
         self.assertEqual(self.names(), ["←今日完了"])  # 開始が左端より前なので ← が付く
 
-    def test_pending_gets_a_mark(self):
-        self.write_task("待ち", task("pending", "2026-10-04", "2026-10-08"))
-        self.assertEqual(self.names(), ["⏸待ち"])
+    def test_waiting_and_requested_get_a_mark(self):
+        self.write_task("待ち", task("waiting", "2026-10-04", "2026-10-08"))
+        self.write_task("依頼", task("requested", "2026-10-04", "2026-10-08"))
+        self.assertEqual(sorted(self.names()), ["⏸待ち", "✉依頼"])
+
+    def test_idea_shelved_and_cancelled_are_hidden_even_without_dates(self):
+        self.write_task("思いつき", task("idea", "", ""))
+        self.write_task("塩漬け", task("shelved", "2026-10-04", "2026-10-08"))
+        self.write_task("中止", task("cancelled", "2026-10-04", "2026-10-08"))
+        problems = []
+        self.assertEqual(self.names(problems), [])
+        self.assertEqual(problems, [])
+
+    def test_tasks_in_the_inbox_are_included(self):
+        (self.vault / "00_inbox").mkdir()
+        (self.vault / "00_inbox" / "受信.md").write_text(task("todo", "2026-10-05", "2026-10-06"), encoding="utf-8")
+        (self.vault / "00_inbox" / "資料.md").write_text("---\ntype: doc\n---\n", encoding="utf-8")
+        self.assertEqual(self.names(), ["受信"])
 
     def test_undated_open_tasks_are_skipped_and_reported(self):
         self.write_task("日付なし", task("todo", "", ""))
-        self.write_task("期限なし", task("doing", "2026-10-04", ""))
+        self.write_task("期限なし", task("in_progress", "2026-10-04", ""))
         self.write_task("不正", task("todo", "2026-10-04", "2026-02-30"))
         self.write_task("完了で日付なし", task("done", "", "", completed="2026-10-04"))
         problems = []
@@ -120,7 +142,7 @@ class TestCollectGanttTasks(TempVault):
 
     def test_an_unreadable_note_does_not_stop_the_others(self):
         (self.vault / "20_tasks" / "壊れた.md").write_bytes(b"---\ntype: task\n\xff\xfe\x00broken\n---\n")
-        self.write_task("正常", task("doing", "2026-10-04", "2026-10-06"))
+        self.write_task("正常", task("in_progress", "2026-10-04", "2026-10-06"))
         problems = []
         self.assertEqual(self.names(problems), ["正常"])
         self.assertEqual(len(problems), 1)
@@ -139,7 +161,7 @@ class TestCollectGanttTasks(TempVault):
 
 class TestUpdateGantt(TempVault):
     def test_rewrites_only_between_the_markers_and_returns_problems(self):
-        self.write_task("A", task("doing", "2026-10-04", "2026-10-06"))
+        self.write_task("A", task("in_progress", "2026-10-04", "2026-10-06"))
         self.write_task("日付なし", task("todo", "", ""))
         note = self.vault / "note.md"
         note.write_text(f"前\n{ds.GANTT_START}\n古い\n{ds.GANTT_END}\n後\n", encoding="utf-8")

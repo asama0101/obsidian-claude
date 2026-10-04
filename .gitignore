@@ -48,6 +48,20 @@
 !/70_meetings/
 /70_meetings/*
 !/70_meetings/.gitkeep
+!/80_context/
+/80_context/*
+!/80_context/knowledge/
+/80_context/knowledge/*
+!/80_context/knowledge/.gitkeep
+!/80_context/decisions/
+/80_context/decisions/*
+!/80_context/decisions/.gitkeep
+!/80_context/projects/
+/80_context/projects/*
+!/80_context/projects/.gitkeep
+!/80_context/mistakes/
+/80_context/mistakes/*
+!/80_context/mistakes/.gitkeep
 
 # 仕組み（テンプレート・Bases・手順書・スキルの解説）
 !/90_system/

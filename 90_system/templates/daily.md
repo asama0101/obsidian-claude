@@ -14,6 +14,9 @@ tags: []
 ## タスク
 ![[daily-tasks.base#タスク]]
 
+## アイデア・インボックス
+![[daily-tasks.base#アイデア・インボックス]]
+
 ## ガントチャート
 <!-- gantt:start -->
 <!-- gantt:end -->

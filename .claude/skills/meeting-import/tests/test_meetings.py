@@ -19,13 +19,13 @@ TEXT = "\n".join(
         "- [ ] 議題の節は対象外",
         "",
         "## アクションアイテム",
-        "- [ ] 資料を送る @自分 期限:2026-10-10",
+        "- [ ] 資料を送る 期限:2026-10-10",
         "- [x] 済んだ項目",
         "- [X] 大文字の済んだ項目",
         "- [ ] ",
         "- [ ] 処理済みの項目 → [[済み]]",
         "- [ ] [[旧形式の済み]]",
-        "- 見積もりを出す @佐藤",
+        "- 見積もりを出す",
         "  - [ ] 子の項目",
         "- [ ] [[別]]の件を確認する",
         "",
@@ -33,7 +33,7 @@ TEXT = "\n".join(
         "- [ ] ここは対象外",
     ]
 )
-UNRESOLVED = ["資料を送る @自分 期限:2026-10-10", "見積もりを出す @佐藤", "子の項目", "[[別]]の件を確認する"]
+UNRESOLVED = ["資料を送る 期限:2026-10-10", "見積もりを出す", "子の項目", "[[別]]の件を確認する"]
 
 
 class TestUnresolvedActions(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestUnresolvedActions(unittest.TestCase):
         self.assertEqual(meetings.unresolved_actions(TEXT), UNRESOLVED)
 
     def test_items_with_the_new_or_old_mark_are_resolved(self):
-        for line in ["- [ ] a → [[A]]", "- [ ] a @x 期限:2026-10-10 → [[A|別名]]", "- [ ] [[A]]", "- [[A]]", "  - [ ] [[A#見出し]]  "]:
+        for line in ["- [ ] a → [[A]]", "- [ ] a 期限:2026-10-10 → [[A|別名]]", "- [ ] [[A]]", "- [[A]]", "  - [ ] [[A#見出し]]  "]:
             with self.subTest(line=line):
                 self.assertEqual(meetings.unresolved_actions(f"## アクションアイテム\n{line}\n"), [])
 
@@ -66,17 +66,15 @@ class TestUnresolvedActions(unittest.TestCase):
 
 
 class TestParseItem(unittest.TestCase):
-    def test_splits_assignee_and_due(self):
+    def test_splits_the_due_date(self):
         self.assertEqual(
-            meetings.parse_item("資料を送る @自分 期限:2026-10-10"),
-            {"text": "資料を送る @自分 期限:2026-10-10", "content": "資料を送る", "assignee": "自分", "due": "2026-10-10"},
+            meetings.parse_item("資料を送る 期限:2026-10-10"),
+            {"text": "資料を送る 期限:2026-10-10", "content": "資料を送る", "due": "2026-10-10"},
         )
 
-    def test_assignee_and_due_are_optional(self):
-        self.assertEqual(meetings.parse_item("見積もり"), {"text": "見積もり", "content": "見積もり", "assignee": "", "due": ""})
-
-    def test_an_email_address_is_not_an_assignee(self):
-        self.assertEqual(meetings.parse_item("a@example.com に送る")["assignee"], "")
+    def test_due_is_optional_and_at_signs_are_kept(self):
+        self.assertEqual(meetings.parse_item("見積もり"), {"text": "見積もり", "content": "見積もり", "due": ""})
+        self.assertEqual(meetings.parse_item("a@example.com に送る")["content"], "a@example.com に送る")
 
     def test_a_malformed_due_is_left_in_the_content(self):
         item = meetings.parse_item("送る 期限:来週")
@@ -85,32 +83,32 @@ class TestParseItem(unittest.TestCase):
 
 class TestLinkAction(unittest.TestCase):
     def test_appends_the_mark_to_only_that_line_and_leaves_it_unchecked(self):
-        updated = meetings.link_action(TEXT, "資料を送る @自分 期限:2026-10-10", "資料を作る")
+        updated = meetings.link_action(TEXT, "資料を送る 期限:2026-10-10", "資料を作る")
         before, after = TEXT.split("\n"), updated.split("\n")
-        self.assertEqual(after[9], "- [ ] 資料を送る @自分 期限:2026-10-10 → [[資料を作る]]")
+        self.assertEqual(after[9], "- [ ] 資料を送る 期限:2026-10-10 → [[資料を作る]]")
         self.assertEqual(after[:9], before[:9])
         self.assertEqual(after[10:], before[10:])
 
     def test_a_linked_item_no_longer_appears_as_unresolved(self):
-        updated = meetings.link_action(TEXT, "資料を送る @自分 期限:2026-10-10", "x")
+        updated = meetings.link_action(TEXT, "資料を送る 期限:2026-10-10", "x")
         self.assertEqual(meetings.unresolved_actions(updated), UNRESOLVED[1:])
 
     def test_a_plain_bullet_and_an_indented_item_keep_their_shape(self):
-        updated = meetings.link_action(TEXT, "見積もりを出す @佐藤", "x")
-        self.assertIn("\n- 見積もりを出す @佐藤 → [[x]]\n", updated)
+        updated = meetings.link_action(TEXT, "見積もりを出す", "x")
+        self.assertIn("\n- 見積もりを出す → [[x]]\n", updated)
         updated = meetings.link_action(TEXT, "子の項目", "y")
         self.assertIn("\n  - [ ] 子の項目 → [[y]]\n", updated)
 
     def test_still_works_after_lines_were_inserted_above(self):
         shifted = TEXT.replace("## 目的・議題", "## 目的・議題\n- 新しい議題\n- もう1つ")
-        self.assertIn("- [ ] 資料を送る @自分 期限:2026-10-10 → [[x]]", meetings.link_action(shifted, "資料を送る @自分 期限:2026-10-10", "x"))
+        self.assertIn("- [ ] 資料を送る 期限:2026-10-10 → [[x]]", meetings.link_action(shifted, "資料を送る 期限:2026-10-10", "x"))
 
     def test_only_the_first_of_duplicate_items_is_marked(self):
         text = "## アクションアイテム\n- [ ] a\n- [ ] a\n"
         self.assertEqual(meetings.link_action(text, "a", "x"), "## アクションアイテム\n- [ ] a → [[x]]\n- [ ] a\n")
 
     def test_surrounding_whitespace_in_the_item_is_ignored(self):
-        self.assertIn("→ [[x]]", meetings.link_action(TEXT, "  見積もりを出す @佐藤 ", "x"))
+        self.assertIn("→ [[x]]", meetings.link_action(TEXT, "  見積もりを出す ", "x"))
 
     def test_keeps_crlf_line_endings(self):
         text = "## アクションアイテム\r\n- [ ] a\r\n- [ ] b\r\n"

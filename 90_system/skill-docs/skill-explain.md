@@ -47,7 +47,7 @@ flowchart TD
 
 ## 保守者向け
 - 本体: `.claude/skills/skill-explain/SKILL.md`
-- 設計: `10_projects/skill-explain/skill-explain SPEC.md`（受入条件・非目標・決定ログ）
+- 設計: `10_projects/Claudeのスキル作成/skill-explain SPEC.md`（受入条件・非目標・決定ログ）
 - 読む場所:
   - Vault: `.claude/skills/*/SKILL.md`
   - ユーザー: `%USERPROFILE%\.claude\skills\*\SKILL.md`

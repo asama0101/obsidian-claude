@@ -1,6 +1,8 @@
 filters:
   and:
-    - file.inFolder("20_tasks")
+    - or:
+        - file.inFolder("20_tasks")
+        - file.inFolder("00_inbox")
     - type == "task"
     - project == link(this.file.name)
 views:

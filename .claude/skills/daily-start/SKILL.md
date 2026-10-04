@@ -1,6 +1,6 @@
 ---
 name: daily-start
-description: 今日のデイリーノートを作成し、ガントチャートを再生成して Obsidian で開く。スタートアップ（daily-start.bat）や、ユーザーが「デイリーノートを作って」「ガントを更新して」と言ったときに使う。
+description: 今日のデイリーノートを作成し、ガントチャートを再生成して Obsidian で開く。スタートアップ（daily-start.bat）や、ユーザーが「デイリーノートを作って」「今日を始める」と言ったときに使う（ガントだけの更新は gantt-update）。
 allowed-tools: Bash(python ${CLAUDE_SKILL_DIR}/daily_start.py) Bash(python "${CLAUDE_SKILL_DIR}/daily_start.py") Bash(python ${CLAUDE_SKILL_DIR}/daily_start.py *) Bash(python "${CLAUDE_SKILL_DIR}/daily_start.py" *) Bash(python .claude/skills/daily-start/daily_start.py) Bash(python .claude/skills/daily-start/daily_start.py *)
 ---
 
@@ -13,6 +13,8 @@ python "${CLAUDE_SKILL_DIR}/daily_start.py"
 ```
 
 実行結果の1行目（`作成: ...` / `既存: ...`）をユーザーに短く伝える。2行目以降に `注意: ...` があれば、それも伝える。エラーが出たら、そのメッセージをそのまま報告して終了する。
+
+続けて、Microsoft 365 コネクタ（Outlook の予定表を読むツール）がこのセッションで使えるときだけ、`meeting-import` スキルの「手順C: 朝の枠作り」で今日の会議の議事録の枠を作る。使えなければ何もせず、1行だけ伝える。
 
 - ノートが既にあれば作成せず、ガントのみ再生成する。
 - 読めないタスクや、`start` / `due` が空・不正なタスクは、ガントに出さずに `注意: ...` に名前が出る。

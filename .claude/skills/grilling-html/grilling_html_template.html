@@ -53,6 +53,7 @@ button { font: inherit; padding: 8px 18px; border-radius: 8px; border: 1px solid
   background: var(--card); color: var(--text); cursor: pointer; }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 button:disabled { opacity: .5; cursor: default; }
+button.clear { font-size: 13px; padding: 2px 12px; margin: 2px 0 4px; color: var(--muted); }
 #status { font-size: 13px; color: var(--muted); }
 #status.warn { color: var(--warn); }
 #status.ok { color: var(--rec); font-weight: 700; }
@@ -122,6 +123,15 @@ button:disabled { opacity: .5; cursor: default; }
       label.appendChild(box);
       card.appendChild(label);
     });
+    if (inputs.length) {
+      // 一度選ぶとラジオボタンは外せないので、選択なし（自由入力だけ）に戻すボタンを置く
+      var clear = el('button', 'clear', '選択をクリア');
+      clear.type = 'button';
+      clear.addEventListener('click', function () {
+        inputs.forEach(function (i) { i.checked = false; });
+      });
+      card.appendChild(clear);
+    }
     if (q.reason) card.appendChild(el('div', 'reason', '推奨の理由: ' + q.reason));
 
     var f1 = el('label', 'field', '自由入力（候補にない回答は「その他」を選ばずここに書いてOK）');
