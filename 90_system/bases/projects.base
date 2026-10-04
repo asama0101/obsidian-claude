@@ -1,0 +1,27 @@
+filters:
+  and:
+    - type == "project"
+    - '!file.inFolder("90_system")'
+views:
+  - type: table
+    name: 進行中
+    filters:
+      and:
+        - status == "active"
+    order:
+      - file.name
+      - status
+      - start
+      - due
+    sort:
+      - property: due
+        direction: ASC
+  - type: table
+    name: 全件
+    order:
+      - file.name
+      - status
+      - due
+    sort:
+      - property: due
+        direction: ASC

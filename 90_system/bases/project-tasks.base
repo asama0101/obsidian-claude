@@ -1,0 +1,17 @@
+filters:
+  and:
+    - file.inFolder("20_tasks")
+    - type == "task"
+    - project == link(this.file.name)
+views:
+  - type: table
+    name: 関連タスク
+    order:
+      - file.name
+      - status
+      - start
+      - due
+      - completed
+    sort:
+      - property: due
+        direction: ASC

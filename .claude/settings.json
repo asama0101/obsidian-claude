@@ -1,0 +1,58 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash(python .claude/skills/daily-start/daily_start.py:*)"
+    ],
+    "ask": [
+      "Edit(.claude/settings*.json)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(del:*)",
+      "Bash(git push:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git stash drop:*)",
+      "Bash(git stash clear:*)",
+      "Bash(git commit --amend:*)",
+      "PowerShell(Remove-Item:*)",
+      "PowerShell(Move-Item:*)",
+      "PowerShell(git branch -D:*)",
+      "PowerShell(git reset --hard:*)",
+      "PowerShell(git stash drop:*)",
+      "PowerShell(git stash clear:*)",
+      "PowerShell(git commit --amend:*)",
+      "WebFetch",
+      "WebSearch"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/vault_hooks.py\" session-start",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/vault_hooks.py\" post-tool-use",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

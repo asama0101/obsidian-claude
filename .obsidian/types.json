@@ -1,0 +1,10 @@
+{
+  "types": {
+    "created": "date",
+    "start": "date",
+    "due": "date",
+    "completed": "date",
+    "date": "date",
+    "tags": "tags"
+  }
+}

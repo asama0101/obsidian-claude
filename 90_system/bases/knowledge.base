@@ -1,0 +1,21 @@
+filters:
+  and:
+    - or:
+        - type == "knowledge"
+        - type == "research"
+    - '!file.inFolder("90_system")'
+views:
+  - type: table
+    name: 全件
+    groupBy:
+      property: type
+      direction: ASC
+    order:
+      - file.name
+      - tags
+      - project
+      - source
+      - created
+    sort:
+      - property: created
+        direction: DESC

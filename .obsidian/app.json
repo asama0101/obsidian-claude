@@ -1,0 +1,10 @@
+{
+  "alwaysUpdateLinks": true,
+  "attachmentFolderPath": "90_system/attachments",
+  "newFileLocation": "folder",
+  "newFileFolderPath": "00_inbox",
+  "showLineNumber": true,
+  "readableLineLength": false,
+  "defaultViewMode": "preview",
+  "openBehavior": "daily"
+}

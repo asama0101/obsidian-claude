@@ -1,0 +1,31 @@
+filters:
+  and:
+    # 埋め込み先のプロジェクトノート自身は出さない
+    - file.path != this.file.path
+    - '!file.inFolder("90_system")'
+    - or:
+        # project が一致する knowledge / research / doc（置き場所は問わない）
+        - and:
+            - or:
+                - type == "knowledge"
+                - type == "research"
+                - type == "doc"
+            - project == link(this.file.name)
+        # プロジェクトのフォルダの中にあるファイル（PDF などの Markdown 以外も含む）
+        - file.inFolder(this.file.folder)
+formulas:
+  種類: 'if(type, type, file.ext)'
+views:
+  - type: table
+    name: 知識・資料
+    groupBy:
+      property: formula.種類
+      direction: ASC
+    order:
+      - file.name
+      - tags
+      - file.folder
+      - created
+    sort:
+      - property: file.mtime
+        direction: DESC

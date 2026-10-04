@@ -1,0 +1,25 @@
+filters:
+  and:
+    - file.inFolder("20_tasks")
+    - type == "task"
+    - formula.区分 != ""
+formulas:
+  # 基準日: 埋め込み先のノート名（YYYY-MM-DD）。ノート名が日付でない（base を単体で開いた等）ときは today()
+  区分: 'if(status == "done", if(completed && date(completed) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today()), "5 今日完了", ""), if((status == "todo" && start && date(start) <= if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())) || ((status == "doing" || status == "pending") && due && date(due) < if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())), "1 遅れ", if(due && date(due) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today()), "2 今日が期限", if(status == "doing", "3 進行中", if(status == "pending", "4 保留", "")))))'
+views:
+  - type: table
+    name: タスク
+    groupBy:
+      property: formula.区分
+      direction: ASC
+    order:
+      - file.name
+      - project
+      - status
+      - start
+      - due
+      - completed
+      - memo
+    sort:
+      - property: due
+        direction: ASC

@@ -1,0 +1,65 @@
+# 配布用リポジトリ: 配布対象だけを追跡するホワイトリスト。
+# ノート・個人の設定（PERSONAL.md）は追跡しない。配布対象を足すときは「!」の行を足す。
+
+# いったん全部を除外する
+/*
+
+# ルールブックと説明
+!/.gitignore
+!/CLAUDE.md
+!/README.md
+
+# Claude Code のスキル・フック・設定（個人用の settings.local.json は除く）
+!/.claude/
+/.claude/settings.local.json
+
+# Obsidian の設定（ワークスペースなど個人の状態は除く）
+!/.obsidian/
+/.obsidian/*
+!/.obsidian/app.json
+!/.obsidian/types.json
+!/.obsidian/templates.json
+!/.obsidian/daily-notes.json
+!/.obsidian/hotkeys.json
+!/.obsidian/core-plugins.json
+
+# 空のフォルダ構成（.gitkeep だけ）
+!/00_inbox/
+/00_inbox/*
+!/00_inbox/.gitkeep
+!/10_projects/
+/10_projects/*
+!/10_projects/.gitkeep
+!/20_tasks/
+/20_tasks/*
+!/20_tasks/.gitkeep
+!/30_knowledge/
+/30_knowledge/*
+!/30_knowledge/.gitkeep
+!/40_research/
+/40_research/*
+!/40_research/.gitkeep
+!/50_documents/
+/50_documents/*
+!/50_documents/.gitkeep
+!/60_daily/
+/60_daily/*
+!/60_daily/.gitkeep
+!/70_meetings/
+/70_meetings/*
+!/70_meetings/.gitkeep
+
+# 仕組み（テンプレート・Bases・手順書・スキルの解説）
+!/90_system/
+/90_system/*
+!/90_system/templates/
+!/90_system/bases/
+!/90_system/skill-docs/
+!/90_system/setup.md
+!/90_system/attachments/
+/90_system/attachments/*
+!/90_system/attachments/.gitkeep
+
+# 配布対象の中でも除くもの
+__pycache__/
+desktop.ini

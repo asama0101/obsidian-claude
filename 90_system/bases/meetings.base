@@ -1,0 +1,40 @@
+filters:
+  and:
+    - file.inFolder("70_meetings")
+    - type == "meeting"
+views:
+  - type: table
+    name: 今日
+    filters:
+      and:
+        # 基準日: 埋め込み先のノート名（YYYY-MM-DD）。ノート名が日付でないときは today()
+        - 'date(date) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())'
+    order:
+      - file.name
+      - project
+      - attendees
+    sort:
+      - property: file.name
+        direction: ASC
+  - type: table
+    name: プロジェクト
+    filters:
+      and:
+        - project == link(this.file.name)
+    order:
+      - file.name
+      - date
+      - attendees
+    sort:
+      - property: date
+        direction: DESC
+  - type: table
+    name: 全件
+    order:
+      - file.name
+      - date
+      - project
+      - attendees
+    sort:
+      - property: date
+        direction: DESC

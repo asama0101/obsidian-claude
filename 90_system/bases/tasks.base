@@ -1,0 +1,61 @@
+filters:
+  and:
+    - file.inFolder("20_tasks")
+    - type == "task"
+views:
+  - type: table
+    name: 未完了（期限順）
+    filters:
+      and:
+        - status != "done"
+    order:
+      - file.name
+      - status
+      - project
+      - start
+      - due
+      - memo
+    sort:
+      - property: due
+        direction: ASC
+  - type: table
+    name: プロジェクト別
+    filters:
+      and:
+        - status != "done"
+    groupBy:
+      property: project
+      direction: ASC
+    order:
+      - file.name
+      - status
+      - start
+      - due
+      - memo
+    sort:
+      - property: due
+        direction: ASC
+  - type: table
+    name: 要修正
+    filters:
+      or:
+        - start.isEmpty()
+        - due.isEmpty()
+    order:
+      - file.name
+      - status
+      - project
+      - start
+      - due
+  - type: table
+    name: 完了
+    filters:
+      and:
+        - status == "done"
+    order:
+      - file.name
+      - project
+      - completed
+    sort:
+      - property: completed
+        direction: DESC
