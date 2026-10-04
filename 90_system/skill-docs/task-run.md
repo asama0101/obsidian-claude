@@ -11,7 +11,7 @@ tags: [skill]
 
 ## 何ができるか
 - タスクの完了条件を、`grilling-html` の質問フォームで詰める。少なくとも次を決める。
-  - 成果物: 形（ノートか、既存ノートへの追記か）・置き場所（調べものは `40_research/`、資料は `10_projects/<名前>/` か `50_documents/`、知識は `30_knowledge/`）・名前
+  - 成果物: 形（ノートか、既存ノートへの追記か）・置き場所（調べもの・知識は `30_knowledge/`、資料は `10_projects/<名前>/` か `50_documents/`）・名前
   - 範囲と、やらないこと
   - 使ってよい情報源（Vault のノート、Web など）
   - 完了の判定（何がそろえば OK か）
@@ -33,14 +33,16 @@ tags: [skill]
 - 完了したあとは、必要なら `knowledge-harvest` で知識を取り出す（次にやることとして案内される）。
 
 ## ロジック
-スクリプトを直接は使わない。具体化は `grilling-html` の手順（`grilling_html.py` とブラウザ操作）に従う。実行はサブエージェント（Agent ツール）が行う。
+task-run 自身のスクリプトはない。具体化は `grilling-html` の手順に従い、質問の HTML の生成は `grilling_html.py`（`init` / `render` / `index`）、フォームを開いて回答を読み取るのは Claude（Playwright MCP のブラウザ操作）が行う。実行はサブエージェント（Agent ツール）が行う。
 
 ```mermaid
 flowchart TD
   A(Claude: タスクを探して読み、決める) --> B(Claude: grilling-html の手順で完了条件の質問を作る)
-  B --> S1[script: grilling_html.py init / render とブラウザでフォームを開く]
-  S1 --> U1(ユーザー: 回答し、最終確認で承認する)
-  U1 --> C(Claude: 完了条件を書き、status を in_progress にし、経緯に開始を記録)
+  B --> S1[script: grilling_html.py init と render で質問の HTML を作る]
+  S1 --> B2(Claude: Playwright でフォームを開く)
+  B2 --> U1(ユーザー: 回答して送信し、最終確認で承認する)
+  U1 --> R(Claude: 送信された回答を読み取る)
+  R --> C(Claude: 完了条件を書き、status を in_progress にし、経緯に開始を記録)
   C --> D(Claude: 完了条件・任せる範囲・記録のしかたを書いたプロンプトを作る)
   D --> E(サブエージェント: バックグラウンドで実行し、成果物を作り、経緯と成果に記録)
   E --> F(Claude: 完了の通知を受け、報告を要約して見るべきファイルを示す)
@@ -51,7 +53,7 @@ flowchart TD
   H --> J(Claude: 状態・成果物・次にやることを報告)
   classDef ai fill:#e8f0fe,stroke:#4285f4
   classDef sc fill:#fef3e0,stroke:#f29900
-  class A,B,C,D,E,F,G,H,I,J,U1 ai
+  class A,B,B2,R,C,D,E,F,G,H,I,J,U1 ai
   class S1 sc
   subgraph 凡例
     L1(Claude の推論処理):::ai
@@ -61,10 +63,12 @@ flowchart TD
 
 - サブエージェントの処理も、Claude の推論処理として図に含める。
 - 完了条件を変えるときは、`G` の NG から `B`（具体化）に戻る（図では省略）。
+- grilling-html の質問は、frontier が空になるまでラウンドを重ね、最後に最終確認のフォームで承認を得る（図では1回分にまとめている）。
 
 ## 保守者向け
 - 場所: `.claude/skills/task-run/SKILL.md`（スクリプトは持たない）
 - 使うスキル: `grilling-html`（`.claude/skills/grilling-html/`。セッションは `00_inbox/` にできる）
+- `allowed-tools`: `grilling-html` のスクリプト（`${CLAUDE_SKILL_DIR}/../grilling-html/grilling_html.py *`）を、`${CLAUDE_SKILL_DIR}` の形（引用符なし・あり）と相対パス（`.claude/skills/grilling-html/grilling_html.py *`）の形で登録している。
 - サブエージェントの呼び方: Agent ツールを `subagent_type: general-purpose`、`run_in_background: true` で呼ぶ。サブエージェントは会話を見られないので、プロンプトに次をすべて書く。
   - タスクのノートのパスと、完了条件の全文
   - 任せる範囲（SKILL.md の「任せる範囲」をそのまま）と、CLAUDE.md・`80_context/_rules.md` に従うこと
@@ -78,4 +82,4 @@ flowchart TD
   - 完了条件の承認までは、タスクの frontmatter を変えず、実行もしない。
   - サブエージェントの報告は作業者の報告であって、ユーザーの承認ではない。完了の判断は、必ずユーザーの確認で行う。
 - 補足: 完了の通知は、フック（`.claude/hooks/vault_hooks.py` から `notify.py`）による Windows の通知（CLAUDE.md の「フックと通知」による）。サブエージェントの完了でこの通知が出ることは、未確認。
-- 注意: 実際に実行して動作を確かめてはいない（未検証）。SKILL.md に `allowed-tools` はなく、`grilling-html` のスクリプトを実行するときに許可を求められるかは未確認。
+- 注意: 実際に実行して動作を確かめてはいない（未検証）。

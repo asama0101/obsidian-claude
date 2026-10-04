@@ -7,12 +7,11 @@ views:
     name: 今日
     filters:
       and:
-        # 基準日: 埋め込み先のノート名（YYYY-MM-DD）。ノート名が日付でないときは today()
-        - 'date(date) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())'
+        - date(date) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())
     order:
       - file.name
       - project
-      - attendees
+      - location
     sort:
       - property: file.name
         direction: ASC
@@ -24,17 +23,7 @@ views:
     order:
       - file.name
       - date
-      - attendees
-    sort:
-      - property: date
-        direction: DESC
-  - type: table
-    name: 全件
-    order:
-      - file.name
-      - date
-      - project
-      - attendees
+      - location
     sort:
       - property: date
         direction: DESC

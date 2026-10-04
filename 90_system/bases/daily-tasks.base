@@ -5,10 +5,8 @@ filters:
         - file.inFolder("00_inbox")
     - type == "task"
 formulas:
-  # 基準日: 埋め込み先のノート名（YYYY-MM-DD）。ノート名が日付でない（base を単体で開いた等）ときは today()
-  # 「遅れ」の定義は daily_start.py の is_late と同じにする（変えるときは両方を直す）
-  区分: 'if(status == "done", if(completed && date(completed) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today()), "6 今日完了", ""), if(!(status == "todo" || status == "in_progress" || status == "waiting" || status == "requested"), "", if((status == "todo" && start && date(start) <= if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())) || ((status == "in_progress" || status == "waiting" || status == "requested") && due && date(due) < if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())), "1 遅れ", if(due && date(due) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today()), "2 今日が期限", if(status == "in_progress", "3 作業中", if(status == "requested", "4 依頼中", if(status == "waiting", "5 保留", "")))))))'
-  場所: 'if(file.inFolder("00_inbox"), "インボックス", "20_tasks")'
+  区分: if(status == "done", if(completed && date(completed) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today()), "6 今日完了", ""), if(!(status == "todo" || status == "in_progress" || status == "waiting" || status == "requested"), "", if((status == "todo" && start && date(start) <= if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())) || ((status == "in_progress" || status == "waiting" || status == "requested") && due && date(due) < if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today())), "1 遅れ", if(due && date(due) == if(/^\d{4}-\d{2}-\d{2}/.matches(this.file.name), date(this.file.name), today()), "2 今日が期限", if(status == "in_progress", "3 作業中", if(status == "requested", "4 依頼中", if(status == "waiting", "5 保留", "")))))))
+  場所: if(file.inFolder("00_inbox"), "インボックス", "20_tasks")
 views:
   - type: table
     name: タスク

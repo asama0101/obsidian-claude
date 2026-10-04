@@ -31,8 +31,8 @@ class VaultTestCase(unittest.TestCase):
     def write_meeting(self, *actions, project="[[P]]", name=MEETING, newline="\n"):
         lines = [
             "---", "type: meeting", "date: 2026-10-05", f'project: "{project}"' if project else "project:",
-            "attendees:", "source:", "created: 2026-10-05", "tags: []", "---", f"# {name}", "",
-            "## 目的・議題", "- ", "", "## 議事・決定事項", "- ", "", "## アクションアイテム", *actions, "",
+            "location: 会議室A", "source:", "created: 2026-10-05", "tags: []", "---", f"# {name}", "",
+            "## 参加者", "- 山田（営業）", "- 佐藤", "", "## 目的・議題", "- ", "", "## 議事・決定事項", "- ", "", "## アクションアイテム", *actions, "",
             "## 参照ドキュメント", "- ", "",
         ]
         path = self.vault / "70_meetings" / f"{name}.md"

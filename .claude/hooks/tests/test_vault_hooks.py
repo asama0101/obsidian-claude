@@ -163,13 +163,13 @@ class TestNotifications(HookTestCase):
                                         "tool_input": {"file_path": str(self.vault / rel)}})
 
     def test_stop_lists_the_files_edited_in_the_turn_and_clears_them(self):
-        for rel in ("30_knowledge/a.md", "30_knowledge/b.md", "30_knowledge/a.md", "40_research/c.md", "50_documents/d.md"):
+        for rel in ("30_knowledge/a.md", "30_knowledge/b.md", "30_knowledge/a.md", "70_meetings/c.md", "50_documents/d.md"):
             self.edit(rel)
         self.edit("30_knowledge/other.md", session="s2")
         self.assertEqual(self.run_hook("stop", {"session_id": "s1"}), "")
         [toast] = self.toasts()
         self.assertEqual(toast["title"], "Claude Code: 完了")
-        self.assertEqual(toast["lines"][0], "30_knowledge/a.md, 30_knowledge/b.md, 40_research/c.md ほか 1 件")
+        self.assertEqual(toast["lines"][0], "30_knowledge/a.md, 30_knowledge/b.md, 70_meetings/c.md ほか 1 件")
         self.assertIn("4 件", toast["lines"][1])
         self.assertTrue(toast["launch"].startswith("obsidian://open?vault="))
         self.assertTrue(toast["launch"].endswith("&file=30_knowledge/a"))

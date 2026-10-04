@@ -55,7 +55,7 @@ flowchart TD
 - 未完了で `due` が基準日より前のタスクと、`start` が基準日より前の `todo` は出さない（ダッシュボードの「遅れ」で見る）。
 - 遅れは赤（`crit`）、`in_progress` は強調（`active`）、`done` はグレー（`done`）。`waiting` は名前の先頭に `⏸`、`requested` は `✉`（`MARKS`）。プロジェクトごとにセクション分けし、`project` がないものは「プロジェクトなし」に入れる。
 - 「遅れ」の判定（`is_late`）: `todo` は `start` が基準日以前、`in_progress` / `waiting` / `requested` は `due` が基準日より前。
-- タスク本文のチェックリスト（`- [ ] 項目名 期限:YYYY-MM-DD`。期限は任意）は、マイルストーン（◇）として、そのタスクの表示開始日の位置に出る。期限は名前の後ろに（期限 YYYY-MM-DD）と付くだけで、位置は変わらない。期限が基準日より前の未完了は赤（`crit`）、完了（`- [x]`）はグレー（`done`）。チェックリストの分解は `task-split` スキルが行う。
+- タスク本文のチェックリスト（`- [ ] 項目名 期限:YYYY-MM-DD`。期限は任意）のうち、`<!-- gantt:start -->` 〜 `<!-- gantt:end -->` の間にある項目（`parse_checklist`。マーカーが無いタスクからは拾わない。組は複数でもよい）は、マイルストーン（◇）として、そのタスクの表示開始日の位置に出る。期限は名前の後ろに（期限 YYYY-MM-DD）と付くだけで、位置は変わらない。期限が基準日より前の未完了は赤（`crit`）、完了（`- [x]`）はグレー（`done`）。チェックリストの分解は `task-split` スキルが行う。
 
 ## 保守者向け
 - スキル本体: `.claude/skills/daily-start/SKILL.md`
@@ -64,7 +64,7 @@ flowchart TD
 - ダッシュボードと同じ区分を返す関数 `dashboard_group` がある（遅れ / 今日が期限 / 作業中 / 依頼中 / 保留 / 今日完了）。`daily-tasks.base` の区分と同じ定義にしている（スクリプトの docstring による）。
 - 起動: `.claude/skills/daily-start/daily-start.bat`（Vault ルートに移動して `claude -p` を実行し、`pause` で画面を残す）
 - SKILL.md のコマンドは `${CLAUDE_SKILL_DIR}` で書く。`allowed-tools` に、`${CLAUDE_SKILL_DIR}` の形と相対パス（`.claude/skills/daily-start/daily_start.py`）の形の両方を書いている。
-- テスト（unittest、追加インストール不要）: `python -m unittest discover -s .claude/skills/daily-start/tests`（「遅れ」の判定、ダッシュボードの区分、ガントの抽出（インボックスのタスク、`idea` などを出さないこと、印）、マーカー間の書き換え）
+- テスト（unittest、追加インストール不要）: `python -m unittest discover -s .claude/skills/daily-start/tests`（「遅れ」の判定、ダッシュボードの区分、ガントの抽出（インボックスのタスク、`idea` などを出さないこと、印）、チェックリストのマーカー間だけを拾うこと、マーカー間の書き換え）
 - テンプレート: `90_system/templates/daily.md`。なければ最小のノートを作る。
 - 読む: `20_tasks/*.md` と `00_inbox/*.md`（どちらも直下）
 - 書く: `60_daily/YYYY-MM-DD.md`（新規作成と、ガントのマーカー間の置換。内容が変わらなければ書かない）

@@ -66,16 +66,18 @@ def clean(name):
 
 CHECK_RE = re.compile(r"^\s*[-*]\s+\[([ xX])\]\s+(.+?)\s*$")
 CHECK_DUE_RE = re.compile(r"\s*期限:(\d{4}-\d{2}-\d{2})\s*$")
+CHECK_BLOCK_RE = re.compile(re.escape(GANTT_START) + r"(.*?)" + re.escape(GANTT_END), re.S)
 
 
 def parse_checklist(text):
     """タスク本文のチェックリストを、マイルストーンとして取り出す。
 
-    書式: `- [ ] 項目名 期限:YYYY-MM-DD`（期限は任意）。frontmatter は読み飛ばす。
+    対象は `<!-- gantt:start -->` 〜 `<!-- gantt:end -->` の間の行だけ（組は複数でもよい。
+    マーカーが無ければ何も拾わない）。書式: `- [ ] 項目名 期限:YYYY-MM-DD`（期限は任意）。
     """
-    body = re.sub(r"\A---\r?\n.*?\r?\n---", "", text, count=1, flags=re.S)
+    lines = [line for block in CHECK_BLOCK_RE.findall(text) for line in block.splitlines()]
     items = []
-    for line in body.splitlines():
+    for line in lines:
         m = CHECK_RE.match(line)
         if not m:
             continue

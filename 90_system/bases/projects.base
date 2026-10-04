@@ -16,12 +16,3 @@ views:
     sort:
       - property: due
         direction: ASC
-  - type: table
-    name: 全件
-    order:
-      - file.name
-      - status
-      - due
-    sort:
-      - property: due
-        direction: ASC

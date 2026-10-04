@@ -2,12 +2,16 @@
 type: meeting
 date: {{date:YYYY-MM-DD}}
 project:
-attendees: []
+location:
 source:
 created: {{date:YYYY-MM-DD}}
 tags: []
 ---
 # {{title}}
+
+## 参加者
+%% 書式: - 名前（所属・役割は任意） %%
+- 
 
 ## 目的・議題
 - 

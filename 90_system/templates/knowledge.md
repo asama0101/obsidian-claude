@@ -1,6 +1,7 @@
 ---
 type: knowledge
 project:
+source:
 created: {{date:YYYY-MM-DD}}
 tags: []
 ---

@@ -87,6 +87,35 @@ class TestDashboardGroup(unittest.TestCase):
                 self.assertEqual(self.group(**props), expected)
 
 
+class TestParseChecklist(unittest.TestCase):
+    def names(self, body):
+        return [m["name"] for m in ds.parse_checklist(task(body=body))]
+
+    def test_only_items_between_the_markers_are_picked(self):
+        body = (
+            "## 完了条件\n- [ ] 外の項目\n## チェックリスト\n"
+            f"{ds.GANTT_START}\n- [ ] 資料を集める 期限:2026-10-10\n- [x] 済んだ項目\n{ds.GANTT_END}\n"
+            "- [ ] 囲いの後\n## 経緯\n- [ ] 経緯の項目\n"
+        )
+        items = ds.parse_checklist(task(body=body))
+        self.assertEqual(items, [
+            {"name": "資料を集める", "due": D("2026-10-10"), "done": False},
+            {"name": "済んだ項目", "due": None, "done": True},
+        ])
+
+    def test_several_blocks_are_all_picked(self):
+        body = f"{ds.GANTT_START}\n- [ ] a\n{ds.GANTT_END}\n- [ ] 外\n{ds.GANTT_START}\n- [ ] b\n{ds.GANTT_END}\n"
+        self.assertEqual(self.names(body), ["a", "b"])
+
+    def test_nothing_is_picked_without_markers_or_with_an_unclosed_start(self):
+        self.assertEqual(self.names("## チェックリスト\n- [ ] a\n"), [])
+        self.assertEqual(self.names(f"{ds.GANTT_START}\n- [ ] a\n"), [])
+
+    def test_crlf_line_endings(self):
+        body = f"{ds.GANTT_START}\r\n- [ ] a 期限:2026-10-10\r\n{ds.GANTT_END}\r\n"
+        self.assertEqual(ds.parse_checklist(task(body=body)), [{"name": "a", "due": D("2026-10-10"), "done": False}])
+
+
 class TestCollectGanttTasks(TempVault):
     def names(self, problems=None):
         return [t["name"] for t in ds.collect_gantt_tasks(self.vault, TODAY, problems)]

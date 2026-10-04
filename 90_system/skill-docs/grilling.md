@@ -24,7 +24,7 @@ tags: [skill]
   - `➡️ 推奨回答`
   - 質問どうしは `---` で区切る。
 - 利用者は番号ごとに答える。全ラウンドが終わったあと、共通理解に達したと確認する。
-- 補足: HTML フォームで行いたいときは別スキルの `grilling-html` を使う（Vault の `CLAUDE.md` と `grilling-html` の description による）。
+- 補足: HTML フォームで行いたいときは別スキルの `grilling-html` を使う（`grilling-html` の description による）。ユーザーの `~\.claude\CLAUDE.md` には「詳細な質問手順が必要なときは `/grilling` を使う」とある。
 
 ## ロジック
 スクリプトなし（すべて Claude の推論処理）。サブエージェントによる事実調査も Claude の処理として図に含める。
@@ -34,13 +34,12 @@ flowchart TD
   A(Claude: 設計ツリーを作る) --> B(Claude: フロンティアを求める)
   B --> C(Claude: 環境の事実が要る質問があればサブエージェントに調べさせる)
   B --> D(Claude: 調査待ちでない質問を番号付きで推奨回答つきに出す)
-  D --> E(ユーザー: 回答する)
   C --> F(Claude: 調査結果を受けて下流の質問を出せるようにする)
-  E --> G(Claude: ツリーを組み替える)
+  D -- ユーザーが回答 --> G(Claude: ツリーを組み替える)
   F --> G
-  G --> H{フロンティアが空?}
-  H -- いいえ --> B
-  H -- はい --> I(Claude: 共通理解を提示し、ユーザーの確認を待つ)
+  G --> H{Claude: フロンティアが空かを判断する}
+  H -- 空でない --> B
+  H -- 空 --> I(Claude: 共通理解を提示し、ユーザーの確認を待つ)
   classDef ai fill:#e8f0fe,stroke:#4285f4
   classDef sc fill:#fef3e0,stroke:#f29900
   class A,B,C,D,F,G,H,I ai
@@ -55,6 +54,7 @@ flowchart TD
 - 同じフォルダに `agents\openai.yaml` がある。内容は `display_name: "Grilling"` と `short_description: "Stress-test thinking a round of questions at a time"`。用途は表示用の情報と読めるが、どこで使われるかは未確認。
 - 書き込み先: なし（質問と回答は会話の中だけ）。スクリプト・テンプレートも使わない。
 - 制約: 共通理解をユーザーが確認するまで、結論に基づく作業をしない。
+- 関連: Vault の `grilling-html` は、このスキルのルールを自分の SKILL.md に取り込んで自己完結している（`grilling-html` の SKILL.md「ルール（grilling から取り込み）」と `10_projects/Claudeのスキル作成/grilling-html SPEC.md` の「配置」）。こちらを変えても `grilling-html` には自動では反映されない。
 - 注意:
   - SKILL.md は英語で書かれている。
   - ユーザー領域のスキルなので、Vault の Git では追跡されない（Vault 外にあるため）。

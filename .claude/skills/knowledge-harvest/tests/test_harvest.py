@@ -57,8 +57,7 @@ class TempVault(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.vault = Path(self._tmp.name)
-        for d in ("20_tasks", "00_inbox", "60_daily", "10_projects/P", "80_context/decisions",
-                  "80_context/knowledge", "80_context/mistakes", "80_context/projects"):
+        for d in ("20_tasks", "00_inbox", "60_daily", "10_projects/P", "10_projects/Q", "80_context"):
             (self.vault / d).mkdir(parents=True)
 
     def tearDown(self):
@@ -106,28 +105,101 @@ class TestTargets(TempVault):
         self.assertEqual(data["memo"], [])
 
 
+PROGRESS = """# 進捗ログ
+
+%% 書式の説明 %%
+
+## P
+### 現在の要約
+- いまの状況: 順調
+- 次の一手: 試す
+- 課題・リスク: なし
+- 最終更新: 2026-10-04
+- 5行目は出さない
+### ログ
+#### 2026-10-04
+- 進んだこと: x
+"""
+
+DECISIONS = """# 判断記録
+
+%% 書式の説明 %%
+
+## 方式の選択
+- 日付: 2026-10-04
+- プロジェクト: [[P]]
+- 背景: x
+- 選択肢:
+  - A 案
+  - B 案
+- 決定: A 案にする
+
+## 日付のない判断
+- 決定:
+  - 字下げした行から取る
+"""
+
+KNOWLEDGE = """# 技術知見
+
+## 文字コード
+- 日付: 2026-10-03
+- 要約: UTF-8 で書く
+- 内容: URL https://example.com も書ける
+"""
+
+MISTAKES = """# 失敗記録
+
+## 消してしまった
+- 日付: 2026-10-04
+- 何が起きたか: 消した
+- 再発防止のルール: 消す前に中身を見る
+
+## 上書きした
+- 何が起きたか: 上書きした
+- 再発防止のルール:
+  - 書く前に読む
+  - 差分を見せる
+- 追記 2026-10-05: もう一度起きた
+"""
+
+
 class TestIndex(TempVault):
     def test_builds_the_index_and_the_rules(self):
         self.write("10_projects/P/P.md", "---\ntype: project\nstatus: active\n---\n# P\n")
-        self.write("80_context/projects/P 進捗ログ.md",
-                   "---\ntype: progress\nproject: \"[[P]]\"\n---\n# P 進捗ログ\n\n## 現在の要約\n- いまの状況: 順調\n\n## ログ\n")
-        self.write("80_context/decisions/方式の選択.md",
-                   "---\ntype: decision\nproject: \"[[P]]\"\ndate: 2026-10-04\n---\n# 方式\n\n## 背景\n- x\n\n## 決定\n- A 案にする\n")
-        self.write("80_context/knowledge/知見.md", "---\ntype: knowledge\n---\n# 知見\n\n## 要約\n%% 説明 %%\nUTF-8 で書く\n")
-        self.write("80_context/mistakes/失敗.md",
-                   "---\ntype: mistake\n---\n# 失敗\n\n## 何が起きたか\n- 消した\n\n## 再発防止のルール\n%% 説明 %%\n- 消す前に中身を見る\n")
+        self.write("10_projects/Q/Q.md", "---\ntype: project\nstatus: active\n---\n# Q\n")
+        self.write("80_context/進捗ログ.md", PROGRESS)
+        self.write("80_context/判断記録.md", DECISIONS)
+        self.write("80_context/技術知見.md", KNOWLEDGE)
+        self.write("80_context/失敗記録.md", MISTAKES)
         self.run_cmd("index")
         index = (self.vault / "80_context/_index.md").read_text(encoding="utf-8")
         rules = (self.vault / "80_context/_rules.md").read_text(encoding="utf-8")
-        self.assertIn("- [[P]]（進捗ログ: [[P 進捗ログ]]）\n  - いまの状況: 順調", index)
-        self.assertIn("- [[方式の選択]]（2026-10-04, P）: A 案にする", index)
-        self.assertIn("- [[知見]]: UTF-8 で書く", index)
-        self.assertIn("- [[失敗]]: 消した", index)
-        self.assertIn("- 消す前に中身を見る（[[失敗]]）", rules)
+        self.assertIn("- [[P]]（[[進捗ログ#P]]）\n  - いまの状況: 順調\n  - 次の一手: 試す\n"
+                      "  - 課題・リスク: なし\n  - 最終更新: 2026-10-04\n", index)
+        self.assertNotIn("5行目", index)
+        self.assertIn("- [[Q]]: 進捗ログなし", index)
+        self.assertIn("- [[判断記録#方式の選択]]（2026-10-04, P）: A 案にする", index)
+        self.assertIn("- [[判断記録#日付のない判断]]: 字下げした行から取る", index)
+        self.assertIn("- [[技術知見#文字コード]]（2026-10-03）: UTF-8 で書く", index)
+        self.assertIn("- [[失敗記録#消してしまった]]（2026-10-04）: 消した", index)
+        self.assertIn("- 消す前に中身を見る（[[失敗記録#消してしまった]]）", rules)
+        self.assertIn("- 書く前に読む（[[失敗記録#上書きした]]）\n- 差分を見せる（[[失敗記録#上書きした]]）\n", rules)
+        self.assertNotIn("もう一度起きた", rules)
+        self.assertNotIn("書式の説明", index)
 
     def test_empty_context(self):
         self.run_cmd("index")
+        index = (self.vault / "80_context/_index.md").read_text(encoding="utf-8")
+        for title in ("判断記録", "技術知見", "失敗記録"):
+            self.assertIn(f"## {title}\n- なし", index)
+        self.assertIn("## 進行中のプロジェクト（現在の要約）\n- なし", index)
         self.assertIn("- なし", (self.vault / "80_context/_rules.md").read_text(encoding="utf-8"))
+
+    def test_files_without_entries(self):
+        self.write("80_context/判断記録.md", "# 判断記録\n\n%% 書式の説明 %%\n")
+        self.run_cmd("index")
+        index = (self.vault / "80_context/_index.md").read_text(encoding="utf-8")
+        self.assertIn("## 判断記録\n- なし", index)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,8 @@
         その「経緯」の節の、印のない行
       - since: 判定に使った日時（前回の棚卸しの日時。記録がなければ今日の 0 時）
   index
-      80_context/_index.md（索引）と 80_context/_rules.md（再発防止のルール）を作り直す。
+      80_context/_index.md（索引）と 80_context/_rules.md（再発防止のルール）を、
+      80_context の 技術知見.md・判断記録.md・失敗記録.md・進捗ログ.md から作り直す。
   mark [--at ISO日時]
       棚卸しを終えた日時を 90_system/harvest-state.json に記録する（既定は今）。
 
@@ -138,9 +139,51 @@ def cmd_targets(vault, day):
 
 # ---------------------------------------------------------------- index
 
-def notes(vault, sub):
-    folder = vault / CONTEXT / sub
-    return sorted(folder.glob("*.md")) if folder.is_dir() else []
+# 種類ごとのファイル名と、索引に出す項目
+KINDS = (("判断記録", "決定"), ("技術知見", "要約"), ("失敗記録", "何が起きたか"))
+PROGRESS = "進捗ログ"
+
+
+def context_text(vault, name):
+    path = vault / CONTEXT / f"{name}.md"
+    return ds.read(path) if path.exists() else ""
+
+
+def blocks(lines, level):
+    """見出しのレベル level の節を (見出し, 本文の行) のリストで返す。
+    本文は、同じかそれより上のレベルの見出しの前まで。最初の見出しより前の行は捨てる。"""
+    out, cur = [], None
+    for line in lines:
+        m = re.match(r"^(#{1,6})\s+(.*?)\s*$", line)
+        if m and len(m.group(1)) <= level:
+            cur = None
+            if len(m.group(1)) == level:
+                cur = (m.group(2), [])
+                out.append(cur)
+            continue
+        if cur is not None:
+            cur[1].append(line)
+    return out
+
+
+def fields(lines):
+    """1件の本文の「- 項目名: 内容」を {項目名: [行]} で返す。
+    内容は、同じ行の残りと、その下の字下げした行（箇条書きの記号は外す）。"""
+    out, key = {}, None
+    for line in lines:
+        m = re.match(r"^[-*]\s+([^:：]+?)[:：]\s*(.*)$", line)
+        if m:
+            key = m.group(1).strip()
+            out.setdefault(key, [])
+            if m.group(2).strip():
+                out[key].append(m.group(2).strip())
+        elif key and line[:1] in (" ", "\t") and line.strip():
+            s = re.sub(r"^\s*[-*]\s+", "", line).strip()
+            if s and not s.startswith("%%"):
+                out[key].append(s)
+        elif line.strip():
+            key = None
+    return out
 
 
 def active_projects(vault):
@@ -159,48 +202,43 @@ def build_index(vault):
              f"`{CONTEXT}/` の記録の一覧。詳しくは各ノートを開いて読む。", ""]
 
     lines.append("## 進行中のプロジェクト（現在の要約）")
-    # 進捗ログは「<プロジェクト名> 進捗ログ.md」。対応は frontmatter の project で取る
-    logs = {}
-    for p in notes(vault, "projects"):
-        logs[ds.link_name(ds.parse_frontmatter(ds.read(p)).get("project", "")) or p.stem] = p
+    # 進捗ログ.md の「## プロジェクト名」の節の「### 現在の要約」
+    logs = dict(blocks(context_text(vault, PROGRESS).splitlines(), 2))
     projects = active_projects(vault)
     if not projects:
         lines.append("- なし")
     for name in projects:
-        log = logs.get(name)
-        if not log:
+        if name not in logs:
             lines.append(f"- [[{name}]]: 進捗ログなし")
             continue
-        summary = [s.strip() for s in section(ds.read(log), "現在の要約") if s.strip()]
-        lines.append(f"- [[{name}]]（進捗ログ: [[{log.stem}]]）")
+        summary = dict(blocks(logs[name], 3)).get("現在の要約", [])
+        summary = [s.strip() for s in summary if s.strip() and not s.strip().startswith("%%")]
+        lines.append(f"- [[{name}]]（[[{PROGRESS}#{name}]]）")
         lines += [f"  {s}" for s in summary[:4]]
     lines.append("")
 
-    for sub, title, head in (("decisions", "判断記録", "決定"), ("knowledge", "技術知見", "要約"), ("mistakes", "失敗記録", "何が起きたか")):
+    for title, head in KINDS:
         lines.append(f"## {title}")
-        found = notes(vault, sub)
+        found = blocks(context_text(vault, title).splitlines(), 2)
         if not found:
             lines.append("- なし")
-        for p in found:
-            text = ds.read(p)
-            props = ds.parse_frontmatter(text)
-            extra = ", ".join(x for x in (props.get("date", ""), ds.link_name(props.get("project", ""))) if x)
-            summary = first_text(section(text, head))
-            lines.append(f"- [[{p.stem}]]" + (f"（{extra}）" if extra else "") + (f": {summary}" if summary else ""))
+        for name, body in found:
+            f = fields(body)
+            extra = ", ".join(x for x in (first_text(f.get("日付", [])), ds.link_name(first_text(f.get("プロジェクト", [])))) if x)
+            summary = first_text(f.get(head, []))
+            lines.append(f"- [[{title}#{name}]]" + (f"（{extra}）" if extra else "") + (f": {summary}" if summary else ""))
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
 def build_rules(vault):
     lines = [INDEX_NOTE, "# 再発防止のルール", "",
-             f"`{CONTEXT}/mistakes/` の失敗記録の「再発防止のルール」を集めたもの。作業のときは必ず守る。", ""]
+             f"`{CONTEXT}/失敗記録.md` の「再発防止のルール」を集めたもの。作業のときは必ず守る。", ""]
     count = 0
-    for p in notes(vault, "mistakes"):
-        for line in section(ds.read(p), "再発防止のルール"):
-            s = re.sub(r"^\s*[-*]\s+", "", line).strip()
-            if s and not s.startswith("%%"):
-                lines.append(f"- {s}（[[{p.stem}]]）")
-                count += 1
+    for name, body in blocks(context_text(vault, "失敗記録").splitlines(), 2):
+        for s in fields(body).get("再発防止のルール", []):
+            lines.append(f"- {s}（[[失敗記録#{name}]]）")
+            count += 1
     if not count:
         lines.append("- なし")
     return "\n".join(lines).rstrip() + "\n"

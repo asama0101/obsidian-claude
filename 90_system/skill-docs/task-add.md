@@ -31,9 +31,9 @@ tags: [skill]
 
 ```mermaid
 flowchart TD
-  A(Claude: タスク名を決める) --> B{名前から目的が読み取れる?}
-  B -- いいえ --> C(Claude: 目的が分かる名前の案を1つ示して確かめる)
-  B -- はい --> D{00_inbox か 20_tasks に同名あり?}
+  A(Claude: タスク名を決める) --> B{Claude: 名前から目的が読み取れるかを判断する}
+  B -- 読み取れない --> C(Claude: 目的が分かる名前の案を1つ示して確かめる)
+  B -- 読み取れる --> D{Claude: 00_inbox と 20_tasks に同名があるかを確かめる}
   C --> D
   D -- あり --> E(Claude: 上書きせず別名を提案する)
   D -- なし --> F(Claude: 発言から決まっていることだけを読み取る)
@@ -51,7 +51,7 @@ flowchart TD
 
 ## 保守者向け
 - 場所: `.claude/skills/task-add/SKILL.md`
-- 使うテンプレート: `90_system/templates/task.md`
+- 使うテンプレート: `90_system/templates/task.md`（frontmatter は `type: task`・`status: idea`・`project`・`start`・`due`・`completed`・`memo`・`created`・`tags`。本文は 完了条件 / チェックリスト / 経緯 / 成果）
 - 読む: `00_inbox/` と `20_tasks/`（同名の確認）
 - 書く: `00_inbox/<タスク名>.md`（新規のみ）
 - 制約:
@@ -59,5 +59,5 @@ flowchart TD
   - 既存のタスクは変更しない。
   - 名前には Windows で使えない文字（`\ / : * ? " < > |`）を使わない。
   - 完了にするときは `status: done` と `completed` を必ず両方入れる（デイリーのダッシュボードが参照する）。
-- 補足: `00_inbox/` の直下のタスクも、ダッシュボードとガントの対象になる（`idea` は「アイデア・インボックス」に出て、ガントには出ない）。Claude がタスクを作ると、フックでガントが更新される。
+- 補足: `00_inbox/` の直下のタスクも、ダッシュボードとガントの対象になる（`idea` は「アイデア・インボックス」に出て、ガントには出ない）。Claude がタスクを作ると、フックでガントが更新される（デイリーノートがなければ飛ばす）。
 - 注意: 実際に実行して動作を確かめてはいない（未検証）。

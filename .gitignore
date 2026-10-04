@@ -36,9 +36,6 @@
 !/30_knowledge/
 /30_knowledge/*
 !/30_knowledge/.gitkeep
-!/40_research/
-/40_research/*
-!/40_research/.gitkeep
 !/50_documents/
 /50_documents/*
 !/50_documents/.gitkeep
@@ -50,18 +47,7 @@
 !/70_meetings/.gitkeep
 !/80_context/
 /80_context/*
-!/80_context/knowledge/
-/80_context/knowledge/*
-!/80_context/knowledge/.gitkeep
-!/80_context/decisions/
-/80_context/decisions/*
-!/80_context/decisions/.gitkeep
-!/80_context/projects/
-/80_context/projects/*
-!/80_context/projects/.gitkeep
-!/80_context/mistakes/
-/80_context/mistakes/*
-!/80_context/mistakes/.gitkeep
+!/80_context/.gitkeep
 
 # 仕組み（テンプレート・Bases・手順書・スキルの解説）
 !/90_system/
