@@ -73,7 +73,6 @@ def cmd_index(args) -> int:
         "type: doc",
         "status: draft",
         f"created: {datetime.date.today().isoformat()}",
-        "tags: []",
         "---",
         f"# {d.name}",
         "",

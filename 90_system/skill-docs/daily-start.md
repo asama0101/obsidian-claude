@@ -2,7 +2,6 @@
 type: doc
 status: draft
 created: 2026-10-04
-tags: [skill]
 ---
 # daily-start
 
@@ -71,6 +70,6 @@ flowchart TD
 - 制約:
   - SKILL.md は、コマンドを引数の追加や改変なしでそのまま1回だけ実行すると定めている。
   - マーカーがないノートは、ガントを更新せず警告を出す。マーカーは消さない。
-  - 「遅れ」の定義は `daily-tasks.base` と `daily_start.py` の `is_late` で共通。変えるときは両方を直す（`CLAUDE.md` の記載）。
+  - 「遅れ」の定義は `daily-tasks.base` と `daily_start.py` の `is_late` で共通。変えるときは両方を直す（`.claude/rules/daily.md` の記載）。
 - 注意: Obsidian の実行パスは `C:\Program Files\Obsidian\Obsidian.exe` に固定。まず `obsidian://` URI で開き、失敗したときだけ使う。
 - 共有: `gantt-update` と `daily-end` は、このスクリプトを `--gantt-only` 付きで使う。`knowledge-harvest` の `harvest.py` は、このスクリプトを import して読み書きの関数を使う。フック（`.claude/hooks/vault_hooks.py`）も、このスクリプトでガントを更新する。

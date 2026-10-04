@@ -19,7 +19,6 @@ views:
       direction: ASC
     order:
       - file.name
-      - tags
       - file.folder
       - created
     sort:

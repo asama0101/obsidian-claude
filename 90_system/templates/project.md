@@ -4,7 +4,6 @@ status: active
 start:
 due:
 created: {{date:YYYY-MM-DD}}
-tags: []
 ---
 # {{title}}
 

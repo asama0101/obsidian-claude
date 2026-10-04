@@ -1,7 +1,6 @@
 ---
 type: daily
 created: {{date:YYYY-MM-DD}}
-tags: []
 ---
 # {{title}}
 

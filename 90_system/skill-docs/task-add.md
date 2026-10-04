@@ -2,7 +2,6 @@
 type: doc
 status: draft
 created: 2026-10-04
-tags: [skill]
 ---
 # task-add
 
@@ -24,7 +23,7 @@ tags: [skill]
   1. タスク名を決める（目的を表す日本語で簡潔に）。名前から目的が読み取れない（「資料」「確認」だけなど）ときは、作る前に、目的が分かる名前の案を1つ示して一言だけ確かめる。
   2. `00_inbox/` と `20_tasks/` に同名のノートがあれば、上書きせず、別名を提案する。
   3. ノートを作り、「作ったタスク（場所と状態）・反映した値・次にやること」が報告される。次にやることの例: 振り分けは `daily-end`、分解は `task-split`、任せるなら `task-run`。
-- Obsidian で作るときは、`Ctrl+N` → `Ctrl+Shift+N` でタスクのテンプレートを挿入する（CLAUDE.md の記載）。
+- Obsidian で作るときは、`Ctrl+N` → `Ctrl+Shift+N` でタスクのテンプレートを挿入する（README.md の「はじめかた」の記載）。
 
 ## ロジック
 スクリプトなし（すべて Claude の推論処理）。
@@ -51,7 +50,7 @@ flowchart TD
 
 ## 保守者向け
 - 場所: `.claude/skills/task-add/SKILL.md`
-- 使うテンプレート: `90_system/templates/task.md`（frontmatter は `type: task`・`status: idea`・`project`・`start`・`due`・`completed`・`memo`・`created`・`tags`。本文は 完了条件 / チェックリスト / 経緯 / 成果）
+- 使うテンプレート: `90_system/templates/task.md`（frontmatter は `type: task`・`status: idea`・`project`・`start`・`due`・`completed`・`memo`・`created`。本文は 完了条件 / チェックリスト / 経緯 / 成果）
 - 読む: `00_inbox/` と `20_tasks/`（同名の確認）
 - 書く: `00_inbox/<タスク名>.md`（新規のみ）
 - 制約:

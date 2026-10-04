@@ -27,7 +27,6 @@ Vault のルートで作業する。`PERSONAL.md` は CLAUDE.md から `@PERSONA
    type: doc
    status: draft
    created: <最初に作った日>
-   tags: []
    ---
    # 個人の設定
 

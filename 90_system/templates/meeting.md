@@ -5,7 +5,6 @@ project:
 location:
 source:
 created: {{date:YYYY-MM-DD}}
-tags: []
 ---
 # {{title}}
 

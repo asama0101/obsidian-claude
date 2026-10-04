@@ -2,7 +2,6 @@
 type: doc
 status: draft
 created: 2026-10-04
-tags: [skill]
 ---
 # task-run
 
@@ -81,5 +80,5 @@ flowchart TD
 - 制約:
   - 完了条件の承認までは、タスクの frontmatter を変えず、実行もしない。
   - サブエージェントの報告は作業者の報告であって、ユーザーの承認ではない。完了の判断は、必ずユーザーの確認で行う。
-- 補足: 完了の通知は、フック（`.claude/hooks/vault_hooks.py` から `notify.py`）による Windows の通知（CLAUDE.md の「フックと通知」による）。サブエージェントの完了でこの通知が出ることは、未確認。
+- 補足: 完了の通知は、フック（`.claude/hooks/vault_hooks.py` から `notify.py`）による Windows の通知（README.md の「自動で動くもの」による）。サブエージェントの完了でこの通知が出ることは、未確認。
 - 注意: 実際に実行して動作を確かめてはいない（未検証）。

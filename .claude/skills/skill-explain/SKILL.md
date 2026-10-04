@@ -28,7 +28,6 @@ description: スキルを読み取って解説ノート（ひとこと・でき�
 type: doc
 status: draft
 created: YYYY-MM-DD
-tags: [skill]
 ---
 # <スキル名>
 

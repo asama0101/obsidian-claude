@@ -47,7 +47,7 @@ Vault のルートで作業する。議事録の書式は `90_system/templates/m
    - `project`: 既定は議事録の `project`。
    - 案を確定させず、ユーザーが確認・訂正した値だけを使う。タスクにしない項目は、そのまま残す。
 3. **タスクを作る。** 承認された項目ごとに、`90_system/templates/task.md` に従って `20_tasks/<タスク名>.md` を作る（会議で決まったものは振り分け済みとみなし、インボックスを通さない）。
-   - `status`（`todo` か `requested`）、`project: "[[プロジェクト名]]"`（無ければ空）、`start`・`due`、`completed` は空、`created` は今日、`tags: []`。`requested` のときは `memo` に依頼の相手と内容が分かれば書く。
+   - `status`（`todo` か `requested`）、`project: "[[プロジェクト名]]"`（無ければ空）、`start`・`due`、`completed` は空、`created` は今日。`requested` のときは `memo` に依頼の相手と内容が分かれば書く。
    - `project` の次の行に `meeting: "[[<議事録名>]]"` を足す（このスキルで作るタスクだけが持つプロパティ）。
    - 本文はテンプレートの見出しのまま、`## 経緯` に `### <今日>` と `- 議事録 [[<議事録名>]] のアクションアイテム「<content>」から作成。` を書く。
    - 既存のノートは上書きしない。

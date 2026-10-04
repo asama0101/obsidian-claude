@@ -2,7 +2,6 @@
 type: doc
 status: draft
 created: 2026-10-04
-tags: [skill]
 ---
 # doctor
 

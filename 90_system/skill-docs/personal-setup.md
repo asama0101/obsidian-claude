@@ -2,7 +2,6 @@
 type: doc
 status: draft
 created: 2026-10-04
-tags: [skill]
 ---
 # personal-setup
 
@@ -32,7 +31,6 @@ tags: [skill]
   type: doc
   status: draft
   created: <最初に作った日>
-  tags: []
   ---
   # 個人の設定
 
